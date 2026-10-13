@@ -7,7 +7,6 @@ export type Frame = Omit<FrameType, "style"> & {
 
 export default (p: Frame) => {
   const { children, style, className, ...rest } = p
-  // const cornerShape = p["corner-radius-full"] || p["corner-radius-huge"] ? "round" : "squircle"
   const cornerShape = "round"
 
   return (
