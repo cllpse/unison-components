@@ -126,3 +126,15 @@ export const UNITS_TAILWIND: Partial<Record<keyof typeof UNITS, string>> = {
   "1p5": "[6px]",
   full: "full",
 }
+
+export const UNITS_FIGMA = {
+  /**
+   * Represents a fill dimension (width or height) that should fill the available space.
+   */
+  fill: "fill",
+
+  /**
+   * Represents a hug dimension (width or height) that should hug the content.
+   */
+  hug: "hug",
+} as const
