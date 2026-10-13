@@ -221,17 +221,6 @@ const GGcomputeSizing = (p: Frame): { className: string[]; style: StyleNative & 
   }
 }
 
-/**
- * Loading configuration
- * @param {boolean} 0 - loading state enabled
- * @param {keyof FigmaFill} 1 - foreground color
- * @param {0 | 50 | undefined} 2 - blur intensity
- * @example [true, 'fill-white']
- * @example [true, 'fill-white', 'blur-on']
- * @example [true, 'fill-white', 'blur-off']
- */
-export type LoadingOptions = [boolean, keyof FigmaFill] | [boolean, keyof FigmaFill, "blur-on" | "blur-off"]
-
 export type Frame = FigmaFrameFlow &
   FigmaFrameWidth &
   FigmaFrameHeight &
@@ -262,8 +251,6 @@ export type Frame = FigmaFrameFlow &
 
     pointerEvents?: "box-none" | "auto"
 
-    loading?: LoadingOptions | undefined
-
     onTouchStart?: PressableProps["onTouchStart"]
     onTouchEnd?: PressableProps["onTouchEnd"]
 
@@ -282,7 +269,6 @@ export type Frame = FigmaFrameFlow &
 
     children?: ViewProps["children"]
 
-    elementLoader?: ReactNode
     elementAnimatedView?: ReactNode
 
     "tailwind-group"?: boolean
@@ -375,8 +361,6 @@ export default (p: Frame) => {
         pointerEvents={p.pointerEvents}
       >
         {p.children}
-
-        {p.elementLoader}
       </Pressable>
     )
   } else {
@@ -401,8 +385,6 @@ export default (p: Frame) => {
         pointerEvents={p.pointerEvents}
       >
         {p.children}
-
-        {p.elementLoader}
       </View>
     )
   }
