@@ -1,5 +1,5 @@
 import FrameBase, { type Frame as FrameType } from "../base/Frame.base"
-import type { StyleNative, StyleWeb } from "../types/ElementProperties"
+import type { StyleNative, StyleWeb } from "../types/elementProperties"
 
 export type Frame = Omit<FrameType, "style"> & {
   style?: StyleWeb

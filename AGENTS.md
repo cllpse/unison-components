@@ -25,7 +25,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 - Styling props are boolean flags named in kebab-case after Figma: `flow-horizontal`, `width-fill`, `padding-4`,
   `corner-radius-full`, `fill-primary-500`, `typography-body-wrap`. Prefer adding a flag over a value prop.
-- Flag types live in `src/types/FigmaProperties.ts` as `Figma<Thing>` types. Generate them from the tokens with
+- Flag types live in `src/types/figmaProperties.ts` as `Figma<Thing>` types. Generate them from the tokens with
   mapped template-literal types (`UnitsFlags<"gap-">`, `Color<"fill-">`) instead of hand-writing every key.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is
   exported under the component's name (`export type Frame = FigmaFrameFlow & … & { … }`).
@@ -35,8 +35,8 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 ## Computing styles
 
-- Each flag group has a helper named `<Component>Compute<Group>` (`FrameComputePadding`, `TextComputeTypography`,
-  `ElementComputePointerEvents`). Helpers return `FigmaPropertiesReturn` (`{ styles?, className? }`): Tailwind
+- Each flag group has a helper named `compute<Component><Group>` (`computeFramePadding`, `computeTextTypography`,
+  `computeElementPointerEvents`). Helpers return `FigmaPropertiesReturn` (`{ styles?, className? }`): Tailwind
   classes, plus inline `styles` where a numeric value or a guaranteed override is needed.
 - When a group is required, return `FigmaPropertiesReturnError` with
   `{ error: '<Text /> – missing "typography-" property' }` (en dash).
@@ -68,6 +68,9 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 Biome enforces the formatting: 2-space indent, 120-column lines, double quotes, no semicolons, sorted imports.
 Beyond that:
 
+- Naming: PascalCase for components, component files (`Frame.base.tsx`) and types; camelCase for all other files
+  and for functions, verb first (`computeFramePadding`, `extractColor`, `resolveUnitKey`); `SCREAMING_SNAKE_CASE`
+  for module-level constants (`COLORS`, `FONT_FEATURE_STYLE`).
 - Arrow functions only. Components are anonymous default exports, `export default (p: Frame) => { … }`; everything
   else is a named `export const`.
 - The props parameter is `p`. Destructure what you transform and spread the rest:
@@ -75,8 +78,8 @@ Beyond that:
 - When importing a component alongside its props type, alias the type: `import FrameBase, { type Frame as
   FrameType } from "../base/Frame.base"`.
 - Relative imports only; `src/*` and `@frame/*` paths are blocked by Biome.
-- One concern per file in `src/utilities`, with the file named after its main export (`computeColor.ts` exports
-  `computeColor`).
+- Files in `src/utilities` either hold one function and are named after it (`computeColor.ts`), or group the
+  `compute*` helpers for a family of props (`figmaPropertyHelpers.ts`, `elementPropertyHelpers.ts`).
 - Leave a blank line before the final `return` and between logical blocks; one-line `if (…) return …` guards may be
   stacked without blank lines.
 - No `useMemo` / `useCallback` / `React.memo`: consuming apps run React Compiler.

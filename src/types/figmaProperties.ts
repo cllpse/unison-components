@@ -1,6 +1,6 @@
 import type { COLORS } from "../constants/colors"
 import type { UNITS } from "../constants/units"
-import type { ClassName, StyleNative, StyleWeb } from "./ElementProperties"
+import type { ClassName, StyleNative, StyleWeb } from "./elementProperties"
 
 type Simplify<T> = {
   [KeyType in keyof T]: T[KeyType]

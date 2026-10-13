@@ -1,5 +1,5 @@
 export { COLORS } from "../src/constants/colors"
-export type { ClassName, StyleNative, StyleWeb } from "../src/types/ElementProperties"
+export type { ClassName, StyleNative, StyleWeb } from "../src/types/elementProperties"
 export { type ColorFlagKind, type ColorFlagProps, computeColor } from "../src/utilities/computeColor"
 export { type ExtractedColor, extractColor } from "../src/utilities/extractColor"
 export { default as Frame } from "../src/web/Frame.web"

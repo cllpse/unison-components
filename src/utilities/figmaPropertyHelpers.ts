@@ -1,7 +1,7 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import { COLORS } from "../constants/colors"
 import { UNITS, UNITS_TAILWIND } from "../constants/units"
-import type { StyleNative, StyleWeb } from "../types/ElementProperties"
+import type { StyleNative, StyleWeb } from "../types/elementProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -37,7 +37,7 @@ import type {
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
-} from "../types/FigmaProperties"
+} from "../types/figmaProperties"
 import type { ColorFlagKind } from "./computeColor"
 import { extractColor } from "./extractColor"
 
@@ -91,11 +91,11 @@ const resolveFrameAlignment = (
   return { vertical: "top", horizontal: "left" }
 }
 
-export const FrameComputeFlow = (p: FigmaFrameFlow): FigmaPropertiesReturn => {
+export const computeFrameFlow = (p: FigmaFrameFlow): FigmaPropertiesReturn => {
   return { className: resolveFrameFlow(p) === "horizontal" ? "flex-row" : "flex-col" }
 }
 
-export const FrameComputeAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): FigmaPropertiesReturn => {
+export const computeFrameAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): FigmaPropertiesReturn => {
   const { vertical, horizontal } = resolveFrameAlignment(p)
   const horizontalEdge = FRAME_HORIZONTAL_TO_EDGE[horizontal]
   const verticalEdge = FRAME_VERTICAL_TO_EDGE[vertical]
@@ -116,7 +116,7 @@ export const FrameComputeAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): 
 // RNW dedupes style objects by property and they deterministically win over the
 // reset's atomic classes — unlike Tailwind classes, whose win depends on CSS
 // source order.
-export const FrameComputeSizing = (p: FigmaFrameWidth & FigmaFrameHeight): FigmaPropertiesReturn => {
+export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): FigmaPropertiesReturn => {
   let exactWidth = ""
   let exactHeight = ""
 
@@ -211,7 +211,7 @@ export const FrameComputeSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
   }
 }
 
-export const FrameComputeGap = (p: FigmaFrameGap): FigmaPropertiesReturnError => {
+export const computeFrameGap = (p: FigmaFrameGap): FigmaPropertiesReturnError => {
   let className = ""
 
   for (const key in UNITS) {
@@ -236,7 +236,7 @@ const resolveUnitKey = <P extends object>(p: P, prefix: string): keyof typeof UN
   return undefined
 }
 
-export const FrameComputePadding = (p: FigmaPadding): FigmaPropertiesReturn => {
+export const computeFramePadding = (p: FigmaPadding): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -244,7 +244,7 @@ export const FrameComputePadding = (p: FigmaPadding): FigmaPropertiesReturn => {
   return { styles: { padding: UNITS[key] }, className: `p-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputePaddingVertical = (p: FigmaPaddingVertical): FigmaPropertiesReturn => {
+export const computeFramePaddingVertical = (p: FigmaPaddingVertical): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-vertical-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -254,7 +254,7 @@ export const FrameComputePaddingVertical = (p: FigmaPaddingVertical): FigmaPrope
   return { styles: { paddingTop: value, paddingBottom: value }, className: `py-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputePaddingHorizontal = (p: FigmaPaddingHorizontal): FigmaPropertiesReturn => {
+export const computeFramePaddingHorizontal = (p: FigmaPaddingHorizontal): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-horizontal-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -264,7 +264,7 @@ export const FrameComputePaddingHorizontal = (p: FigmaPaddingHorizontal): FigmaP
   return { styles: { paddingLeft: value, paddingRight: value }, className: `px-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputePaddingLeft = (p: FigmaPaddingLeft): FigmaPropertiesReturn => {
+export const computeFramePaddingLeft = (p: FigmaPaddingLeft): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-left-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -272,7 +272,7 @@ export const FrameComputePaddingLeft = (p: FigmaPaddingLeft): FigmaPropertiesRet
   return { styles: { paddingLeft: UNITS[key] }, className: `pl-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputePaddingRight = (p: FigmaPaddingRight): FigmaPropertiesReturn => {
+export const computeFramePaddingRight = (p: FigmaPaddingRight): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-right-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -280,7 +280,7 @@ export const FrameComputePaddingRight = (p: FigmaPaddingRight): FigmaPropertiesR
   return { styles: { paddingRight: UNITS[key] }, className: `pr-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputePaddingTop = (p: FigmaPaddingTop): FigmaPropertiesReturn => {
+export const computeFramePaddingTop = (p: FigmaPaddingTop): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-top-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -288,7 +288,7 @@ export const FrameComputePaddingTop = (p: FigmaPaddingTop): FigmaPropertiesRetur
   return { styles: { paddingTop: UNITS[key] }, className: `pt-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputePaddingBottom = (p: FigmaPaddingBottom): FigmaPropertiesReturn => {
+export const computeFramePaddingBottom = (p: FigmaPaddingBottom): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "padding-bottom-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -296,7 +296,7 @@ export const FrameComputePaddingBottom = (p: FigmaPaddingBottom): FigmaPropertie
   return { styles: { paddingBottom: UNITS[key] }, className: `pb-${UNITS_TAILWIND[key] ?? key}` }
 }
 
-export const FrameComputeCornerRadiusTopLeft = (p: FigmaFrameCornerRadiusTopLeft): FigmaPropertiesReturn => {
+export const computeFrameCornerRadiusTopLeft = (p: FigmaFrameCornerRadiusTopLeft): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "corner-radius-top-left-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -307,7 +307,7 @@ export const FrameComputeCornerRadiusTopLeft = (p: FigmaFrameCornerRadiusTopLeft
   }
 }
 
-export const FrameComputeCornerRadiusTopRight = (p: FigmaFrameCornerRadiusTopRight): FigmaPropertiesReturn => {
+export const computeFrameCornerRadiusTopRight = (p: FigmaFrameCornerRadiusTopRight): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "corner-radius-top-right-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -318,7 +318,7 @@ export const FrameComputeCornerRadiusTopRight = (p: FigmaFrameCornerRadiusTopRig
   }
 }
 
-export const FrameComputeCornerRadiusBottomLeft = (p: FigmaFrameCornerRadiusBottomLeft): FigmaPropertiesReturn => {
+export const computeFrameCornerRadiusBottomLeft = (p: FigmaFrameCornerRadiusBottomLeft): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "corner-radius-bottom-left-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -329,7 +329,7 @@ export const FrameComputeCornerRadiusBottomLeft = (p: FigmaFrameCornerRadiusBott
   }
 }
 
-export const FrameComputeCornerRadiusBottomRight = (p: FigmaFrameCornerRadiusBottomRight): FigmaPropertiesReturn => {
+export const computeFrameCornerRadiusBottomRight = (p: FigmaFrameCornerRadiusBottomRight): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "corner-radius-bottom-right-")
 
   if (key === undefined) return { styles: {}, className: "" }
@@ -340,7 +340,7 @@ export const FrameComputeCornerRadiusBottomRight = (p: FigmaFrameCornerRadiusBot
   }
 }
 
-export const FrameComputeCornerRadius = (
+export const computeFrameCornerRadius = (
   p: FigmaFrameBorderRadius &
     FigmaFrameCornerRadius &
     FigmaFrameCornerRadiusTopLeft &
@@ -349,10 +349,10 @@ export const FrameComputeCornerRadius = (
     FigmaFrameCornerRadiusBottomRight,
 ): FigmaPropertiesReturn => {
   const key = resolveUnitKey(p, "border-radius-") ?? resolveUnitKey(p, "corner-radius-")
-  const topLeft = FrameComputeCornerRadiusTopLeft(p)
-  const topRight = FrameComputeCornerRadiusTopRight(p)
-  const bottomLeft = FrameComputeCornerRadiusBottomLeft(p)
-  const bottomRight = FrameComputeCornerRadiusBottomRight(p)
+  const topLeft = computeFrameCornerRadiusTopLeft(p)
+  const topRight = computeFrameCornerRadiusTopRight(p)
+  const bottomLeft = computeFrameCornerRadiusBottomLeft(p)
+  const bottomRight = computeFrameCornerRadiusBottomRight(p)
 
   return {
     styles: {
@@ -374,36 +374,36 @@ export const FrameComputeCornerRadius = (
   }
 }
 
-export const FrameComputeFill = (p: FigmaFill): FigmaPropertiesReturn => {
-  return ComputeColor(p, "fill", "bg")
+export const computeFrameFill = (p: FigmaFill): FigmaPropertiesReturn => {
+  return computeColorClassName(p, "fill", "bg")
 }
 
 const STROKE_SOLID = "outline-1 outline -outline-offset-1"
 const STROKE_DASHED = `${STROKE_SOLID} outline-dashed`
 
-export const FrameComputeStroke = (p: FigmaStroke & FigmaStrokeStyle): FigmaPropertiesReturn => {
-  const stroke = ComputeColor(p, "stroke", "outline")
+export const computeFrameStroke = (p: FigmaStroke & FigmaStrokeStyle): FigmaPropertiesReturn => {
+  const stroke = computeColorClassName(p, "stroke", "outline")
 
   if (stroke.className === "") return stroke
 
   return { className: `${stroke.className} ${p["stroke-style-dashed"] ? STROKE_DASHED : STROKE_SOLID}` }
 }
 
-export const FrameComputeFillHover = (p: FigmaFillHover): FigmaPropertiesReturn => {
-  return ComputeColor(p, "fill-hover", "hover:bg")
+export const computeFrameFillHover = (p: FigmaFillHover): FigmaPropertiesReturn => {
+  return computeColorClassName(p, "fill-hover", "hover:bg")
 }
 
-export const FrameComputeStrokeHover = (p: FigmaStrokeHover): FigmaPropertiesReturn => {
-  return ComputeColor(p, "stroke-hover", "hover:outline")
+export const computeFrameStrokeHover = (p: FigmaStrokeHover): FigmaPropertiesReturn => {
+  return computeColorClassName(p, "stroke-hover", "hover:outline")
 }
 
-export const FrameComputeEffectShadow = (p: FigmaFrameEffectShadow): FigmaPropertiesReturn => {
+export const computeFrameEffectShadow = (p: FigmaFrameEffectShadow): FigmaPropertiesReturn => {
   if (p["effect-shadow-none"]) {
     return { className: "" }
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: ...
-  const fill = FrameComputeFill(p as any)
+  const fill = computeFrameFill(p as any)
 
   if (fill.className === "bg-white") {
     if (p["effect-shadow-small"]) {
@@ -435,7 +435,7 @@ export const FrameComputeEffectShadow = (p: FigmaFrameEffectShadow): FigmaProper
   return { styles: { boxShadow: "none" }, className: "" }
 }
 
-export const TextComputeTypography = (p: FigmaTypography): FigmaPropertiesReturnError => {
+export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturnError => {
   if (p["typography-timecode"]) {
     return {
       className: "font-['iAWriterDuo'] font-bold text-[64px] leading-[64px]",
@@ -542,8 +542,8 @@ export const TextComputeTypography = (p: FigmaTypography): FigmaPropertiesReturn
   return { error: '<Text /> – missing "typography-" property' }
 }
 
-export const TextComputeFill = (p: FigmaFill): FigmaPropertiesReturnError => {
-  const fill = ComputeColor(p, "fill", "text")
+export const computeTextFill = (p: FigmaFill): FigmaPropertiesReturnError => {
+  const fill = computeColorClassName(p, "fill", "text")
 
   if (fill.className !== "") {
     return fill
@@ -552,11 +552,11 @@ export const TextComputeFill = (p: FigmaFill): FigmaPropertiesReturnError => {
   return { error: '<Text /> – missing "fill-" property' }
 }
 
-export const TextComputeFillHover = (p: FigmaFillHover): FigmaPropertiesReturn => {
-  return ComputeColor(p, "fill-hover", "hover:text")
+export const computeTextFillHover = (p: FigmaFillHover): FigmaPropertiesReturn => {
+  return computeColorClassName(p, "fill-hover", "hover:text")
 }
 
-export const TextComputeTypographyAlignment = (p: FigmaTypographyAlignment): FigmaPropertiesReturn => {
+export const computeTextTypographyAlignment = (p: FigmaTypographyAlignment): FigmaPropertiesReturn => {
   if (p["typography-align-left"]) return { styles: { textAlign: "left" }, className: "text-left" }
   if (p["typography-align-center"]) return { styles: { textAlign: "center" }, className: "text-center" }
   if (p["typography-align-right"]) return { styles: { textAlign: "right" }, className: "text-right" }
@@ -564,7 +564,7 @@ export const TextComputeTypographyAlignment = (p: FigmaTypographyAlignment): Fig
   return { styles: {}, className: "" }
 }
 
-export const TextComputeTypographyDecoration = (p: FigmaTypographyDecoration): FigmaPropertiesReturn => {
+export const computeTextTypographyDecoration = (p: FigmaTypographyDecoration): FigmaPropertiesReturn => {
   if (p["typography-decoration-underline"]) {
     return { styles: { textDecorationLine: "underline" }, className: "underline" }
   }
@@ -576,7 +576,7 @@ export const TextComputeTypographyDecoration = (p: FigmaTypographyDecoration): F
  * @deprecated
  * @todo @cllpse: transition to wrapping in Frame and using Material Icons
  */
-export const IconComputeWidth = (p: FigmaIconWidth): FigmaPropertiesReturnError => {
+export const computeIconWidth = (p: FigmaIconWidth): FigmaPropertiesReturnError => {
   if (p["width-small"]) {
     return { styles: { width: UNITS[2], height: UNITS[2] }, className: "w-6 h-6 shrink-0" }
   }
@@ -596,11 +596,11 @@ export const IconComputeWidth = (p: FigmaIconWidth): FigmaPropertiesReturnError 
   return { error: '<Icon /> – missing "width-" property' }
 }
 
-export const IconComputeFill = (p: FigmaFill): FigmaPropertiesReturn => {
-  return ComputeColor(p, "fill", "text")
+export const computeIconFill = (p: FigmaFill): FigmaPropertiesReturn => {
+  return computeColorClassName(p, "fill", "text")
 }
 
-const ComputeColor = (
+const computeColorClassName = (
   p: object,
   kind: ColorFlagKind,
   property: "bg" | "text" | "outline" | "hover:bg" | "hover:text" | "hover:outline",
@@ -614,7 +614,7 @@ const ComputeColor = (
   }
 }
 
-export const FontFeatureStyle: StyleProp<TextStyle> = Platform.select({
+export const FONT_FEATURE_STYLE: StyleProp<TextStyle> = Platform.select({
   ios: { fontVariant: ["stylistic-one"] },
   android: { fontFeatureSettings: '"ss01" 1' },
   default: {},

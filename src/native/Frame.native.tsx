@@ -1,5 +1,5 @@
 import FrameBase, { type Frame as FrameType } from "../base/Frame.base"
-import type { StyleNative } from "../types/ElementProperties"
+import type { StyleNative } from "../types/elementProperties"
 
 export type Frame = Omit<FrameType, "role" | "aria-label" | "aria-selected"> & {
   _STYLE?: StyleNative

@@ -1,5 +1,5 @@
 import TextBase, { type Text as TextType } from "../base/Text.base"
-import type { StyleNative } from "../types/ElementProperties"
+import type { StyleNative } from "../types/elementProperties"
 
 export type Text = Omit<TextType, "_STYLE"> & {
   _STYLE?: StyleNative

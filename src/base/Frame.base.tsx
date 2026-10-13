@@ -1,6 +1,6 @@
 import type { ReactNode, RefObject } from "react"
 import { Pressable, type PressableProps, type Role, View, type ViewInstance, type ViewProps } from "react-native"
-import type { ClassName, PointerEventsWeb, StyleNative, StyleWeb } from "../types/ElementProperties"
+import type { ClassName, PointerEventsWeb, StyleNative, StyleWeb } from "../types/elementProperties"
 // import DebugError from "./DebugError.base"
 import type {
   FigmaFill,
@@ -28,28 +28,28 @@ import type {
   FigmaStroke,
   FigmaStrokeHover,
   FigmaStrokeStyle,
-} from "../types/FigmaProperties"
-import { ElementComputePointerEvents } from "../utilities/ElementPropertyHelpers"
+} from "../types/figmaProperties"
+import { computeElementPointerEvents } from "../utilities/elementPropertyHelpers"
 
 import {
-  FrameComputeAlignment,
-  FrameComputeCornerRadius,
-  FrameComputeEffectShadow,
-  FrameComputeFill,
-  FrameComputeFillHover,
-  FrameComputeFlow,
-  FrameComputeGap,
-  FrameComputePadding,
-  FrameComputePaddingBottom,
-  FrameComputePaddingHorizontal,
-  FrameComputePaddingLeft,
-  FrameComputePaddingRight,
-  FrameComputePaddingTop,
-  FrameComputePaddingVertical,
-  FrameComputeSizing,
-  FrameComputeStroke,
-  FrameComputeStrokeHover,
-} from "../utilities/FigmaPropertyHelpers"
+  computeFrameAlignment,
+  computeFrameCornerRadius,
+  computeFrameEffectShadow,
+  computeFrameFill,
+  computeFrameFillHover,
+  computeFrameFlow,
+  computeFrameGap,
+  computeFramePadding,
+  computeFramePaddingBottom,
+  computeFramePaddingHorizontal,
+  computeFramePaddingLeft,
+  computeFramePaddingRight,
+  computeFramePaddingTop,
+  computeFramePaddingVertical,
+  computeFrameSizing,
+  computeFrameStroke,
+  computeFrameStrokeHover,
+} from "../utilities/figmaPropertyHelpers"
 
 export type Frame = FigmaFrameFlow &
   FigmaFrameWidth &
@@ -103,25 +103,25 @@ export type Frame = FigmaFrameFlow &
   }
 
 export default (p: Frame) => {
-  const gap = FrameComputeGap(p).className
-  const padding = FrameComputePadding(p)
-  const paddingVertical = FrameComputePaddingVertical(p)
-  const paddingHorizontal = FrameComputePaddingHorizontal(p)
-  const paddingLeft = FrameComputePaddingLeft(p)
-  const paddingRight = FrameComputePaddingRight(p)
-  const paddingTop = FrameComputePaddingTop(p)
-  const paddingBottom = FrameComputePaddingBottom(p)
-  const fill = FrameComputeFill(p).className
-  const stroke = FrameComputeStroke(p).className
-  const fillHover = FrameComputeFillHover(p).className
-  const cornerRadius = FrameComputeCornerRadius(p)
-  const effectShadow = FrameComputeEffectShadow(p).className
-  const strokeHover = FrameComputeStrokeHover(p).className
-  const pointerEvents = ElementComputePointerEvents(p).className
+  const gap = computeFrameGap(p).className
+  const padding = computeFramePadding(p)
+  const paddingVertical = computeFramePaddingVertical(p)
+  const paddingHorizontal = computeFramePaddingHorizontal(p)
+  const paddingLeft = computeFramePaddingLeft(p)
+  const paddingRight = computeFramePaddingRight(p)
+  const paddingTop = computeFramePaddingTop(p)
+  const paddingBottom = computeFramePaddingBottom(p)
+  const fill = computeFrameFill(p).className
+  const stroke = computeFrameStroke(p).className
+  const fillHover = computeFrameFillHover(p).className
+  const cornerRadius = computeFrameCornerRadius(p)
+  const effectShadow = computeFrameEffectShadow(p).className
+  const strokeHover = computeFrameStrokeHover(p).className
+  const pointerEvents = computeElementPointerEvents(p).className
 
-  const flow = FrameComputeFlow(p).className
-  const alignment = FrameComputeAlignment(p).className
-  const sizing = FrameComputeSizing(p)
+  const flow = computeFrameFlow(p).className
+  const alignment = computeFrameAlignment(p).className
+  const sizing = computeFrameSizing(p)
 
   const styles = [
     sizing.styles,

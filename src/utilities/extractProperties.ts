@@ -11,9 +11,9 @@
  *     property into a `{...rest}` spread.
  *
  * @example
- * const { fromType, rest } = extractProperties<Base>()(p, ["color", "active", "onChange"])
+ * const { fromType, fromRest } = extractProperties<Base>()(p, ["color", "active", "onChange"])
  *
- * return <_Button {...rest}>{fromType.active ? "on" : "off"}</_Button>
+ * return <_Button {...fromRest}>{fromType.active ? "on" : "off"}</_Button>
  */
 type MissingKey<Base, K extends readonly (keyof Base)[]> = Exclude<keyof Base, K[number]>
 

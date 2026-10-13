@@ -1,5 +1,5 @@
 import { type TextProps, Text as TextReactNative } from "react-native"
-import type { ClassName, StyleNative, StyleWeb } from "../types/ElementProperties"
+import type { ClassName, StyleNative, StyleWeb } from "../types/elementProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -7,15 +7,15 @@ import type {
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
-} from "../types/FigmaProperties"
+} from "../types/figmaProperties"
 import {
-  FontFeatureStyle,
-  TextComputeFill,
-  TextComputeFillHover,
-  TextComputeTypography,
-  TextComputeTypographyAlignment,
-  TextComputeTypographyDecoration,
-} from "../utilities/FigmaPropertyHelpers"
+  computeTextFill,
+  computeTextFillHover,
+  computeTextTypography,
+  computeTextTypographyAlignment,
+  computeTextTypographyDecoration,
+  FONT_FEATURE_STYLE,
+} from "../utilities/figmaPropertyHelpers"
 
 export type Text = FigmaFill &
   FigmaFillHover &
@@ -30,13 +30,13 @@ export type Text = FigmaFill &
   }
 
 export default (p: Text) => {
-  const { className: typography } = TextComputeTypography(p)
-  const { className: fill } = TextComputeFill(p)
-  const { className: fillHover } = TextComputeFillHover(p)
-  const { className: alignment } = TextComputeTypographyAlignment(p)
-  const { className: decoration } = TextComputeTypographyDecoration(p)
+  const { className: typography } = computeTextTypography(p)
+  const { className: fill } = computeTextFill(p)
+  const { className: fillHover } = computeTextFillHover(p)
+  const { className: alignment } = computeTextTypographyAlignment(p)
+  const { className: decoration } = computeTextTypographyDecoration(p)
 
-  const styles = [p.style, FontFeatureStyle]
+  const styles = [p.style, FONT_FEATURE_STYLE]
 
   const classes = [
     "[&_a]:underline [&_a]:underline-offset-2 [&_a]:decoration-current",
