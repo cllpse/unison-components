@@ -38,6 +38,8 @@ import type {
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
 } from "../types/FigmaProperties"
+import type { ColorFlagKind } from "./computeColor"
+import { extractColor } from "./extractColor"
 
 const FRAME_HORIZONTAL_TO_EDGE: Record<FigmaFrameHorizontalPosition, FigmaFrameEdgePosition> = {
   left: "start",
@@ -373,19 +375,26 @@ export const FrameComputeCornerRadius = (
 }
 
 export const FrameComputeFill = (p: FigmaFill): FigmaPropertiesReturn => {
-  return ComputeColor(p, "bg")
+  return ComputeColor(p, "fill", "bg")
 }
 
-export const FrameComputeStroke = (p: FigmaStroke): FigmaPropertiesReturn => {
-  return ComputeStrokeColor(p, "outline")
+const STROKE_SOLID = "outline-1 outline -outline-offset-1"
+const STROKE_DASHED = `${STROKE_SOLID} outline-dashed`
+
+export const FrameComputeStroke = (p: FigmaStroke & FigmaStrokeStyle): FigmaPropertiesReturn => {
+  const stroke = ComputeColor(p, "stroke", "outline")
+
+  if (stroke.className === "") return stroke
+
+  return { className: `${stroke.className} ${p["stroke-style-dashed"] ? STROKE_DASHED : STROKE_SOLID}` }
 }
 
 export const FrameComputeFillHover = (p: FigmaFillHover): FigmaPropertiesReturn => {
-  return ComputeColorHover(p, "hover:bg")
+  return ComputeColor(p, "fill-hover", "hover:bg")
 }
 
 export const FrameComputeStrokeHover = (p: FigmaStrokeHover): FigmaPropertiesReturn => {
-  return ComputeStrokeHoverColor(p, "hover:outline")
+  return ComputeColor(p, "stroke-hover", "hover:outline")
 }
 
 export const FrameComputeEffectShadow = (p: FigmaFrameEffectShadow): FigmaPropertiesReturn => {
@@ -534,7 +543,7 @@ export const TextComputeTypography = (p: FigmaTypography): FigmaPropertiesReturn
 }
 
 export const TextComputeFill = (p: FigmaFill): FigmaPropertiesReturnError => {
-  const fill = ComputeColor(p, "text")
+  const fill = ComputeColor(p, "fill", "text")
 
   if (fill.className !== "") {
     return fill
@@ -544,7 +553,7 @@ export const TextComputeFill = (p: FigmaFill): FigmaPropertiesReturnError => {
 }
 
 export const TextComputeFillHover = (p: FigmaFillHover): FigmaPropertiesReturn => {
-  return ComputeColorHover(p, "hover:text")
+  return ComputeColor(p, "fill-hover", "hover:text")
 }
 
 export const TextComputeTypographyAlignment = (p: FigmaTypographyAlignment): FigmaPropertiesReturn => {
@@ -588,508 +597,21 @@ export const IconComputeWidth = (p: FigmaIconWidth): FigmaPropertiesReturnError 
 }
 
 export const IconComputeFill = (p: FigmaFill): FigmaPropertiesReturn => {
-  return ComputeColor(p, "text")
+  return ComputeColor(p, "fill", "text")
 }
 
 const ComputeColor = (
-  p: FigmaFill & FigmaStroke & FigmaStrokeStyle,
-  property: "bg" | "text" | "fill",
+  p: object,
+  kind: ColorFlagKind,
+  property: "bg" | "text" | "outline" | "hover:bg" | "hover:text" | "hover:outline",
 ): FigmaPropertiesReturn => {
-  if (p["fill-white"]) return { className: `${property}-white` }
-  if (p["fill-black"]) return { className: `${property}-black` }
+  const flag = extractColor(kind, p)
 
-  if (p["fill-tentative-0"]) return { className: `${property}-tentative-0` }
-  if (p["fill-tentative-50"]) return { className: `${property}-tentative-50` }
-  if (p["fill-tentative-100"]) return { className: `${property}-tentative-100` }
-  if (p["fill-tentative-200"]) return { className: `${property}-tentative-200` }
-  if (p["fill-tentative-300"]) return { className: `${property}-tentative-300` }
-  if (p["fill-tentative-400"]) return { className: `${property}-tentative-400` }
-  if (p["fill-tentative-500"]) return { className: `${property}-tentative-500` }
-  if (p["fill-tentative-600"]) return { className: `${property}-tentative-600` }
-  if (p["fill-tentative-700"]) return { className: `${property}-tentative-700` }
-  if (p["fill-tentative-800"]) return { className: `${property}-tentative-800` }
-  if (p["fill-tentative-900"]) return { className: `${property}-tentative-900` }
-  if (p["fill-tentative-brand"]) return { className: `${property}-tentative-brand` }
+  if (flag === undefined) return { className: "" }
 
-  if (p["fill-tertiary-0"]) return { className: `${property}-tertiary-0` }
-  if (p["fill-tertiary-50"]) return { className: `${property}-tertiary-50` }
-  if (p["fill-tertiary-100"]) return { className: `${property}-tertiary-100` }
-  if (p["fill-tertiary-200"]) return { className: `${property}-tertiary-200` }
-  if (p["fill-tertiary-300"]) return { className: `${property}-tertiary-300` }
-  if (p["fill-tertiary-400"]) return { className: `${property}-tertiary-400` }
-  if (p["fill-tertiary-500"]) return { className: `${property}-tertiary-500` }
-  if (p["fill-tertiary-600"]) return { className: `${property}-tertiary-600` }
-  if (p["fill-tertiary-700"]) return { className: `${property}-tertiary-700` }
-  if (p["fill-tertiary-800"]) return { className: `${property}-tertiary-800` }
-  if (p["fill-tertiary-900"]) return { className: `${property}-tertiary-900` }
-  if (p["fill-tertiary-brand"]) return { className: `${property}-tertiary-brand` }
-
-  if (p["fill-positive-0"]) return { className: `${property}-positive-0` }
-  if (p["fill-positive-50"]) return { className: `${property}-positive-50` }
-  if (p["fill-positive-100"]) return { className: `${property}-positive-100` }
-  if (p["fill-positive-200"]) return { className: `${property}-positive-200` }
-  if (p["fill-positive-300"]) return { className: `${property}-positive-300` }
-  if (p["fill-positive-400"]) return { className: `${property}-positive-400` }
-  if (p["fill-positive-500"]) return { className: `${property}-positive-500` }
-  if (p["fill-positive-600"]) return { className: `${property}-positive-600` }
-  if (p["fill-positive-700"]) return { className: `${property}-positive-700` }
-  if (p["fill-positive-800"]) return { className: `${property}-positive-800` }
-  if (p["fill-positive-900"]) return { className: `${property}-positive-900` }
-  if (p["fill-positive-brand"]) return { className: `${property}-positive-brand` }
-
-  if (p["fill-negative-0"]) return { className: `${property}-negative-0` }
-  if (p["fill-negative-50"]) return { className: `${property}-negative-50` }
-  if (p["fill-negative-100"]) return { className: `${property}-negative-100` }
-  if (p["fill-negative-200"]) return { className: `${property}-negative-200` }
-  if (p["fill-negative-300"]) return { className: `${property}-negative-300` }
-  if (p["fill-negative-400"]) return { className: `${property}-negative-400` }
-  if (p["fill-negative-500"]) return { className: `${property}-negative-500` }
-  if (p["fill-negative-600"]) return { className: `${property}-negative-600` }
-  if (p["fill-negative-700"]) return { className: `${property}-negative-700` }
-  if (p["fill-negative-800"]) return { className: `${property}-negative-800` }
-  if (p["fill-negative-900"]) return { className: `${property}-negative-900` }
-  if (p["fill-negative-brand"]) return { className: `${property}-negative-brand` }
-
-  if (p["fill-secondary-0"]) return { className: `${property}-secondary-0` }
-  if (p["fill-secondary-50"]) return { className: `${property}-secondary-50` }
-  if (p["fill-secondary-100"]) return { className: `${property}-secondary-100` }
-  if (p["fill-secondary-200"]) return { className: `${property}-secondary-200` }
-  if (p["fill-secondary-300"]) return { className: `${property}-secondary-300` }
-  if (p["fill-secondary-400"]) return { className: `${property}-secondary-400` }
-  if (p["fill-secondary-500"]) return { className: `${property}-secondary-500` }
-  if (p["fill-secondary-600"]) return { className: `${property}-secondary-600` }
-  if (p["fill-secondary-700"]) return { className: `${property}-secondary-700` }
-  if (p["fill-secondary-800"]) return { className: `${property}-secondary-800` }
-  if (p["fill-secondary-900"]) return { className: `${property}-secondary-900` }
-  if (p["fill-secondary-brand"]) return { className: `${property}-secondary-brand` }
-
-  if (p["fill-primary-0"]) return { className: `${property}-primary-0` }
-  if (p["fill-primary-50"]) return { className: `${property}-primary-50` }
-  if (p["fill-primary-100"]) return { className: `${property}-primary-100` }
-  if (p["fill-primary-200"]) return { className: `${property}-primary-200` }
-  if (p["fill-primary-300"]) return { className: `${property}-primary-300` }
-  if (p["fill-primary-400"]) return { className: `${property}-primary-400` }
-  if (p["fill-primary-500"]) return { className: `${property}-primary-500` }
-  if (p["fill-primary-600"]) return { className: `${property}-primary-600` }
-  if (p["fill-primary-700"]) return { className: `${property}-primary-700` }
-  if (p["fill-primary-800"]) return { className: `${property}-primary-800` }
-  if (p["fill-primary-900"]) return { className: `${property}-primary-900` }
-  if (p["fill-primary-brand"]) return { className: `${property}-primary-brand` }
-
-  if (p["fill-neutral-0"]) return { className: `${property}-neutral-0` }
-  if (p["fill-neutral-50"]) return { className: `${property}-neutral-50` }
-  if (p["fill-neutral-100"]) return { className: `${property}-neutral-100` }
-  if (p["fill-neutral-200"]) return { className: `${property}-neutral-200` }
-  if (p["fill-neutral-300"]) return { className: `${property}-neutral-300` }
-  if (p["fill-neutral-400"]) return { className: `${property}-neutral-400` }
-  if (p["fill-neutral-500"]) return { className: `${property}-neutral-500` }
-  if (p["fill-neutral-600"]) return { className: `${property}-neutral-600` }
-  if (p["fill-neutral-700"]) return { className: `${property}-neutral-700` }
-  if (p["fill-neutral-800"]) return { className: `${property}-neutral-800` }
-  if (p["fill-neutral-900"]) return { className: `${property}-neutral-900` }
-
-  if (p["fill-neutralsurface-0"]) return { className: `${property}-neutralsurface-0` }
-  if (p["fill-neutralsurface-50"]) return { className: `${property}-neutralsurface-50` }
-  if (p["fill-neutralsurface-100"]) return { className: `${property}-neutralsurface-100` }
-  if (p["fill-neutralsurface-200"]) return { className: `${property}-neutralsurface-200` }
-  if (p["fill-neutralsurface-300"]) return { className: `${property}-neutralsurface-300` }
-  if (p["fill-neutralsurface-400"]) return { className: `${property}-neutralsurface-400` }
-  if (p["fill-neutralsurface-500"]) return { className: `${property}-neutralsurface-500` }
-  if (p["fill-neutralsurface-600"]) return { className: `${property}-neutralsurface-600` }
-  if (p["fill-neutralsurface-700"]) return { className: `${property}-neutralsurface-700` }
-  if (p["fill-neutralsurface-800"]) return { className: `${property}-neutralsurface-800` }
-  if (p["fill-neutralsurface-900"]) return { className: `${property}-neutralsurface-900` }
-  if (p["fill-neutralsurface-brand"]) return { className: `${property}-neutralsurface-brand` }
-
-  if (p["fill-text-0"]) return { className: `${property}-text-0` }
-  if (p["fill-text-50"]) return { className: `${property}-text-50` }
-  if (p["fill-text-100"]) return { className: `${property}-text-100` }
-  if (p["fill-text-200"]) return { className: `${property}-text-200` }
-  if (p["fill-text-300"]) return { className: `${property}-text-300` }
-  if (p["fill-text-400"]) return { className: `${property}-text-400` }
-  if (p["fill-text-500"]) return { className: `${property}-text-500` }
-  if (p["fill-text-600"]) return { className: `${property}-text-600` }
-  if (p["fill-text-700"]) return { className: `${property}-text-700` }
-  if (p["fill-text-800"]) return { className: `${property}-text-800` }
-  if (p["fill-text-900"]) return { className: `${property}-text-900` }
-  if (p["fill-text-brand"]) return { className: `${property}-text-brand` }
-
-  return { className: "" }
-}
-
-const ComputeColorHover = (
-  p: FigmaFillHover,
-  property: "hover:bg" | "hover:text" | "hover:fill",
-): FigmaPropertiesReturn => {
-  if (p["fill-hover-white"]) return { className: `${property}-white` }
-  if (p["fill-hover-black"]) return { className: `${property}-black` }
-
-  if (p["fill-hover-tentative-0"]) return { className: `${property}-tentative-0` }
-  if (p["fill-hover-tentative-50"]) return { className: `${property}-tentative-50` }
-  if (p["fill-hover-tentative-100"]) return { className: `${property}-tentative-100` }
-  if (p["fill-hover-tentative-200"]) return { className: `${property}-tentative-200` }
-  if (p["fill-hover-tentative-300"]) return { className: `${property}-tentative-300` }
-  if (p["fill-hover-tentative-400"]) return { className: `${property}-tentative-400` }
-  if (p["fill-hover-tentative-500"]) return { className: `${property}-tentative-500` }
-  if (p["fill-hover-tentative-600"]) return { className: `${property}-tentative-600` }
-  if (p["fill-hover-tentative-700"]) return { className: `${property}-tentative-700` }
-  if (p["fill-hover-tentative-800"]) return { className: `${property}-tentative-800` }
-  if (p["fill-hover-tentative-900"]) return { className: `${property}-tentative-900` }
-  if (p["fill-hover-tentative-brand"]) return { className: `${property}-tentative-brand` }
-
-  if (p["fill-hover-tertiary-0"]) return { className: `${property}-tertiary-0` }
-  if (p["fill-hover-tertiary-50"]) return { className: `${property}-tertiary-50` }
-  if (p["fill-hover-tertiary-100"]) return { className: `${property}-tertiary-100` }
-  if (p["fill-hover-tertiary-200"]) return { className: `${property}-tertiary-200` }
-  if (p["fill-hover-tertiary-300"]) return { className: `${property}-tertiary-300` }
-  if (p["fill-hover-tertiary-400"]) return { className: `${property}-tertiary-400` }
-  if (p["fill-hover-tertiary-500"]) return { className: `${property}-tertiary-500` }
-  if (p["fill-hover-tertiary-600"]) return { className: `${property}-tertiary-600` }
-  if (p["fill-hover-tertiary-700"]) return { className: `${property}-tertiary-700` }
-  if (p["fill-hover-tertiary-800"]) return { className: `${property}-tertiary-800` }
-  if (p["fill-hover-tertiary-900"]) return { className: `${property}-tertiary-900` }
-  if (p["fill-hover-tertiary-brand"]) return { className: `${property}-tertiary-brand` }
-
-  if (p["fill-hover-positive-0"]) return { className: `${property}-positive-0` }
-  if (p["fill-hover-positive-50"]) return { className: `${property}-positive-50` }
-  if (p["fill-hover-positive-100"]) return { className: `${property}-positive-100` }
-  if (p["fill-hover-positive-200"]) return { className: `${property}-positive-200` }
-  if (p["fill-hover-positive-300"]) return { className: `${property}-positive-300` }
-  if (p["fill-hover-positive-400"]) return { className: `${property}-positive-400` }
-  if (p["fill-hover-positive-500"]) return { className: `${property}-positive-500` }
-  if (p["fill-hover-positive-600"]) return { className: `${property}-positive-600` }
-  if (p["fill-hover-positive-700"]) return { className: `${property}-positive-700` }
-  if (p["fill-hover-positive-800"]) return { className: `${property}-positive-800` }
-  if (p["fill-hover-positive-900"]) return { className: `${property}-positive-900` }
-  if (p["fill-hover-positive-brand"]) return { className: `${property}-positive-brand` }
-
-  if (p["fill-hover-negative-0"]) return { className: `${property}-negative-0` }
-  if (p["fill-hover-negative-50"]) return { className: `${property}-negative-50` }
-  if (p["fill-hover-negative-100"]) return { className: `${property}-negative-100` }
-  if (p["fill-hover-negative-200"]) return { className: `${property}-negative-200` }
-  if (p["fill-hover-negative-300"]) return { className: `${property}-negative-300` }
-  if (p["fill-hover-negative-400"]) return { className: `${property}-negative-400` }
-  if (p["fill-hover-negative-500"]) return { className: `${property}-negative-500` }
-  if (p["fill-hover-negative-600"]) return { className: `${property}-negative-600` }
-  if (p["fill-hover-negative-700"]) return { className: `${property}-negative-700` }
-  if (p["fill-hover-negative-800"]) return { className: `${property}-negative-800` }
-  if (p["fill-hover-negative-900"]) return { className: `${property}-negative-900` }
-  if (p["fill-hover-negative-brand"]) return { className: `${property}-negative-brand` }
-
-  if (p["fill-hover-secondary-0"]) return { className: `${property}-secondary-0` }
-  if (p["fill-hover-secondary-50"]) return { className: `${property}-secondary-50` }
-  if (p["fill-hover-secondary-100"]) return { className: `${property}-secondary-100` }
-  if (p["fill-hover-secondary-200"]) return { className: `${property}-secondary-200` }
-  if (p["fill-hover-secondary-300"]) return { className: `${property}-secondary-300` }
-  if (p["fill-hover-secondary-400"]) return { className: `${property}-secondary-400` }
-  if (p["fill-hover-secondary-500"]) return { className: `${property}-secondary-500` }
-  if (p["fill-hover-secondary-600"]) return { className: `${property}-secondary-600` }
-  if (p["fill-hover-secondary-700"]) return { className: `${property}-secondary-700` }
-  if (p["fill-hover-secondary-800"]) return { className: `${property}-secondary-800` }
-  if (p["fill-hover-secondary-900"]) return { className: `${property}-secondary-900` }
-  if (p["fill-hover-secondary-brand"]) return { className: `${property}-secondary-brand` }
-
-  if (p["fill-hover-primary-0"]) return { className: `${property}-primary-0` }
-  if (p["fill-hover-primary-50"]) return { className: `${property}-primary-50` }
-  if (p["fill-hover-primary-100"]) return { className: `${property}-primary-100` }
-  if (p["fill-hover-primary-200"]) return { className: `${property}-primary-200` }
-  if (p["fill-hover-primary-300"]) return { className: `${property}-primary-300` }
-  if (p["fill-hover-primary-400"]) return { className: `${property}-primary-400` }
-  if (p["fill-hover-primary-500"]) return { className: `${property}-primary-500` }
-  if (p["fill-hover-primary-600"]) return { className: `${property}-primary-600` }
-  if (p["fill-hover-primary-700"]) return { className: `${property}-primary-700` }
-  if (p["fill-hover-primary-800"]) return { className: `${property}-primary-800` }
-  if (p["fill-hover-primary-900"]) return { className: `${property}-primary-900` }
-  if (p["fill-hover-primary-brand"]) return { className: `${property}-primary-brand` }
-
-  if (p["fill-hover-neutral-0"]) return { className: `${property}-neutral-0` }
-  if (p["fill-hover-neutral-50"]) return { className: `${property}-neutral-50` }
-  if (p["fill-hover-neutral-100"]) return { className: `${property}-neutral-100` }
-  if (p["fill-hover-neutral-200"]) return { className: `${property}-neutral-200` }
-  if (p["fill-hover-neutral-300"]) return { className: `${property}-neutral-300` }
-  if (p["fill-hover-neutral-400"]) return { className: `${property}-neutral-400` }
-  if (p["fill-hover-neutral-500"]) return { className: `${property}-neutral-500` }
-  if (p["fill-hover-neutral-600"]) return { className: `${property}-neutral-600` }
-  if (p["fill-hover-neutral-700"]) return { className: `${property}-neutral-700` }
-  if (p["fill-hover-neutral-800"]) return { className: `${property}-neutral-800` }
-  if (p["fill-hover-neutral-900"]) return { className: `${property}-neutral-900` }
-
-  if (p["fill-hover-neutralsurface-0"]) return { className: `${property}-neutralsurface-0` }
-  if (p["fill-hover-neutralsurface-50"]) return { className: `${property}-neutralsurface-50` }
-  if (p["fill-hover-neutralsurface-100"]) return { className: `${property}-neutralsurface-100` }
-  if (p["fill-hover-neutralsurface-200"]) return { className: `${property}-neutralsurface-200` }
-  if (p["fill-hover-neutralsurface-300"]) return { className: `${property}-neutralsurface-300` }
-  if (p["fill-hover-neutralsurface-400"]) return { className: `${property}-neutralsurface-400` }
-  if (p["fill-hover-neutralsurface-500"]) return { className: `${property}-neutralsurface-500` }
-  if (p["fill-hover-neutralsurface-600"]) return { className: `${property}-neutralsurface-600` }
-  if (p["fill-hover-neutralsurface-700"]) return { className: `${property}-neutralsurface-700` }
-  if (p["fill-hover-neutralsurface-800"]) return { className: `${property}-neutralsurface-800` }
-  if (p["fill-hover-neutralsurface-900"]) return { className: `${property}-neutralsurface-900` }
-  if (p["fill-hover-neutralsurface-brand"]) return { className: `${property}-neutralsurface-brand` }
-
-  if (p["fill-hover-text-0"]) return { className: `${property}-text-0` }
-  if (p["fill-hover-text-50"]) return { className: `${property}-text-50` }
-  if (p["fill-hover-text-100"]) return { className: `${property}-text-100` }
-  if (p["fill-hover-text-200"]) return { className: `${property}-text-200` }
-  if (p["fill-hover-text-300"]) return { className: `${property}-text-300` }
-  if (p["fill-hover-text-400"]) return { className: `${property}-text-400` }
-  if (p["fill-hover-text-500"]) return { className: `${property}-text-500` }
-  if (p["fill-hover-text-600"]) return { className: `${property}-text-600` }
-  if (p["fill-hover-text-700"]) return { className: `${property}-text-700` }
-  if (p["fill-hover-text-800"]) return { className: `${property}-text-800` }
-  if (p["fill-hover-text-900"]) return { className: `${property}-text-900` }
-  if (p["fill-hover-text-brand"]) return { className: `${property}-text-brand` }
-
-  return { className: "" }
-}
-
-const ComputeStrokeColor = (p: FigmaStroke & FigmaStrokeStyle, property: "outline"): FigmaPropertiesReturn => {
-  const s = `outline-1 outline -outline-offset-1 ${p["stroke-style-dashed"] ? "outline-dashed" : ""}`
-
-  if (p["stroke-white"]) return { className: `${property}-white ${s}` }
-  if (p["stroke-black"]) return { className: `${property}-black ${s}` }
-
-  if (p["stroke-tentative-0"]) return { className: `${property}-tentative-0 ${s}` }
-  if (p["stroke-tentative-50"]) return { className: `${property}-tentative-50 ${s}` }
-  if (p["stroke-tentative-100"]) return { className: `${property}-tentative-100 ${s}` }
-  if (p["stroke-tentative-200"]) return { className: `${property}-tentative-200 ${s}` }
-  if (p["stroke-tentative-300"]) return { className: `${property}-tentative-300 ${s}` }
-  if (p["stroke-tentative-400"]) return { className: `${property}-tentative-400 ${s}` }
-  if (p["stroke-tentative-500"]) return { className: `${property}-tentative-500 ${s}` }
-  if (p["stroke-tentative-600"]) return { className: `${property}-tentative-600 ${s}` }
-  if (p["stroke-tentative-700"]) return { className: `${property}-tentative-700 ${s}` }
-  if (p["stroke-tentative-800"]) return { className: `${property}-tentative-800 ${s}` }
-  if (p["stroke-tentative-900"]) return { className: `${property}-tentative-900 ${s}` }
-  if (p["stroke-tentative-brand"]) return { className: `${property}-tentative-brand ${s}` }
-
-  if (p["stroke-tertiary-0"]) return { className: `${property}-tertiary-0 ${s}` }
-  if (p["stroke-tertiary-50"]) return { className: `${property}-tertiary-50 ${s}` }
-  if (p["stroke-tertiary-100"]) return { className: `${property}-tertiary-100 ${s}` }
-  if (p["stroke-tertiary-200"]) return { className: `${property}-tertiary-200 ${s}` }
-  if (p["stroke-tertiary-300"]) return { className: `${property}-tertiary-300 ${s}` }
-  if (p["stroke-tertiary-400"]) return { className: `${property}-tertiary-400 ${s}` }
-  if (p["stroke-tertiary-500"]) return { className: `${property}-tertiary-500 ${s}` }
-  if (p["stroke-tertiary-600"]) return { className: `${property}-tertiary-600 ${s}` }
-  if (p["stroke-tertiary-700"]) return { className: `${property}-tertiary-700 ${s}` }
-  if (p["stroke-tertiary-800"]) return { className: `${property}-tertiary-800 ${s}` }
-  if (p["stroke-tertiary-900"]) return { className: `${property}-tertiary-900 ${s}` }
-  if (p["stroke-tertiary-brand"]) return { className: `${property}-tertiary-brand ${s}` }
-
-  if (p["stroke-positive-0"]) return { className: `${property}-positive-0 ${s}` }
-  if (p["stroke-positive-50"]) return { className: `${property}-positive-50 ${s}` }
-  if (p["stroke-positive-100"]) return { className: `${property}-positive-100 ${s}` }
-  if (p["stroke-positive-200"]) return { className: `${property}-positive-200 ${s}` }
-  if (p["stroke-positive-300"]) return { className: `${property}-positive-300 ${s}` }
-  if (p["stroke-positive-400"]) return { className: `${property}-positive-400 ${s}` }
-  if (p["stroke-positive-500"]) return { className: `${property}-positive-500 ${s}` }
-  if (p["stroke-positive-600"]) return { className: `${property}-positive-600 ${s}` }
-  if (p["stroke-positive-700"]) return { className: `${property}-positive-700 ${s}` }
-  if (p["stroke-positive-800"]) return { className: `${property}-positive-800 ${s}` }
-  if (p["stroke-positive-900"]) return { className: `${property}-positive-900 ${s}` }
-  if (p["stroke-positive-brand"]) return { className: `${property}-positive-brand` }
-
-  if (p["stroke-negative-0"]) return { className: `${property}-negative-0 ${s}` }
-  if (p["stroke-negative-50"]) return { className: `${property}-negative-50 ${s}` }
-  if (p["stroke-negative-100"]) return { className: `${property}-negative-100 ${s}` }
-  if (p["stroke-negative-200"]) return { className: `${property}-negative-200 ${s}` }
-  if (p["stroke-negative-300"]) return { className: `${property}-negative-300 ${s}` }
-  if (p["stroke-negative-400"]) return { className: `${property}-negative-400 ${s}` }
-  if (p["stroke-negative-500"]) return { className: `${property}-negative-500 ${s}` }
-  if (p["stroke-negative-600"]) return { className: `${property}-negative-600 ${s}` }
-  if (p["stroke-negative-700"]) return { className: `${property}-negative-700 ${s}` }
-  if (p["stroke-negative-800"]) return { className: `${property}-negative-800 ${s}` }
-  if (p["stroke-negative-900"]) return { className: `${property}-negative-900 ${s}` }
-  if (p["stroke-negative-brand"]) return { className: `${property}-negative-brand ${s}` }
-
-  if (p["stroke-secondary-0"]) return { className: `${property}-secondary-0 ${s}` }
-  if (p["stroke-secondary-50"]) return { className: `${property}-secondary-50 ${s}` }
-  if (p["stroke-secondary-100"]) return { className: `${property}-secondary-100 ${s}` }
-  if (p["stroke-secondary-200"]) return { className: `${property}-secondary-200 ${s}` }
-  if (p["stroke-secondary-300"]) return { className: `${property}-secondary-300 ${s}` }
-  if (p["stroke-secondary-400"]) return { className: `${property}-secondary-400 ${s}` }
-  if (p["stroke-secondary-500"]) return { className: `${property}-secondary-500 ${s}` }
-  if (p["stroke-secondary-600"]) return { className: `${property}-secondary-600 ${s}` }
-  if (p["stroke-secondary-700"]) return { className: `${property}-secondary-700 ${s}` }
-  if (p["stroke-secondary-800"]) return { className: `${property}-secondary-800 ${s}` }
-  if (p["stroke-secondary-900"]) return { className: `${property}-secondary-900 ${s}` }
-  if (p["stroke-secondary-brand"]) return { className: `${property}-secondary-brand ${s}` }
-
-  if (p["stroke-primary-0"]) return { className: `${property}-primary-0 ${s}` }
-  if (p["stroke-primary-50"]) return { className: `${property}-primary-50 ${s}` }
-  if (p["stroke-primary-100"]) return { className: `${property}-primary-100 ${s}` }
-  if (p["stroke-primary-200"]) return { className: `${property}-primary-200 ${s}` }
-  if (p["stroke-primary-300"]) return { className: `${property}-primary-300 ${s}` }
-  if (p["stroke-primary-400"]) return { className: `${property}-primary-400 ${s}` }
-  if (p["stroke-primary-500"]) return { className: `${property}-primary-500 ${s}` }
-  if (p["stroke-primary-600"]) return { className: `${property}-primary-600 ${s}` }
-  if (p["stroke-primary-700"]) return { className: `${property}-primary-700 ${s}` }
-  if (p["stroke-primary-800"]) return { className: `${property}-primary-800 ${s}` }
-  if (p["stroke-primary-900"]) return { className: `${property}-primary-900 ${s}` }
-  if (p["stroke-primary-brand"]) return { className: `${property}-primary-brand ${s}` }
-
-  if (p["stroke-neutral-0"]) return { className: `${property}-neutral-0 ${s}` }
-  if (p["stroke-neutral-50"]) return { className: `${property}-neutral-50 ${s}` }
-  if (p["stroke-neutral-100"]) return { className: `${property}-neutral-100 ${s}` }
-  if (p["stroke-neutral-200"]) return { className: `${property}-neutral-200 ${s}` }
-  if (p["stroke-neutral-300"]) return { className: `${property}-neutral-300 ${s}` }
-  if (p["stroke-neutral-400"]) return { className: `${property}-neutral-400 ${s}` }
-  if (p["stroke-neutral-500"]) return { className: `${property}-neutral-500 ${s}` }
-  if (p["stroke-neutral-600"]) return { className: `${property}-neutral-600 ${s}` }
-  if (p["stroke-neutral-700"]) return { className: `${property}-neutral-700 ${s}` }
-  if (p["stroke-neutral-800"]) return { className: `${property}-neutral-800 ${s}` }
-  if (p["stroke-neutral-900"]) return { className: `${property}-neutral-900 ${s}` }
-  if (p["stroke-neutral-brand"]) return { className: `${property}-neutral-brand ${s}` }
-
-  if (p["stroke-neutralsurface-0"]) return { className: `${property}-neutralsurface-0 ${s}` }
-  if (p["stroke-neutralsurface-50"]) return { className: `${property}-neutralsurface-50 ${s}` }
-  if (p["stroke-neutralsurface-100"]) return { className: `${property}-neutralsurface-100 ${s}` }
-  if (p["stroke-neutralsurface-200"]) return { className: `${property}-neutralsurface-200 ${s}` }
-  if (p["stroke-neutralsurface-300"]) return { className: `${property}-neutralsurface-300 ${s}` }
-  if (p["stroke-neutralsurface-400"]) return { className: `${property}-neutralsurface-400 ${s}` }
-  if (p["stroke-neutralsurface-500"]) return { className: `${property}-neutralsurface-500 ${s}` }
-  if (p["stroke-neutralsurface-600"]) return { className: `${property}-neutralsurface-600 ${s}` }
-  if (p["stroke-neutralsurface-700"]) return { className: `${property}-neutralsurface-700 ${s}` }
-  if (p["stroke-neutralsurface-800"]) return { className: `${property}-neutralsurface-800 ${s}` }
-  if (p["stroke-neutralsurface-900"]) return { className: `${property}-neutralsurface-900 ${s}` }
-  if (p["stroke-neutralsurface-brand"]) return { className: `${property}-neutralsurface-brand ${s}` }
-
-  if (p["stroke-text-0"]) return { className: `${property}-text-0 ${s}` }
-  if (p["stroke-text-50"]) return { className: `${property}-text-50 ${s}` }
-  if (p["stroke-text-100"]) return { className: `${property}-text-100 ${s}` }
-  if (p["stroke-text-200"]) return { className: `${property}-text-200 ${s}` }
-  if (p["stroke-text-300"]) return { className: `${property}-text-300 ${s}` }
-  if (p["stroke-text-400"]) return { className: `${property}-text-400 ${s}` }
-  if (p["stroke-text-500"]) return { className: `${property}-text-500 ${s}` }
-  if (p["stroke-text-600"]) return { className: `${property}-text-600 ${s}` }
-  if (p["stroke-text-700"]) return { className: `${property}-text-700 ${s}` }
-  if (p["stroke-text-800"]) return { className: `${property}-text-800 ${s}` }
-  if (p["stroke-text-900"]) return { className: `${property}-text-900 ${s}` }
-  if (p["stroke-text-brand"]) return { className: `${property}-text-brand ${s}` }
-
-  return { className: "" }
-}
-
-const ComputeStrokeHoverColor = (p: FigmaStrokeHover, property: "hover:outline"): FigmaPropertiesReturn => {
-  if (p["stroke-hover-white"]) return { className: `${property}-white` }
-  if (p["stroke-hover-black"]) return { className: `${property}-black` }
-
-  if (p["stroke-hover-tentative-0"]) return { className: `${property}-tentative-0` }
-  if (p["stroke-hover-tentative-50"]) return { className: `${property}-tentative-50` }
-  if (p["stroke-hover-tentative-100"]) return { className: `${property}-tentative-100` }
-  if (p["stroke-hover-tentative-200"]) return { className: `${property}-tentative-200` }
-  if (p["stroke-hover-tentative-300"]) return { className: `${property}-tentative-300` }
-  if (p["stroke-hover-tentative-400"]) return { className: `${property}-tentative-400` }
-  if (p["stroke-hover-tentative-500"]) return { className: `${property}-tentative-500` }
-  if (p["stroke-hover-tentative-600"]) return { className: `${property}-tentative-600` }
-  if (p["stroke-hover-tentative-700"]) return { className: `${property}-tentative-700` }
-  if (p["stroke-hover-tentative-800"]) return { className: `${property}-tentative-800` }
-  if (p["stroke-hover-tentative-900"]) return { className: `${property}-tentative-900` }
-  if (p["stroke-hover-tentative-brand"]) return { className: `${property}-tentative-brand` }
-
-  if (p["stroke-hover-tertiary-0"]) return { className: `${property}-tertiary-0` }
-  if (p["stroke-hover-tertiary-50"]) return { className: `${property}-tertiary-50` }
-  if (p["stroke-hover-tertiary-100"]) return { className: `${property}-tertiary-100` }
-  if (p["stroke-hover-tertiary-200"]) return { className: `${property}-tertiary-200` }
-  if (p["stroke-hover-tertiary-300"]) return { className: `${property}-tertiary-300` }
-  if (p["stroke-hover-tertiary-400"]) return { className: `${property}-tertiary-400` }
-  if (p["stroke-hover-tertiary-500"]) return { className: `${property}-tertiary-500` }
-  if (p["stroke-hover-tertiary-600"]) return { className: `${property}-tertiary-600` }
-  if (p["stroke-hover-tertiary-700"]) return { className: `${property}-tertiary-700` }
-  if (p["stroke-hover-tertiary-800"]) return { className: `${property}-tertiary-800` }
-  if (p["stroke-hover-tertiary-900"]) return { className: `${property}-tertiary-900` }
-  if (p["stroke-hover-tertiary-brand"]) return { className: `${property}-tertiary-brand` }
-
-  if (p["stroke-hover-positive-0"]) return { className: `${property}-positive-0` }
-  if (p["stroke-hover-positive-50"]) return { className: `${property}-positive-50` }
-  if (p["stroke-hover-positive-100"]) return { className: `${property}-positive-100` }
-  if (p["stroke-hover-positive-200"]) return { className: `${property}-positive-200` }
-  if (p["stroke-hover-positive-300"]) return { className: `${property}-positive-300` }
-  if (p["stroke-hover-positive-400"]) return { className: `${property}-positive-400` }
-  if (p["stroke-hover-positive-500"]) return { className: `${property}-positive-500` }
-  if (p["stroke-hover-positive-600"]) return { className: `${property}-positive-600` }
-  if (p["stroke-hover-positive-700"]) return { className: `${property}-positive-700` }
-  if (p["stroke-hover-positive-800"]) return { className: `${property}-positive-800` }
-  if (p["stroke-hover-positive-900"]) return { className: `${property}-positive-900` }
-  if (p["stroke-hover-positive-brand"]) return { className: `${property}-positive-brand` }
-
-  if (p["stroke-hover-negative-0"]) return { className: `${property}-negative-0` }
-  if (p["stroke-hover-negative-50"]) return { className: `${property}-negative-50` }
-  if (p["stroke-hover-negative-100"]) return { className: `${property}-negative-100` }
-  if (p["stroke-hover-negative-200"]) return { className: `${property}-negative-200` }
-  if (p["stroke-hover-negative-300"]) return { className: `${property}-negative-300` }
-  if (p["stroke-hover-negative-400"]) return { className: `${property}-negative-400` }
-  if (p["stroke-hover-negative-500"]) return { className: `${property}-negative-500` }
-  if (p["stroke-hover-negative-600"]) return { className: `${property}-negative-600` }
-  if (p["stroke-hover-negative-700"]) return { className: `${property}-negative-700` }
-  if (p["stroke-hover-negative-800"]) return { className: `${property}-negative-800` }
-  if (p["stroke-hover-negative-900"]) return { className: `${property}-negative-900` }
-  if (p["stroke-hover-negative-brand"]) return { className: `${property}-negative-brand` }
-
-  if (p["stroke-hover-secondary-0"]) return { className: `${property}-secondary-0` }
-  if (p["stroke-hover-secondary-50"]) return { className: `${property}-secondary-50` }
-  if (p["stroke-hover-secondary-100"]) return { className: `${property}-secondary-100` }
-  if (p["stroke-hover-secondary-200"]) return { className: `${property}-secondary-200` }
-  if (p["stroke-hover-secondary-300"]) return { className: `${property}-secondary-300` }
-  if (p["stroke-hover-secondary-400"]) return { className: `${property}-secondary-400` }
-  if (p["stroke-hover-secondary-500"]) return { className: `${property}-secondary-500` }
-  if (p["stroke-hover-secondary-600"]) return { className: `${property}-secondary-600` }
-  if (p["stroke-hover-secondary-700"]) return { className: `${property}-secondary-700` }
-  if (p["stroke-hover-secondary-800"]) return { className: `${property}-secondary-800` }
-  if (p["stroke-hover-secondary-900"]) return { className: `${property}-secondary-900` }
-  if (p["stroke-hover-secondary-brand"]) return { className: `${property}-secondary-brand` }
-
-  if (p["stroke-hover-primary-0"]) return { className: `${property}-primary-0` }
-  if (p["stroke-hover-primary-50"]) return { className: `${property}-primary-50` }
-  if (p["stroke-hover-primary-100"]) return { className: `${property}-primary-100` }
-  if (p["stroke-hover-primary-200"]) return { className: `${property}-primary-200` }
-  if (p["stroke-hover-primary-300"]) return { className: `${property}-primary-300` }
-  if (p["stroke-hover-primary-400"]) return { className: `${property}-primary-400` }
-  if (p["stroke-hover-primary-500"]) return { className: `${property}-primary-500` }
-  if (p["stroke-hover-primary-600"]) return { className: `${property}-primary-600` }
-  if (p["stroke-hover-primary-700"]) return { className: `${property}-primary-700` }
-  if (p["stroke-hover-primary-800"]) return { className: `${property}-primary-800` }
-  if (p["stroke-hover-primary-900"]) return { className: `${property}-primary-900` }
-  if (p["stroke-hover-primary-brand"]) return { className: `${property}-primary-brand` }
-
-  if (p["stroke-hover-neutral-0"]) return { className: `${property}-neutral-0` }
-  if (p["stroke-hover-neutral-50"]) return { className: `${property}-neutral-50` }
-  if (p["stroke-hover-neutral-100"]) return { className: `${property}-neutral-100` }
-  if (p["stroke-hover-neutral-200"]) return { className: `${property}-neutral-200` }
-  if (p["stroke-hover-neutral-300"]) return { className: `${property}-neutral-300` }
-  if (p["stroke-hover-neutral-400"]) return { className: `${property}-neutral-400` }
-  if (p["stroke-hover-neutral-500"]) return { className: `${property}-neutral-500` }
-  if (p["stroke-hover-neutral-600"]) return { className: `${property}-neutral-600` }
-  if (p["stroke-hover-neutral-700"]) return { className: `${property}-neutral-700` }
-  if (p["stroke-hover-neutral-800"]) return { className: `${property}-neutral-800` }
-  if (p["stroke-hover-neutral-900"]) return { className: `${property}-neutral-900` }
-
-  if (p["stroke-hover-neutralsurface-0"]) return { className: `${property}-neutralsurface-0` }
-  if (p["stroke-hover-neutralsurface-50"]) return { className: `${property}-neutralsurface-50` }
-  if (p["stroke-hover-neutralsurface-100"]) return { className: `${property}-neutralsurface-100` }
-  if (p["stroke-hover-neutralsurface-200"]) return { className: `${property}-neutralsurface-200` }
-  if (p["stroke-hover-neutralsurface-300"]) return { className: `${property}-neutralsurface-300` }
-  if (p["stroke-hover-neutralsurface-400"]) return { className: `${property}-neutralsurface-400` }
-  if (p["stroke-hover-neutralsurface-500"]) return { className: `${property}-neutralsurface-500` }
-  if (p["stroke-hover-neutralsurface-600"]) return { className: `${property}-neutralsurface-600` }
-  if (p["stroke-hover-neutralsurface-700"]) return { className: `${property}-neutralsurface-700` }
-  if (p["stroke-hover-neutralsurface-800"]) return { className: `${property}-neutralsurface-800` }
-  if (p["stroke-hover-neutralsurface-900"]) return { className: `${property}-neutralsurface-900` }
-  if (p["stroke-hover-neutralsurface-brand"]) return { className: `${property}-neutralsurface-brand` }
-
-  if (p["stroke-hover-text-0"]) return { className: `${property}-text-0` }
-  if (p["stroke-hover-text-50"]) return { className: `${property}-text-50` }
-  if (p["stroke-hover-text-100"]) return { className: `${property}-text-100` }
-  if (p["stroke-hover-text-200"]) return { className: `${property}-text-200` }
-  if (p["stroke-hover-text-300"]) return { className: `${property}-text-300` }
-  if (p["stroke-hover-text-400"]) return { className: `${property}-text-400` }
-  if (p["stroke-hover-text-500"]) return { className: `${property}-text-500` }
-  if (p["stroke-hover-text-600"]) return { className: `${property}-text-600` }
-  if (p["stroke-hover-text-700"]) return { className: `${property}-text-700` }
-  if (p["stroke-hover-text-800"]) return { className: `${property}-text-800` }
-  if (p["stroke-hover-text-900"]) return { className: `${property}-text-900` }
-  if (p["stroke-hover-text-brand"]) return { className: `${property}-text-brand` }
-
-  return { className: "" }
+  return {
+    className: flag.shade === undefined ? `${property}-${flag.color}` : `${property}-${flag.color}-${flag.shade}`,
+  }
 }
 
 export const FontFeatureStyle: StyleProp<TextStyle> = Platform.select({
