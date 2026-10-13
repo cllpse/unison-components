@@ -5,9 +5,6 @@ export const COLORS = {
   black: "#000000",
   white: "#FFFFFF",
 
-  darken: "rgba(0, 0, 0, 0.45)",
-  lighten: "rgba(255, 255, 255, 0.45)",
-
   // purple
   primary: {
     0: "#FFFFFF00",
