@@ -3,6 +3,7 @@
   "compilerOptions": {
     "jsx": "react-native",
     "noImplicitAny": true,
+    "skipLibCheck": true,
     "paths": {
       "@frame/web": ["./web"],
       "@frame/native": ["./native"]

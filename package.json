@@ -4,26 +4,28 @@
   "description": "",
   "main": "",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "sync-manual:figma-plugin": "rsync -av --delete ./web ./native ./src ../figma-plugin/figma/",
     "sync-watch:figma-plugin": "chokidar './web/**/*' './native/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../figma-plugin/figma/{path}'; else rsync -aR '{path}' ../figma-plugin/figma/; fi\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tanstack/react-table": "^8.21.3",
-    "@tanstack/react-virtual": "^3.14.8",
-    "expo-linear-gradient": "^15.0.7",
-    "framer-motion": "^12.38.0",
-    "motion": "^12.38.0",
-    "react": "^19.2.5",
-    "react-native": "^0.82.1",
-    "react-native-reanimated": "^4.1.5",
-    "react-native-svg": "^15.15.1"
+    "@tanstack/react-table": "^9.3.1",
+    "@tanstack/react-virtual": "^3.14.18",
+    "expo-linear-gradient": "^57.0.2",
+    "framer-motion": "^14.1.1",
+    "motion": "^14.1.1",
+    "react": "^19.3.0",
+    "react-native": "^0.87.1",
+    "react-native-reanimated": "^4.7.1",
+    "react-native-svg": "^15.15.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.8",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "chokidar-cli": "^3.0.0"
+    "@biomejs/biome": "2.5.15",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "chokidar-cli": "^3.0.0",
+    "typescript": "^7.0.2"
   }
 }

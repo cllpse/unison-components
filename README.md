@@ -22,8 +22,14 @@ A base component should always be able to compile to both web and iOS/Android.
 Watch for local file changes, and copy them directly to _"../figma-plugin/_.
 
 ```sh
-sync-manual:figma-plugin
-sync-watch:figma-plugin
+bun run sync-manual:figma-plugin
+bun run sync-watch:figma-plugin
+```
+
+## Type checking
+
+```sh
+bun run typecheck
 ```
 
 ## Releasing

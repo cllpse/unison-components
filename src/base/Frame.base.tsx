@@ -1,5 +1,5 @@
 import type { ReactNode, RefObject } from "react"
-import { Pressable, type PressableProps, type Role, View, type ViewProps } from "react-native"
+import { Pressable, type PressableProps, type Role, View, type ViewInstance, type ViewProps } from "react-native"
 import { UNITS, UNITS_TAILWIND } from "../constants/units"
 import type { ClassName, PointerEventsWeb, StyleNative, StyleWeb } from "../types/ElementProperties"
 // import DebugError from "./DebugError.base"
@@ -258,7 +258,7 @@ export type Frame = FigmaFrameFlow &
   PointerEventsWeb & {
     id?: ViewProps["id"]
 
-    ref?: RefObject<View | null>
+    ref?: RefObject<ViewInstance | null>
 
     pointerEvents?: "box-none" | "auto"
 
