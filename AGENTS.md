@@ -15,8 +15,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   so it compiles for both platforms. Never imported by consumers.
 - `src/web/*.web.tsx` / `src/native/*.native.tsx` — thin platform shells that wrap the base component. Platform-only
   libraries (e.g. `react-native-reanimated`) may only be imported here.
-- Shells inject platform-specific elements through `element*` `ReactNode` slots on the base props (e.g.
-  `elementAnimatedView`) rather than branching inside the base. Small platform differences inside shared code use
+- Platform-specific behavior belongs in the shells; small platform differences inside shared code use
   `Platform.select` / `Platform.OS`.
 - `web/index.ts` / `native/index.ts` are the public entry points. Every public export is listed there, sorted by
   path.

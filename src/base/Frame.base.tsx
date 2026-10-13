@@ -78,7 +78,6 @@ export type Frame = FigmaFrameFlow &
   FigmaFrameEffectShadow &
   PointerEventsWeb & {
     id?: ViewProps["id"]
-    testID?: ViewProps["testID"]
 
     ref?: RefObject<ViewInstance | null>
 
@@ -91,8 +90,6 @@ export type Frame = FigmaFrameFlow &
     onPressIn?: PressableProps["onPressIn"]
     onPressOut?: PressableProps["onPressOut"]
 
-    onLayout?: ViewProps["onLayout"]
-
     style?: StyleNative & StyleWeb
     className?: ClassName
 
@@ -101,8 +98,6 @@ export type Frame = FigmaFrameFlow &
     "aria-selected"?: boolean
 
     children?: ViewProps["children"]
-
-    elementAnimatedView?: ReactNode
 
     "tailwind-group"?: boolean
   }
@@ -168,13 +163,10 @@ export default (p: Frame) => {
 
   let r: ReactNode = null
 
-  if (p.elementAnimatedView) {
-    r = p.elementAnimatedView
-  } else if (p.onPress || p.onPressIn || p.onPressOut) {
+  if (p.onPress || p.onPressIn || p.onPressOut) {
     r = (
       <Pressable
         id={p.id}
-        testID={p.testID}
         ref={p.ref}
         role={p.role as Role}
         aria-label={p["aria-label"]}
@@ -184,7 +176,6 @@ export default (p: Frame) => {
         onPress={p.onPress}
         onPressIn={p.onPressIn}
         onPressOut={p.onPressOut}
-        onLayout={p.onLayout}
         style={[
           styles,
           {
@@ -202,14 +193,12 @@ export default (p: Frame) => {
     r = (
       <View
         id={p.id}
-        testID={p.testID}
         ref={p.ref}
         role={p.role as Role}
         aria-label={p["aria-label"]}
         aria-selected={p["aria-selected"]}
         onTouchStart={p.onTouchStart}
         onTouchEnd={p.onTouchEnd}
-        onLayout={p.onLayout}
         style={[
           styles,
           {
