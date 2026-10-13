@@ -95,5 +95,6 @@ Beyond that:
 
 ## Git
 
-- Feature branch + pull request; don't commit to `main`.
+- Commit directly to `main` for now; no feature branches or pull requests. `figma-plugin` pins this repo as a
+  submodule, so it must only point at commits on `main`.
 - Imperative, sentence-case subjects (`Remove darken and lighten colors`); one concern per commit.
