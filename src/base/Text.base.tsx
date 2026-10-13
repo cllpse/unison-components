@@ -16,7 +16,6 @@ import {
   TextComputeTypographyAlignment,
   TextComputeTypographyDecoration,
 } from "../utilities/FigmaPropertyHelpers"
-import DebugError from "./DebugError.base"
 
 export type Text = FigmaFill &
   FigmaFillHover &
@@ -31,7 +30,7 @@ export type Text = FigmaFill &
   }
 
 export default (p: Text) => {
-  const { className: typography, error: errorTypography } = TextComputeTypography(p)
+  const { className: typography } = TextComputeTypography(p)
   const { className: fill } = TextComputeFill(p)
   const { className: fillHover } = TextComputeFillHover(p)
   const { className: alignment } = TextComputeTypographyAlignment(p)
@@ -52,12 +51,6 @@ export default (p: Text) => {
     p.className ?? "",
   ].join(" ")
 
-  let children = p.children
-
-  if (errorTypography) {
-    children = <DebugError message={errorTypography} />
-  }
-
   return (
     <TextReactNative
       style={[
@@ -69,7 +62,7 @@ export default (p: Text) => {
         },
       ]}
     >
-      {children}
+      {p.children}
     </TextReactNative>
   )
 }
