@@ -29,6 +29,7 @@ export default (p: Frame) => {
       elementAnimatedView={
         styleAnimated ? (
           <Animated.View
+            testID={p.testID}
             ref={p.ref}
             style={[styles, p._STYLE, styleAnimated]}
             onTouchStart={p.onTouchStart}

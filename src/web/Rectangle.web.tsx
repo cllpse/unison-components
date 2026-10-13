@@ -1,5 +1,6 @@
 import type {
   FigmaFill,
+  FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
   FigmaFrameCornerRadiusBottomRight,
@@ -12,6 +13,7 @@ import { FrameComputeCornerRadius, FrameComputeStroke, IconComputeFill } from ".
 
 type Rectangle = Omit<FigmaFrameHeight, "height-hug" | "height-fill"> &
   FigmaFill &
+  FigmaFrameBorderRadius &
   FigmaFrameCornerRadius &
   FigmaFrameCornerRadiusTopLeft &
   FigmaFrameCornerRadiusTopRight &

@@ -7,6 +7,7 @@ import type {
   FigmaFill,
   FigmaFillHover,
   FigmaFrameAlignment,
+  FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
   FigmaFrameCornerRadiusBottomRight,
@@ -17,6 +18,7 @@ import type {
   FigmaFrameGap,
   FigmaFrameHeight,
   FigmaFrameWidth,
+  FigmaFrameWrap,
   FigmaPadding,
   FigmaPaddingBottom,
   FigmaPaddingHorizontal,
@@ -225,6 +227,8 @@ export type Frame = FigmaFrameFlow &
   FigmaFrameWidth &
   FigmaFrameHeight &
   FigmaFrameAlignment &
+  FigmaFrameWrap &
+  FigmaFrameBorderRadius &
   FigmaFrameGap &
   FigmaPadding &
   FigmaPaddingVertical &
@@ -246,6 +250,7 @@ export type Frame = FigmaFrameFlow &
   FigmaFrameEffectShadow &
   PointerEventsWeb & {
     id?: ViewProps["id"]
+    testID?: ViewProps["testID"]
 
     ref?: RefObject<ViewInstance | null>
 
@@ -311,6 +316,7 @@ export default (p: Frame) => {
   const classes = [
     "flex",
     flow === "horizontal" ? "flex-row" : "flex-col",
+    p.wrap ? "flex-wrap" : "",
     ...GGcomputeAlignment(flow, vertical, horizontal),
     ...sizing.className,
     gap,
@@ -340,6 +346,7 @@ export default (p: Frame) => {
     r = (
       <Pressable
         id={p.id}
+        testID={p.testID}
         ref={p.ref}
         role={p.role as Role}
         aria-label={p["aria-label"]}
@@ -367,6 +374,7 @@ export default (p: Frame) => {
     r = (
       <View
         id={p.id}
+        testID={p.testID}
         ref={p.ref}
         role={p.role as Role}
         aria-label={p["aria-label"]}

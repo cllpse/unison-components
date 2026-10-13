@@ -1,5 +1,6 @@
 import type {
   FigmaFill,
+  FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
   FigmaFrameCornerRadiusBottomRight,
@@ -12,6 +13,7 @@ import { FrameComputeCornerRadius, FrameComputeFill, FrameComputeStroke } from "
 
 type Ellipse = Omit<FigmaFrameHeight, "height-hug" | "height-fill"> &
   FigmaFill &
+  FigmaFrameBorderRadius &
   FigmaFrameCornerRadius &
   FigmaFrameCornerRadiusTopLeft &
   FigmaFrameCornerRadiusTopRight &

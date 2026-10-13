@@ -5,6 +5,7 @@ import type {
   FigmaFill,
   FigmaFillHover,
   FigmaFrameAlignment,
+  FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
   FigmaFrameCornerRadiusBottomRight,
@@ -355,13 +356,14 @@ export const FrameComputeCornerRadiusBottomRight = (p: FigmaFrameCornerRadiusBot
 }
 
 export const FrameComputeCornerRadius = (
-  p: FigmaFrameCornerRadius &
+  p: FigmaFrameBorderRadius &
+    FigmaFrameCornerRadius &
     FigmaFrameCornerRadiusTopLeft &
     FigmaFrameCornerRadiusTopRight &
     FigmaFrameCornerRadiusBottomLeft &
     FigmaFrameCornerRadiusBottomRight,
 ): FigmaPropertiesReturn => {
-  const key = resolveUnitKey(p, "corner-radius-")
+  const key = resolveUnitKey(p, "border-radius-") ?? resolveUnitKey(p, "corner-radius-")
   const topLeft = FrameComputeCornerRadiusTopLeft(p)
   const topRight = FrameComputeCornerRadiusTopRight(p)
   const bottomLeft = FrameComputeCornerRadiusBottomLeft(p)

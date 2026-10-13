@@ -81,6 +81,8 @@ export type FigmaFrameCornerRadiusBottomRight = Simplify<
   UnitsFlags<"corner-radius-bottom-right-"> & AdditionalUnitsFlags<"corner-radius-bottom-right-", "full" | "huge">
 >
 
+export type FigmaFrameBorderRadius = Simplify<UnitsFlags<"border-radius-">>
+
 export type FigmaFrameFlow = {
   "flow-horizontal"?: boolean
   "flow-vertical"?: boolean
@@ -105,6 +107,10 @@ export type FigmaFrameAlignment = {
   "alignment-bottom-left"?: boolean
   "alignment-bottom-center"?: boolean
   "alignment-bottom-right"?: boolean
+}
+
+export type FigmaFrameWrap = {
+  wrap?: boolean
 }
 
 export type FigmaFrameEffectShadow = {
