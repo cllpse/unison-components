@@ -95,6 +95,8 @@ export type FigmaFrameFlowParent = {
   "flow-grid-parent"?: boolean
 }
 
+export type FigmaFrameFlowDirection = "horizontal" | "vertical"
+
 export type FigmaFrameAlignment = {
   "alignment-top-left"?: boolean
   "alignment-top-center"?: boolean
@@ -108,6 +110,12 @@ export type FigmaFrameAlignment = {
   "alignment-bottom-center"?: boolean
   "alignment-bottom-right"?: boolean
 }
+
+export type FigmaFrameVerticalPosition = "top" | "center" | "bottom"
+
+export type FigmaFrameHorizontalPosition = "left" | "center" | "right"
+
+export type FigmaFrameEdgePosition = "start" | "center" | "end"
 
 export type FigmaFrameWrap = {
   wrap?: boolean

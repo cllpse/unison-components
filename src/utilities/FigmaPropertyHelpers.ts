@@ -1,6 +1,7 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import { COLORS } from "../constants/colors"
 import { UNITS, UNITS_TAILWIND } from "../constants/units"
+import type { StyleNative, StyleWeb } from "../types/ElementProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -11,11 +12,14 @@ import type {
   FigmaFrameCornerRadiusBottomRight,
   FigmaFrameCornerRadiusTopLeft,
   FigmaFrameCornerRadiusTopRight,
+  FigmaFrameEdgePosition,
   FigmaFrameEffectShadow,
   FigmaFrameFlow,
-  FigmaFrameFlowParent,
+  FigmaFrameFlowDirection,
   FigmaFrameGap,
   FigmaFrameHeight,
+  FigmaFrameHorizontalPosition,
+  FigmaFrameVerticalPosition,
   FigmaFrameWidth,
   FigmaIconWidth,
   FigmaPadding,
@@ -35,195 +39,174 @@ import type {
   FigmaTypographyDecoration,
 } from "../types/FigmaProperties"
 
-export const FrameComputeFlow = (p: FigmaFrameFlow): FigmaPropertiesReturnError => {
-  if (p["flow-vertical"]) return { styles: { flexDirection: "column", width: 0 }, className: "flex-col" }
-  if (p["flow-horizontal"]) return { styles: { flexDirection: "row", width: 0 }, className: "flex-row" }
-  if (p["flow-grid"]) return { styles: {}, className: "" }
-
-  return { error: '<Frame /> – missing "flow-" property' }
+const FRAME_HORIZONTAL_TO_EDGE: Record<FigmaFrameHorizontalPosition, FigmaFrameEdgePosition> = {
+  left: "start",
+  center: "center",
+  right: "end",
 }
 
-export const FrameComputeDimensions = (
-  p: FigmaFrameWidth & FigmaFrameHeight & FigmaFrameFlow & FigmaFrameFlowParent,
-): FigmaPropertiesReturnError => {
-  let flowVertical = p["flow-vertical-parent"]
-  const flowHorizontal = p["flow-horizontal-parent"]
+const FRAME_VERTICAL_TO_EDGE: Record<FigmaFrameVerticalPosition, FigmaFrameEdgePosition> = {
+  top: "start",
+  center: "center",
+  bottom: "end",
+}
 
-  if (!flowVertical && !flowHorizontal) {
-    flowVertical = p["flow-vertical"]
+const FRAME_JUSTIFY: Record<FigmaFrameEdgePosition, string> = {
+  start: "justify-start",
+  center: "justify-center",
+  end: "justify-end",
+}
+
+const FRAME_ITEMS: Record<FigmaFrameEdgePosition, string> = {
+  start: "items-start",
+  center: "items-center",
+  end: "items-end",
+}
+
+const resolveFrameFlow = (p: FigmaFrameFlow): FigmaFrameFlowDirection => {
+  if (p["flow-horizontal"]) return "horizontal"
+  if (p["flow-vertical"]) return "vertical"
+
+  return "vertical"
+}
+
+const resolveFrameAlignment = (
+  p: FigmaFrameAlignment,
+): {
+  vertical: FigmaFrameVerticalPosition
+  horizontal: FigmaFrameHorizontalPosition
+} => {
+  if (p["alignment-top-left"]) return { vertical: "top", horizontal: "left" }
+  if (p["alignment-top-center"]) return { vertical: "top", horizontal: "center" }
+  if (p["alignment-top-right"]) return { vertical: "top", horizontal: "right" }
+  if (p["alignment-left"]) return { vertical: "center", horizontal: "left" }
+  if (p["alignment-center"]) return { vertical: "center", horizontal: "center" }
+  if (p["alignment-right"]) return { vertical: "center", horizontal: "right" }
+  if (p["alignment-bottom-left"]) return { vertical: "bottom", horizontal: "left" }
+  if (p["alignment-bottom-center"]) return { vertical: "bottom", horizontal: "center" }
+  if (p["alignment-bottom-right"]) return { vertical: "bottom", horizontal: "right" }
+
+  return { vertical: "top", horizontal: "left" }
+}
+
+export const FrameComputeFlow = (p: FigmaFrameFlow): FigmaPropertiesReturn => {
+  return { className: resolveFrameFlow(p) === "horizontal" ? "flex-row" : "flex-col" }
+}
+
+export const FrameComputeAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): FigmaPropertiesReturn => {
+  const { vertical, horizontal } = resolveFrameAlignment(p)
+  const horizontalEdge = FRAME_HORIZONTAL_TO_EDGE[horizontal]
+  const verticalEdge = FRAME_VERTICAL_TO_EDGE[vertical]
+
+  if (resolveFrameFlow(p) === "horizontal") {
+    return { className: `${FRAME_JUSTIFY[horizontalEdge]} ${FRAME_ITEMS[verticalEdge]}` }
   }
 
-  const widthFill = p["width-fill"]
-  let widthHug = p["width-hug"]
-  const heightFill = p["height-fill"]
-  let heightHug = p["height-hug"]
+  return { className: `${FRAME_JUSTIFY[verticalEdge]} ${FRAME_ITEMS[horizontalEdge]}` }
+}
 
+// React Native Web's `View` prepends a base reset (see
+// react-native-web View `view$raw`) that forces `min-width: 0`, `min-height: 0`
+// and `flex-shrink: 0` on every element. That breaks the flex model these frames
+// assume: we rely on the browser-default `min-*: auto` so a fill frame won't
+// shrink below its content, and on the default `flex-shrink` so children size
+// predictably. We restore that model via the `style` prop (not className), since
+// RNW dedupes style objects by property and they deterministically win over the
+// reset's atomic classes — unlike Tailwind classes, whose win depends on CSS
+// source order.
+export const FrameComputeSizing = (p: FigmaFrameWidth & FigmaFrameHeight): FigmaPropertiesReturn => {
   let exactWidth = ""
   let exactHeight = ""
 
   for (const key in UNITS) {
     if (p[`width-${key}` as keyof FigmaFrameWidth]) {
       exactWidth = key
-      widthHug = true
     }
 
     if (p[`height-${key}` as keyof FigmaFrameHeight]) {
       exactHeight = key
-      heightHug = true
     }
   }
 
-  if (exactWidth !== "" && exactHeight !== "") {
-    return {
-      styles: {
-        width: UNITS[exactWidth as keyof typeof UNITS],
-        height: UNITS[exactHeight as keyof typeof UNITS],
-      },
-      className: `w-${UNITS_TAILWIND[exactWidth as keyof typeof UNITS] ?? exactWidth} h-${UNITS_TAILWIND[exactHeight as keyof typeof UNITS] ?? exactHeight}`,
-    }
-  }
+  const widthFill = exactWidth === "" && p["width-fill"]
+  const heightFill = exactHeight === "" && p["height-fill"]
 
-  let r = { styles: {}, className: "" }
+  const widthClass =
+    exactWidth !== ""
+      ? `w-${UNITS_TAILWIND[exactWidth as keyof typeof UNITS] ?? exactWidth}`
+      : widthFill
+        ? "w-full"
+        : "w-fit"
+  const heightClass =
+    exactHeight !== ""
+      ? `h-${UNITS_TAILWIND[exactHeight as keyof typeof UNITS] ?? exactHeight}`
+      : heightFill
+        ? "h-full"
+        : "h-fit"
 
-  if (flowVertical) {
-    if (widthFill && heightFill) {
-      r = {
-        styles: { flexGrow: 1, alignSelf: "stretch" },
-        className: `grow shrink self-stretch gg-a`,
-      }
-    }
+  // The View reset forces `min-*: 0` / `flex-shrink: 0`; we restore a sane model via
+  // the `style` prop so it deterministically beats the reset's atomic classes.
+  // (`flex-shrink`/`flex-grow` only act on the main axis and a frame can't know its
+  // parent's direction, so the axis floors below carry the per-axis intent instead.)
+  //
+  // - Exact axes are pinned with matching `min-*`/`max-*` so flex can neither grow nor
+  //   shrink them — the exact size holds even when that axis is the parent's main axis.
+  // - Fill axes get `min-*: 0` so they can shrink past their own content (text
+  //   truncates) and always yield space to fixed siblings, instead of overflowing them
+  //   when the container is constrained from the outside (max-width / fixed width).
+  // - Hug axes keep `min-*: auto` so they never shrink below their content.
+  const styles: StyleNative & StyleWeb = {}
 
-    if (widthHug && heightFill) {
-      r = {
-        styles: { flexGrow: 1, flexShrink: 1 },
-        className: `grow shrink gg-b`,
-      }
-    }
-
-    if (widthFill && heightHug) {
-      r = {
-        styles: { alignSelf: "stretch" },
-        className: `self-stretch grow shrink gg-c`,
-      }
-    }
-
-    if (widthHug && heightHug) {
-      r = { styles: {}, className: `max-w-fit max-h-fit gg-d` }
-    }
+  if (exactWidth !== "" && exactWidth !== "full") {
+    const value = UNITS[exactWidth as keyof typeof UNITS]
+    styles.minWidth = value
+    styles.maxWidth = value
   } else {
-    if (widthFill && heightFill) {
-      r = {
-        styles: { flexGrow: 1, alignSelf: "stretch" },
-        className: `grow self-stretch gg-e`,
-      }
-    }
+    styles.minWidth = widthFill ? 0 : "auto"
+  }
 
-    if (widthHug && heightFill) {
-      r = {
-        styles: { alignSelf: "stretch", flexGrow: 1 },
-        className: `self-stretch grow gg-f h-[stretch]`,
-      }
-    }
+  if (exactHeight !== "" && exactHeight !== "full") {
+    const value = UNITS[exactHeight as keyof typeof UNITS]
+    styles.minHeight = value
+    styles.maxHeight = value
+  } else {
+    styles.minHeight = heightFill ? 0 : "auto"
+  }
 
-    if (widthFill && heightHug) {
-      r = {
-        styles: { flexGrow: 0, flexShrink: 1 },
-        className: `shrink self-stretch gg-g`,
-      }
-    }
-
-    if (widthHug && heightHug) {
-      r = { styles: {}, className: `max-w-fit max-h-fit gg-h` }
+  if (widthFill && heightFill) {
+    // Both axes fill → grow into the main axis, stretch across the cross axis.
+    //
+    // We intentionally emit `w-full` but NOT `h-full`. On whichever axis is the
+    // parent's cross axis, filling is done by `align-self: stretch` — but stretch
+    // only applies when the cross size is `auto`. An explicit `height: 100%` both
+    // suppresses that stretch and, because percentage heights resolve against the
+    // containing block, collapses to content height whenever an ancestor is
+    // hug-sized (indefinite height) — so the frame fails to stretch. `w-full` is
+    // safe because percentage widths resolve against the (near-always definite)
+    // inline size, and it keeps fill siblings equal-width along a horizontal axis.
+    return {
+      className: `${widthClass} self-stretch`,
+      styles: { ...styles, flexGrow: 1, flexShrink: 1 },
     }
   }
 
-  if (exactWidth !== "") {
-    r.styles = { ...r.styles, width: UNITS[exactWidth as keyof typeof UNITS] }
-    r.className = `${r.className} w-${UNITS_TAILWIND[exactWidth as keyof typeof UNITS] ?? exactWidth}`
+  if (!widthFill && !heightFill) {
+    // Hug/exact on both axes → rigid box (equivalent to `flex-none`).
+
+    return {
+      className: `${widthClass} ${heightClass}`,
+      styles: { ...styles, flexGrow: 0, flexShrink: 0 },
+    }
   }
 
-  if (exactHeight !== "") {
-    r.styles = { ...r.styles, height: UNITS[exactHeight as keyof typeof UNITS] }
-    r.className = `${r.className} h-${UNITS_TAILWIND[exactHeight as keyof typeof UNITS] ?? exactHeight}`
+  // Exactly one axis fills: let the filling axis shrink so it yields space to fixed
+  // siblings (instead of overflowing them). Any exact sibling axis is already pinned
+  // above, so `flexShrink: 1` can't collapse it below its exact size.
+
+  return {
+    className: `${widthClass} ${heightClass}`,
+    styles: { ...styles, flexGrow: 0, flexShrink: 1 },
   }
-
-  return r
-}
-
-export const FrameComputeAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): FigmaPropertiesReturnError => {
-  if (p["alignment-top-left"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "flex-start", justifyContent: "flex-start" }
-        : { alignItems: "flex-start", justifyContent: "flex-start" },
-      className: p["flow-vertical"] ? "items-start justify-start" : "items-start justify-start",
-    }
-
-  if (p["alignment-top-center"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "center", justifyContent: "flex-start" }
-        : { alignItems: "flex-start", justifyContent: "center" },
-      className: p["flow-vertical"] ? "items-center justify-start" : "items-start justify-center",
-    }
-
-  if (p["alignment-top-right"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "flex-end", justifyContent: "flex-start" }
-        : { alignItems: "flex-start", justifyContent: "flex-end" },
-      className: p["flow-vertical"] ? "items-end justify-start" : "items-start justify-end",
-    }
-
-  if (p["alignment-left"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "flex-start", justifyContent: "center" }
-        : { alignItems: "center", justifyContent: "flex-start" },
-      className: p["flow-vertical"] ? "items-start justify-center" : "items-center justify-start",
-    }
-
-  if (p["alignment-center"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "center", justifyContent: "center" }
-        : { alignItems: "center", justifyContent: "center" },
-      className: p["flow-vertical"] ? "items-center justify-center" : "items-center justify-center",
-    }
-
-  if (p["alignment-right"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "flex-end", justifyContent: "center" }
-        : { alignItems: "center", justifyContent: "flex-end" },
-      className: p["flow-vertical"] ? "items-end justify-center" : "items-center justify-end",
-    }
-
-  if (p["alignment-bottom-left"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "flex-start", justifyContent: "flex-end" }
-        : { alignItems: "flex-end", justifyContent: "flex-start" },
-      className: p["flow-vertical"] ? "items-start justify-end" : "items-end justify-start",
-    }
-
-  if (p["alignment-bottom-center"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "center", justifyContent: "flex-end" }
-        : { alignItems: "flex-end", justifyContent: "center" },
-      className: p["flow-vertical"] ? "items-center justify-end" : "items-end justify-center",
-    }
-
-  if (p["alignment-bottom-right"])
-    return {
-      styles: p["flow-vertical"]
-        ? { alignItems: "flex-end", justifyContent: "flex-end" }
-        : { alignItems: "flex-end", justifyContent: "flex-end" },
-      className: p["flow-vertical"] ? "items-end justify-end" : "items-end justify-end",
-    }
-
-  return { error: '<Frame /> – missing "alignment-" property' }
 }
 
 export const FrameComputeGap = (p: FigmaFrameGap): FigmaPropertiesReturnError => {

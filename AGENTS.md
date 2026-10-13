@@ -80,8 +80,6 @@ Beyond that:
   `computeColor`).
 - Leave a blank line before the final `return` and between logical blocks; one-line `if (…) return …` guards may be
   stacked without blank lines.
-- File-private layout helpers in `Frame.base.tsx` use a `GG` prefix (`GGresolveFlow`, `GG_JUSTIFY`); keep to it
-  when extending that file.
 - No `useMemo` / `useCallback` / `React.memo`: consuming apps run React Compiler.
 
 ## Comments and docs
