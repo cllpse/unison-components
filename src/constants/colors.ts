@@ -158,4 +158,8 @@ type PaletteColorName = {
 
 export type ColorShade = keyof (typeof COLORS)[PaletteColorName]
 
-export type ColorNameAndShade = `${ColorName}-${ColorShade}` | `white` | `black`
+export type ColorNameAndShade = {
+  [Name in ColorName]: (typeof COLORS)[Name] extends string
+    ? Name
+    : `${Name & string}-${keyof (typeof COLORS)[Name] & string}`
+}[ColorName]
