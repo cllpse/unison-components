@@ -598,9 +598,6 @@ const ComputeColor = (
   if (p["fill-white"]) return { className: `${property}-white` }
   if (p["fill-black"]) return { className: `${property}-black` }
 
-  if (p["fill-darken"]) return { className: `${property}-darken` }
-  if (p["fill-lighten"]) return { className: `${property}-lighten` }
-
   if (p["fill-tentative-0"]) return { className: `${property}-tentative-0` }
   if (p["fill-tentative-50"]) return { className: `${property}-tentative-50` }
   if (p["fill-tentative-100"]) return { className: `${property}-tentative-100` }
@@ -727,9 +724,6 @@ const ComputeColorHover = (
   if (p["fill-hover-white"]) return { className: `${property}-white` }
   if (p["fill-hover-black"]) return { className: `${property}-black` }
 
-  if (p["fill-hover-darken"]) return { className: `${property}-darken` }
-  if (p["fill-hover-lighten"]) return { className: `${property}-lighten` }
-
   if (p["fill-hover-tentative-0"]) return { className: `${property}-tentative-0` }
   if (p["fill-hover-tentative-50"]) return { className: `${property}-tentative-50` }
   if (p["fill-hover-tentative-100"]) return { className: `${property}-tentative-100` }
@@ -855,9 +849,6 @@ const ComputeStrokeColor = (p: FigmaStroke & FigmaStrokeStyle, property: "outlin
   if (p["stroke-white"]) return { className: `${property}-white ${s}` }
   if (p["stroke-black"]) return { className: `${property}-black ${s}` }
 
-  if (p["stroke-darken"]) return { className: `${property}-darken ${s}` }
-  if (p["stroke-lighten"]) return { className: `${property}-lighten ${s}` }
-
   if (p["stroke-tentative-0"]) return { className: `${property}-tentative-0 ${s}` }
   if (p["stroke-tentative-50"]) return { className: `${property}-tentative-50 ${s}` }
   if (p["stroke-tentative-100"]) return { className: `${property}-tentative-100 ${s}` }
@@ -981,9 +972,6 @@ const ComputeStrokeColor = (p: FigmaStroke & FigmaStrokeStyle, property: "outlin
 const ComputeStrokeHoverColor = (p: FigmaStrokeHover, property: "hover:outline"): FigmaPropertiesReturn => {
   if (p["stroke-hover-white"]) return { className: `${property}-white` }
   if (p["stroke-hover-black"]) return { className: `${property}-black` }
-
-  if (p["stroke-hover-darken"]) return { className: `${property}-darken` }
-  if (p["stroke-hover-lighten"]) return { className: `${property}-lighten` }
 
   if (p["stroke-hover-tentative-0"]) return { className: `${property}-tentative-0` }
   if (p["stroke-hover-tentative-50"]) return { className: `${property}-tentative-50` }
