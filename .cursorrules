@@ -1,0 +1,7 @@
+# Project Rules & Coding Standards
+
+Make sure that web/tailwind-safelist.ts is updated. Whenever a change is made to the "className" property of an element, keep the safelist updated.
+
+This project has React Compiler enabled (https://react.dev/learn/react-compiler) so there is no need for manual useMemo, useCallback, and React.memo.
+
+This project uses _ (underscore) in file names and the @deprecated JSDOC to highlight internal-use-only. These are meant to be used as escape-hatches and overrides. You CAN use these; but you must draw attention to doing so.

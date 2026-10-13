@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "noImplicitAny": true,
+    "paths": {
+      "@frame/web": ["./web"],
+      "@frame/native": ["./native"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

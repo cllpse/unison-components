@@ -1,0 +1,84 @@
+/*
+ * Static Tooltip styles.
+ *
+ * Shipped once via a side-effect import (see Tooltip.web.tsx) instead of being
+ * injected into <head> at runtime. The tooltip is shown through the shared
+ * `_PopOverPanel` primitive (PopOver.web.tsx): a native `popover="manual"`
+ * element in the top layer, positioned with CSS anchor positioning against the
+ * trigger's `anchor-name` — no JS measuring. It sits below the trigger and
+ * flips (`@position-try`) when it would overflow the viewport.
+ */
+
+table .frame__tooltip.frame__tooltip--dotted-underline *,
+.frame__tooltip.frame__tooltip--dotted-underline .frame__text {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  cursor: help;
+}
+
+table .frame__tooltip.frame__tooltip--truncate-hint[data-truncated="false"] *,
+.frame__tooltip.frame__tooltip--truncate-hint[data-truncated="false"] .frame__text {
+  text-decoration: none;
+  cursor: auto;
+}
+
+.frame__tooltip-content {
+  position: fixed;
+  background-color: transparent;
+  inset: auto;
+  /* The UA popover box adds padding + overflow: auto, which clips the Frame's shadow. */
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  top: calc(anchor(bottom) + 2px);
+  left: calc(anchor(left) + 2px);
+  /* Size to the label's single-line width, capped so long labels wrap at a
+     sensible width instead of collapsing toward their longest word. Short
+     labels hug their text exactly, so there's never trailing whitespace. */
+  width: max-content;
+  max-width: min(400px, 90vw);
+  /* Avoid orphans / ragged narrow wrapping once the label does break. */
+  text-wrap: pretty;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 120ms ease-out,
+    overlay 120ms ease-out allow-discrete,
+    display 120ms ease-out allow-discrete;
+  /* Keep the tooltip on-screen: flip below→above when it would overflow the
+     bottom, right-align to the trigger when it would overflow the right edge,
+     or both. The browser uses the first fallback that fits. */
+  position-try-fallbacks:
+    --frame-tooltip-flip-block,
+    --frame-tooltip-flip-inline,
+    --frame-tooltip-flip-both;
+}
+
+@position-try --frame-tooltip-flip-block {
+  top: auto;
+  bottom: calc(anchor(top) + 2px);
+}
+
+@position-try --frame-tooltip-flip-inline {
+  left: auto;
+  right: calc(anchor(right) + 2px);
+}
+
+@position-try --frame-tooltip-flip-both {
+  top: auto;
+  bottom: calc(anchor(top) + 2px);
+  left: auto;
+  right: calc(anchor(right) + 2px);
+}
+
+.frame__tooltip-content:popover-open {
+  opacity: 1;
+}
+
+@starting-style {
+  .frame__tooltip-content:popover-open {
+    opacity: 0;
+  }
+}
