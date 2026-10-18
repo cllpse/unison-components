@@ -19,13 +19,13 @@ A base component should always be able to compile to both web and iOS/Android.
 
 ## Active development
 
-Watch for local file changes, and copy them directly to the _unison-components_ submodule in _../unison-plugin/_ or _../unison-playground/_.
+Watch for local file changes, and copy them directly to the _unison-components_ submodule in _../unison-plugin/_ or _../unison-playground-web/_.
 
 ```sh
 bun run components:sync-manual:plugin
 bun run components:sync-watch:plugin
-bun run components:sync-manual:playground
-bun run components:sync-watch:playground
+bun run components:sync-manual:playground-web
+bun run components:sync-watch:playground-web
 ```
 
 ## Tailwind

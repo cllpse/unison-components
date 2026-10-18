@@ -50,9 +50,10 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   `// @ts-expect-error` on `$$css` (React Native Web's className passthrough).
 - Override React Native Web's reset (`min-*: 0`, `flex-shrink: 0`, `padding: 0`, `word-wrap: break-word`) with
   Tailwind classes, not `style`. They win because consumers import Tailwind's utilities unlayered, and React Native Web
-  inserts its stylesheet first in `<head>` (see unison-playground's `globals.css`). Use arbitrary values or properties
-  that also exist in Tailwind 3 (`min-w-[auto]`, `[overflow-wrap:anywhere]`). Classes built from tokens at runtime must
-  be in the safelist in `scripts/generateTailwindCss.ts`; rerun `bun run tailwind:css` and commit `tailwind.css`.
+  inserts its stylesheet first in `<head>` (see unison-playground-web's `globals.css`). Use arbitrary values or
+  properties that also exist in Tailwind 3 (`min-w-[auto]`, `[overflow-wrap:anywhere]`). Classes built from tokens at
+  runtime must be in the safelist in `scripts/generateTailwindCss.ts`; rerun `bun run tailwind:css` and commit
+  `tailwind.css`.
 - Web shells add a BEM-style root class: `unison-components__<component>` (`unison-components__frame`, `unison-components__text`).
 - Utilities on the render path must not allocate or build strings per call; memoize on first use and return shared
   frozen objects (see `computeColor` / `extractColor`).
