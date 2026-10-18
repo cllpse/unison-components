@@ -1,28 +1,32 @@
 import { View } from "react-native"
 import Svg, { Path } from "react-native-svg"
 import type { ClassName, StyleNative, StyleWeb } from "../types/elementProperties"
-import type { FigmaFill } from "../types/figmaProperties"
-import { computeVectorFill, computeVectorSizing } from "../utilities/figmaPropertyHelpers"
+import type { FigmaFill, FigmaVectorHeight, FigmaVectorWidth } from "../types/figmaProperties"
+import { computeVectorFill, computeVectorSize } from "../utilities/figmaPropertyHelpers"
 
-export type Vector = FigmaFill & {
-  /** SVG path data, as Figma exports it from the vector's fill geometry. */
-  path: string
-  /** The vector's bounds in path coordinates (`"minX minY width height"`); also sets the rendered size. */
-  viewBox: string
-  /** Figma's winding rule for the path. Defaults to `"nonzero"`. */
-  fillRule?: "nonzero" | "evenodd"
+export type Vector = FigmaFill &
+  FigmaVectorWidth &
+  FigmaVectorHeight & {
+    /** SVG path data, as Figma exports it from the vector's fill geometry. */
+    path: string
+    /** The vector's bounds in path coordinates (`"minX minY width height"`); scaled to fit the `width-` / `height-` box. */
+    viewBox: string
+    /** Figma's winding rule for the path. Defaults to `"nonzero"`. */
+    fillRule?: "nonzero" | "evenodd"
 
-  style?: StyleNative & StyleWeb
-  className?: ClassName
-}
+    style?: StyleNative & StyleWeb
+    className?: ClassName
+  }
 
 export default (p: Vector) => {
   const fill = computeVectorFill(p)
-  const sizing = computeVectorSizing(p)
+  const size = computeVectorSize(p)
 
-  const styles = [sizing.styles, p.style]
+  if (size.error) throw new Error(size.error)
 
-  const classes = [sizing.className, p.className ?? ""]
+  const styles = [size.styles, p.style]
+
+  const classes = [size.className, p.className ?? ""]
 
   // The Svg fills a View that carries the size and the className, because react-native-svg's web renderer does not
   // take React Native Web's `$$css` className passthrough.

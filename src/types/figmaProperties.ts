@@ -177,6 +177,10 @@ export type FigmaIconWidth = {
   "width-huge"?: boolean
 }
 
+export type FigmaVectorWidth = Simplify<Omit<UnitsFlags<"width-">, "width-full">>
+
+export type FigmaVectorHeight = Simplify<Omit<UnitsFlags<"height-">, "height-full">>
+
 export type FigmaFill = Simplify<Color<"fill-">>
 
 export type FigmaStroke = Simplify<Color<"stroke-">>

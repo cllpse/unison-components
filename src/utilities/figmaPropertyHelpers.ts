@@ -37,6 +37,8 @@ import type {
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
+  FigmaVectorHeight,
+  FigmaVectorWidth,
 } from "../types/figmaProperties"
 import type { ColorFlagKind } from "./computeColor"
 import { extractColor } from "./extractColor"
@@ -616,24 +618,31 @@ export const computeVectorFill = (p: FigmaFill): FigmaPropertiesReturn => {
   return { styles: { color }, className: "" }
 }
 
-// Memoized per viewBox, so repeat renders of the same vector never split strings or allocate.
-const VECTOR_SIZING_CACHE = new Map<string, FigmaPropertiesReturn>()
+// Memoized per width and height key, so repeat renders of the same vector never allocate.
+const VECTOR_SIZE_CACHE = new Map<string, FigmaPropertiesReturn>()
 
 /**
- * Size a vector to its viewBox. Both axes are pinned and the box never grows or shrinks, matching how Figma keeps a
- * vector at its own bounds inside auto layout. Returns a shared, frozen object.
- * @example computeVectorSizing({ viewBox: "0 0 24 24" }) // { styles: { width: 24, height: 24, … }, className: "" }
+ * Size a vector to its `width-` and `height-` flags; both are required. The box is pinned and never grows or shrinks,
+ * matching how Figma keeps a vector at its own bounds inside auto layout; the viewBox scales to fit it. Returns a
+ * shared, frozen object.
+ * @example computeVectorSize({ "width-6": true, "height-6": true }) // { styles: { width: 24, height: 24, … }, className: "" }
  */
-export const computeVectorSizing = (p: { viewBox: string }): FigmaPropertiesReturn => {
-  let sizing = VECTOR_SIZING_CACHE.get(p.viewBox)
+export const computeVectorSize = (p: FigmaVectorWidth & FigmaVectorHeight): FigmaPropertiesReturnError => {
+  const widthKey = resolveUnitKey(p, "width-")
+  const heightKey = resolveUnitKey(p, "height-")
 
-  if (sizing === undefined) {
-    const [, , width, height] = p.viewBox
-      .trim()
-      .split(/[\s,]+/)
-      .map(Number)
+  if (widthKey === undefined) return { error: '<Vector /> – missing "width-" property' }
 
-    sizing = Object.freeze({
+  if (heightKey === undefined) return { error: '<Vector /> – missing "height-" property' }
+
+  const cacheKey = `${widthKey} ${heightKey}`
+  let size = VECTOR_SIZE_CACHE.get(cacheKey)
+
+  if (size === undefined) {
+    const width = UNITS[widthKey]
+    const height = UNITS[heightKey]
+
+    size = Object.freeze({
       styles: Object.freeze({
         width,
         height,
@@ -646,10 +655,10 @@ export const computeVectorSizing = (p: { viewBox: string }): FigmaPropertiesRetu
       }),
       className: "",
     })
-    VECTOR_SIZING_CACHE.set(p.viewBox, sizing)
+    VECTOR_SIZE_CACHE.set(cacheKey, size)
   }
 
-  return sizing
+  return size
 }
 
 const computeColorClassName = (
