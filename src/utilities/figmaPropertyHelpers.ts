@@ -600,6 +600,58 @@ export const computeIconFill = (p: FigmaFill): FigmaPropertiesReturn => {
   return computeColorClassName(p, "fill", "text")
 }
 
+/**
+ * Resolve a vector's fill flag to a color value, since SVG paths take a paint value rather than a Tailwind class.
+ * Without a fill flag the path inherits `currentColor`, so a parent's text color tints it.
+ * @example computeVectorFill({ "fill-primary-500": true }) // { styles: { color: "#BD7FFF" }, className: "" }
+ */
+export const computeVectorFill = (p: FigmaFill): FigmaPropertiesReturn => {
+  const flag = extractColor("fill", p)
+
+  if (flag === undefined) return { styles: { color: COLORS.currentcolor }, className: "" }
+
+  const palette = COLORS[flag.color]
+  const color = typeof palette === "string" ? palette : palette[flag.shade as keyof typeof palette]
+
+  return { styles: { color }, className: "" }
+}
+
+// Memoized per viewBox, so repeat renders of the same vector never split strings or allocate.
+const VECTOR_SIZING_CACHE = new Map<string, FigmaPropertiesReturn>()
+
+/**
+ * Size a vector to its viewBox. Both axes are pinned and the box never grows or shrinks, matching how Figma keeps a
+ * vector at its own bounds inside auto layout. Returns a shared, frozen object.
+ * @example computeVectorSizing({ viewBox: "0 0 24 24" }) // { styles: { width: 24, height: 24, … }, className: "" }
+ */
+export const computeVectorSizing = (p: { viewBox: string }): FigmaPropertiesReturn => {
+  let sizing = VECTOR_SIZING_CACHE.get(p.viewBox)
+
+  if (sizing === undefined) {
+    const [, , width, height] = p.viewBox
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number)
+
+    sizing = Object.freeze({
+      styles: Object.freeze({
+        width,
+        height,
+        minWidth: width,
+        minHeight: height,
+        maxWidth: width,
+        maxHeight: height,
+        flexGrow: 0,
+        flexShrink: 0,
+      }),
+      className: "",
+    })
+    VECTOR_SIZING_CACHE.set(p.viewBox, sizing)
+  }
+
+  return sizing
+}
+
 const computeColorClassName = (
   p: object,
   kind: ColorFlagKind,
