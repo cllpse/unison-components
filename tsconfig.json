@@ -5,8 +5,8 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "paths": {
-      "@frame/web": ["./web"],
-      "@frame/native": ["./native"]
+      "@unison-components/web": ["./web"],
+      "@unison-components/native": ["./native"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

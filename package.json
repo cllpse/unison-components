@@ -5,8 +5,10 @@
   "main": "",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "sync-manual:figma-plugin": "rsync -av --delete ./web ./native ./src ../figma-plugin/figma/",
-    "sync-watch:figma-plugin": "chokidar './web/**/*' './native/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../figma-plugin/figma/{path}'; else rsync -aR '{path}' ../figma-plugin/figma/; fi\""
+    "components:sync-manual:plugin": "rsync -av --delete ./web ./native ./src ../unison-plugin/unison-components/",
+    "components:sync-watch:plugin": "chokidar './web/**/*' './native/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
+    "components:sync-manual:playground": "rsync -av --delete ./web ./native ./src ../unison-playground/unison-components/",
+    "components:sync-watch:playground": "chokidar './web/**/*' './native/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-playground/unison-components/{path}'; else rsync -aR '{path}' ../unison-playground/unison-components/; fi\""
   },
   "author": "",
   "license": "ISC",

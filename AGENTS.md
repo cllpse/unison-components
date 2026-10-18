@@ -77,7 +77,7 @@ Beyond that:
   `const { children, className, style, ...rest } = p`.
 - When importing a component alongside its props type, alias the type: `import FrameBase, { type Frame as
   FrameType } from "../base/Frame.base"`.
-- Relative imports only; `src/*` and `@frame/*` paths are blocked by Biome.
+- Relative imports only; `src/*` and `@unison-components/*` paths are blocked by Biome.
 - Files in `src/utilities` either hold one function and are named after it (`computeColor.ts`), or group the
   `compute*` helpers for a family of props (`figmaPropertyHelpers.ts`, `elementPropertyHelpers.ts`).
 - Leave a blank line before the final `return` and between logical blocks; one-line `if (…) return …` guards may be
@@ -95,6 +95,6 @@ Beyond that:
 
 ## Git
 
-- Commit directly to `main` for now; no feature branches or pull requests. `figma-plugin` pins this repo as a
+- Commit directly to `main` for now; no feature branches or pull requests. `unison-plugin` pins this repo as a
   submodule, so it must only point at commits on `main`.
 - Imperative, sentence-case subjects (`Remove darken and lighten colors`); one concern per commit.

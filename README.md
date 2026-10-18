@@ -19,11 +19,13 @@ A base component should always be able to compile to both web and iOS/Android.
 
 ## Active development
 
-Watch for local file changes, and copy them directly to _"../figma-plugin/_.
+Watch for local file changes, and copy them directly to the _unison-components_ submodule in _../unison-plugin/_ or _../unison-playground/_.
 
 ```sh
-bun run sync-manual:figma-plugin
-bun run sync-watch:figma-plugin
+bun run components:sync-manual:plugin
+bun run components:sync-watch:plugin
+bun run components:sync-manual:playground
+bun run components:sync-watch:playground
 ```
 
 ## Type checking
