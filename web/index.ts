@@ -4,3 +4,4 @@ export { type ColorFlagKind, type ColorFlagProps, computeColor } from "../src/ut
 export { type ExtractedColor, extractColor } from "../src/utilities/extractColor"
 export { default as Frame } from "../src/web/Frame.web"
 export { default as Vector } from "../src/web/Vector.web"
+export { default as Text } from "../src/web/Text.web"
