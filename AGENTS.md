@@ -47,7 +47,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   `// @ts-expect-error` on `$$css` (React Native Web's className passthrough).
 - Use `style`, not Tailwind classes, to override React Native Web's reset: inline styles win deterministically,
   classes depend on CSS source order.
-- Web shells add a BEM-style root class: `frame__<component>` (`frame__frame`, `frame__text`).
+- Web shells add a BEM-style root class: `unison-components__<component>` (`unison-components__frame`, `unison-components__text`).
 - Utilities on the render path must not allocate or build strings per call; memoize on first use and return shared
   frozen objects (see `computeColor` / `extractColor`).
 

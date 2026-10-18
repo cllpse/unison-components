@@ -11,7 +11,7 @@ export default (p: Frame) => {
 
   return (
     <FrameBase
-      className={`frame__frame transition-[outline-color,background-color] duration-[120ms] ease-out ${className ?? ""}`}
+      className={`unison-components__frame transition-[outline-color,background-color] duration-[120ms] ease-out ${className ?? ""}`}
       style={
         {
           ...style,

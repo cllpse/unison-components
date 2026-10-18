@@ -19,7 +19,7 @@ export default (p: Text) => {
         // RNW types omit `"anywhere"` even though it's valid CSS for `word-wrap`.
         wordWrap: "anywhere" as CSSProperties["wordWrap"],
       }}
-      className={`frame__text ${className ?? ""}`}
+      className={`unison-components__text ${className ?? ""}`}
       {...rest}
     >
       {children}
