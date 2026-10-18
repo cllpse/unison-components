@@ -3,7 +3,6 @@
 // Tailwind can't find by scanning the source. Consumers import the result (`@import "unison-components/tailwind.css"`)
 // and need no build step of their own. Rerun with `bun run tailwind:css` after changing the tokens, and commit the
 // result.
-// @ts-expect-error: this package has no Node types; the script runs under Bun
 import { writeFileSync } from "node:fs"
 import { COLORS } from "../src/constants/colors"
 import { UNITS, UNITS_TAILWIND } from "../src/constants/units"

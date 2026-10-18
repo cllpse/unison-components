@@ -9,5 +9,7 @@
       "@unison-components/native": ["./native"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  // Build scripts run under Bun and need Node types, which this package does not install.
+  "exclude": ["node_modules", "scripts"]
 }
