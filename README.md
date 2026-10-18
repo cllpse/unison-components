@@ -28,6 +28,21 @@ bun run components:sync-manual:playground
 bun run components:sync-watch:playground
 ```
 
+## Tailwind
+
+Consumers import _tailwind.css_ from their Tailwind 4 entry stylesheet (web, or Uniwind on iOS and Android):
+
+```css
+@import "./unison-components/tailwind.css";
+```
+
+It carries the library's colors as theme colors, a `@source` for the library's files and a safelist of the class names
+the library builds at runtime. It is generated from the tokens; rerun and commit it after changing them:
+
+```sh
+bun run tailwind:css
+```
+
 ## Type checking
 
 ```sh

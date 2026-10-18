@@ -7,17 +7,11 @@ export type Frame = Omit<FrameType, "style"> & {
 
 export default (p: Frame) => {
   const { children, style, className, ...rest } = p
-  const cornerShape = "round"
 
   return (
     <FrameBase
-      className={`unison-components__frame transition-[outline-color,background-color] duration-[120ms] ease-out ${className ?? ""}`}
-      style={
-        {
-          ...style,
-          cornerShape,
-        } as StyleWeb & StyleNative
-      }
+      className={`unison-components__frame [corner-shape:round] transition-[outline-color,background-color] duration-[120ms] ease-out ${className ?? ""}`}
+      style={style as StyleWeb & StyleNative}
       {...rest}
     >
       {children}

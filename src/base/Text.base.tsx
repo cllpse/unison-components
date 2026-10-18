@@ -61,6 +61,7 @@ export default (p: Text) => {
           className: classes,
         },
       ]}
+      className={classes}
     >
       {p.children}
     </TextReactNative>

@@ -27,9 +27,11 @@ export default (p: Vector) => {
   const styles = [size.styles, p.style]
 
   const classes = [size.className, p.className ?? ""]
+  const className = classes.join(" ")
 
   // The Svg fills a View that carries the size and the className, because react-native-svg's web renderer does not
-  // take React Native Web's `$$css` className passthrough.
+  // take React Native Web's `$$css` className passthrough. The `className` prop is for Uniwind on iOS and Android;
+  // React Native Web drops it.
   return (
     <View
       style={[
@@ -37,9 +39,10 @@ export default (p: Vector) => {
         {
           // @ts-expect-error ...
           $$css: true,
-          className: classes.join(" "),
+          className,
         },
       ]}
+      className={className}
     >
       <Svg width="100%" height="100%" viewBox={p.viewBox} color={fill.styles?.color as string}>
         <Path d={p.path} fill="currentColor" fillRule={p.fillRule ?? "nonzero"} />

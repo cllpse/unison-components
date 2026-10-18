@@ -37,7 +37,10 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 - Each flag group has a helper named `compute<Component><Group>` (`computeFramePadding`, `computeTextTypography`,
   `computeElementPointerEvents`). Helpers return `FigmaPropertiesReturn` (`{ styles?, className? }`): Tailwind
-  classes, plus inline `styles` where a numeric value or a guaranteed override is needed.
+  classes, with inline `styles` only for what a class cannot express (a native-only style such as
+  `FONT_FEATURE_STYLE`). iOS and Android get their styling from the classes through Uniwind.
+- Base components pass the joined classes both in the `$$css` style object (React Native Web) and as the `className`
+  prop (Uniwind on iOS and Android; React Native Web drops it).
 - When a group is required, return `FigmaPropertiesReturnError` with
   `{ error: '<Text /> – missing "typography-" property' }` (en dash).
 - Write helpers as a flat series of guard clauses: `if (p["flag"]) return { … }`, then a final fallback return.
@@ -45,8 +48,11 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - Base components collect results into a `styles` array and a `classes` array (`""` for absent entries), then pass
   them to the primitive as `style={[styles, { $$css: true, className: classes.join(" ") }]}` with a
   `// @ts-expect-error` on `$$css` (React Native Web's className passthrough).
-- Use `style`, not Tailwind classes, to override React Native Web's reset: inline styles win deterministically,
-  classes depend on CSS source order.
+- Override React Native Web's reset (`min-*: 0`, `flex-shrink: 0`, `padding: 0`, `word-wrap: break-word`) with
+  Tailwind classes, not `style`. They win because consumers import Tailwind's utilities unlayered, and React Native Web
+  inserts its stylesheet first in `<head>` (see unison-playground's `globals.css`). Use arbitrary values or properties
+  that also exist in Tailwind 3 (`min-w-[auto]`, `[overflow-wrap:anywhere]`). Classes built from tokens at runtime must
+  be in the safelist in `scripts/generateTailwindCss.ts`; rerun `bun run tailwind:css` and commit `tailwind.css`.
 - Web shells add a BEM-style root class: `unison-components__<component>` (`unison-components__frame`, `unison-components__text`).
 - Utilities on the render path must not allocate or build strings per call; memoize on first use and return shared
   frozen objects (see `computeColor` / `extractColor`).

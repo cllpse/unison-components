@@ -161,6 +161,8 @@ export default (p: Frame) => {
     p.className ?? "",
   ]
 
+  const className = classes.join(" ")
+
   let r: ReactNode = null
 
   if (p.onPress || p.onPressIn || p.onPressOut) {
@@ -181,9 +183,10 @@ export default (p: Frame) => {
           {
             // @ts-expect-error ...
             $$css: true,
-            className: classes.join(" "),
+            className,
           },
         ]}
+        className={className}
         pointerEvents={p.pointerEvents}
       >
         {p.children}
@@ -204,9 +207,10 @@ export default (p: Frame) => {
           {
             // @ts-expect-error ...
             $$css: true,
-            className: classes.join(" "),
+            className,
           },
         ]}
+        className={className}
         pointerEvents={p.pointerEvents}
       >
         {p.children}

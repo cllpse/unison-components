@@ -1,7 +1,6 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import { COLORS } from "../constants/colors"
 import { UNITS, UNITS_TAILWIND } from "../constants/units"
-import type { StyleNative, StyleWeb } from "../types/elementProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -109,15 +108,11 @@ export const computeFrameAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): 
   return { className: `${FRAME_JUSTIFY[verticalEdge]} ${FRAME_ITEMS[horizontalEdge]}` }
 }
 
-// React Native Web's `View` prepends a base reset (see
-// react-native-web View `view$raw`) that forces `min-width: 0`, `min-height: 0`
-// and `flex-shrink: 0` on every element. That breaks the flex model these frames
-// assume: we rely on the browser-default `min-*: auto` so a fill frame won't
-// shrink below its content, and on the default `flex-shrink` so children size
-// predictably. We restore that model via the `style` prop (not className), since
-// RNW dedupes style objects by property and they deterministically win over the
-// reset's atomic classes — unlike Tailwind classes, whose win depends on CSS
-// source order.
+// React Native Web's `View` prepends a base reset (see react-native-web View `view$raw`) that forces `min-width: 0`,
+// `min-height: 0` and `flex-shrink: 0` on every element. That breaks the flex model these frames assume: we rely on
+// the browser-default `min-*: auto` so a fill frame won't shrink below its content, and on the default `flex-shrink` so
+// children size predictably. We restore that model with Tailwind classes, which beat the reset because consumers load
+// Tailwind's utilities unlayered and after React Native Web's stylesheet (see AGENTS.md).
 export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): FigmaPropertiesReturn => {
   let exactWidth = ""
   let exactHeight = ""
@@ -134,82 +129,62 @@ export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
 
   const widthFill = exactWidth === "" && p["width-fill"]
   const heightFill = exactHeight === "" && p["height-fill"]
+  const widthUnit = UNITS_TAILWIND[exactWidth as keyof typeof UNITS] ?? exactWidth
+  const heightUnit = UNITS_TAILWIND[exactHeight as keyof typeof UNITS] ?? exactHeight
 
-  const widthClass =
-    exactWidth !== ""
-      ? `w-${UNITS_TAILWIND[exactWidth as keyof typeof UNITS] ?? exactWidth}`
-      : widthFill
-        ? "w-full"
-        : "w-fit"
-  const heightClass =
-    exactHeight !== ""
-      ? `h-${UNITS_TAILWIND[exactHeight as keyof typeof UNITS] ?? exactHeight}`
-      : heightFill
-        ? "h-full"
-        : "h-fit"
+  const widthClass = exactWidth !== "" ? `w-${widthUnit}` : widthFill ? "w-full" : "w-fit"
+  const heightClass = exactHeight !== "" ? `h-${heightUnit}` : heightFill ? "h-full" : "h-fit"
 
-  // The View reset forces `min-*: 0` / `flex-shrink: 0`; we restore a sane model via
-  // the `style` prop so it deterministically beats the reset's atomic classes.
-  // (`flex-shrink`/`flex-grow` only act on the main axis and a frame can't know its
-  // parent's direction, so the axis floors below carry the per-axis intent instead.)
+  // `flex-shrink`/`flex-grow` only act on the main axis and a frame can't know its parent's direction, so the axis
+  // floors below carry the per-axis intent instead.
   //
-  // - Exact axes are pinned with matching `min-*`/`max-*` so flex can neither grow nor
-  //   shrink them — the exact size holds even when that axis is the parent's main axis.
-  // - Fill axes get `min-*: 0` so they can shrink past their own content (text
-  //   truncates) and always yield space to fixed siblings, instead of overflowing them
-  //   when the container is constrained from the outside (max-width / fixed width).
+  // - Exact axes are pinned with matching `min-*`/`max-*` so flex can neither grow nor shrink them — the exact size
+  //   holds even when that axis is the parent's main axis.
+  // - Fill axes get `min-*: 0` so they can shrink past their own content (text truncates) and always yield space to
+  //   fixed siblings, instead of overflowing them when the container is constrained from the outside (max-width /
+  //   fixed width).
   // - Hug axes keep `min-*: auto` so they never shrink below their content.
-  const styles: StyleNative & StyleWeb = {}
-
-  if (exactWidth !== "" && exactWidth !== "full") {
-    const value = UNITS[exactWidth as keyof typeof UNITS]
-    styles.minWidth = value
-    styles.maxWidth = value
-  } else {
-    styles.minWidth = widthFill ? 0 : "auto"
-  }
-
-  if (exactHeight !== "" && exactHeight !== "full") {
-    const value = UNITS[exactHeight as keyof typeof UNITS]
-    styles.minHeight = value
-    styles.maxHeight = value
-  } else {
-    styles.minHeight = heightFill ? 0 : "auto"
-  }
+  const widthFloor =
+    exactWidth !== "" && exactWidth !== "full"
+      ? `min-w-${widthUnit} max-w-${widthUnit}`
+      : widthFill
+        ? "min-w-0"
+        : "min-w-[auto]"
+  const heightFloor =
+    exactHeight !== "" && exactHeight !== "full"
+      ? `min-h-${heightUnit} max-h-${heightUnit}`
+      : heightFill
+        ? "min-h-0"
+        : "min-h-[auto]"
 
   if (widthFill && heightFill) {
     // Both axes fill → grow into the main axis, stretch across the cross axis.
     //
-    // We intentionally emit `w-full` but NOT `h-full`. On whichever axis is the
-    // parent's cross axis, filling is done by `align-self: stretch` — but stretch
-    // only applies when the cross size is `auto`. An explicit `height: 100%` both
-    // suppresses that stretch and, because percentage heights resolve against the
-    // containing block, collapses to content height whenever an ancestor is
-    // hug-sized (indefinite height) — so the frame fails to stretch. `w-full` is
-    // safe because percentage widths resolve against the (near-always definite)
-    // inline size, and it keeps fill siblings equal-width along a horizontal axis.
+    // We intentionally emit `w-full` but NOT `h-full`. On whichever axis is the parent's cross axis, filling is done
+    // by `align-self: stretch` — but stretch only applies when the cross size is `auto`. An explicit `height: 100%`
+    // both suppresses that stretch and, because percentage heights resolve against the containing block, collapses to
+    // content height whenever an ancestor is hug-sized (indefinite height) — so the frame fails to stretch. `w-full`
+    // is safe because percentage widths resolve against the (near-always definite) inline size, and it keeps fill
+    // siblings equal-width along a horizontal axis.
     return {
-      className: `${widthClass} self-stretch`,
-      styles: { ...styles, flexGrow: 1, flexShrink: 1 },
+      styles: {},
+      className: `${widthClass} self-stretch ${widthFloor} ${heightFloor} grow shrink`,
     }
   }
 
   if (!widthFill && !heightFill) {
     // Hug/exact on both axes → rigid box (equivalent to `flex-none`).
-
     return {
-      className: `${widthClass} ${heightClass}`,
-      styles: { ...styles, flexGrow: 0, flexShrink: 0 },
+      styles: {},
+      className: `${widthClass} ${heightClass} ${widthFloor} ${heightFloor} grow-0 shrink-0`,
     }
   }
 
-  // Exactly one axis fills: let the filling axis shrink so it yields space to fixed
-  // siblings (instead of overflowing them). Any exact sibling axis is already pinned
-  // above, so `flexShrink: 1` can't collapse it below its exact size.
-
+  // Exactly one axis fills: let the filling axis shrink so it yields space to fixed siblings (instead of overflowing
+  // them). Any exact sibling axis is already pinned above, so `shrink` can't collapse it below its exact size.
   return {
-    className: `${widthClass} ${heightClass}`,
-    styles: { ...styles, flexGrow: 0, flexShrink: 1 },
+    styles: {},
+    className: `${widthClass} ${heightClass} ${widthFloor} ${heightFloor} grow-0 shrink`,
   }
 }
 
@@ -243,7 +218,7 @@ export const computeFramePadding = (p: FigmaPadding): FigmaPropertiesReturn => {
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return { styles: { padding: UNITS[key] }, className: `p-${UNITS_TAILWIND[key] ?? key}` }
+  return { styles: {}, className: `p-${UNITS_TAILWIND[key] ?? key}` }
 }
 
 export const computeFramePaddingVertical = (p: FigmaPaddingVertical): FigmaPropertiesReturn => {
@@ -251,9 +226,10 @@ export const computeFramePaddingVertical = (p: FigmaPaddingVertical): FigmaPrope
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  const value = UNITS[key]
-
-  return { styles: { paddingTop: value, paddingBottom: value }, className: `py-${UNITS_TAILWIND[key] ?? key}` }
+  return {
+    styles: {},
+    className: `py-${UNITS_TAILWIND[key] ?? key}`,
+  }
 }
 
 export const computeFramePaddingHorizontal = (p: FigmaPaddingHorizontal): FigmaPropertiesReturn => {
@@ -261,9 +237,10 @@ export const computeFramePaddingHorizontal = (p: FigmaPaddingHorizontal): FigmaP
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  const value = UNITS[key]
-
-  return { styles: { paddingLeft: value, paddingRight: value }, className: `px-${UNITS_TAILWIND[key] ?? key}` }
+  return {
+    styles: {},
+    className: `px-${UNITS_TAILWIND[key] ?? key}`,
+  }
 }
 
 export const computeFramePaddingLeft = (p: FigmaPaddingLeft): FigmaPropertiesReturn => {
@@ -271,7 +248,7 @@ export const computeFramePaddingLeft = (p: FigmaPaddingLeft): FigmaPropertiesRet
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return { styles: { paddingLeft: UNITS[key] }, className: `pl-${UNITS_TAILWIND[key] ?? key}` }
+  return { styles: {}, className: `pl-${UNITS_TAILWIND[key] ?? key}` }
 }
 
 export const computeFramePaddingRight = (p: FigmaPaddingRight): FigmaPropertiesReturn => {
@@ -279,7 +256,7 @@ export const computeFramePaddingRight = (p: FigmaPaddingRight): FigmaPropertiesR
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return { styles: { paddingRight: UNITS[key] }, className: `pr-${UNITS_TAILWIND[key] ?? key}` }
+  return { styles: {}, className: `pr-${UNITS_TAILWIND[key] ?? key}` }
 }
 
 export const computeFramePaddingTop = (p: FigmaPaddingTop): FigmaPropertiesReturn => {
@@ -287,7 +264,7 @@ export const computeFramePaddingTop = (p: FigmaPaddingTop): FigmaPropertiesRetur
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return { styles: { paddingTop: UNITS[key] }, className: `pt-${UNITS_TAILWIND[key] ?? key}` }
+  return { styles: {}, className: `pt-${UNITS_TAILWIND[key] ?? key}` }
 }
 
 export const computeFramePaddingBottom = (p: FigmaPaddingBottom): FigmaPropertiesReturn => {
@@ -295,7 +272,7 @@ export const computeFramePaddingBottom = (p: FigmaPaddingBottom): FigmaPropertie
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return { styles: { paddingBottom: UNITS[key] }, className: `pb-${UNITS_TAILWIND[key] ?? key}` }
+  return { styles: {}, className: `pb-${UNITS_TAILWIND[key] ?? key}` }
 }
 
 export const computeFrameCornerRadiusTopLeft = (p: FigmaFrameCornerRadiusTopLeft): FigmaPropertiesReturn => {
@@ -304,7 +281,7 @@ export const computeFrameCornerRadiusTopLeft = (p: FigmaFrameCornerRadiusTopLeft
   if (key === undefined) return { styles: {}, className: "" }
 
   return {
-    styles: { borderTopLeftRadius: UNITS[key] },
+    styles: {},
     className: `rounded-tl-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
   }
 }
@@ -315,7 +292,7 @@ export const computeFrameCornerRadiusTopRight = (p: FigmaFrameCornerRadiusTopRig
   if (key === undefined) return { styles: {}, className: "" }
 
   return {
-    styles: { borderTopRightRadius: UNITS[key] },
+    styles: {},
     className: `rounded-tr-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
   }
 }
@@ -326,7 +303,7 @@ export const computeFrameCornerRadiusBottomLeft = (p: FigmaFrameCornerRadiusBott
   if (key === undefined) return { styles: {}, className: "" }
 
   return {
-    styles: { borderBottomLeftRadius: UNITS[key] },
+    styles: {},
     className: `rounded-bl-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
   }
 }
@@ -337,7 +314,7 @@ export const computeFrameCornerRadiusBottomRight = (p: FigmaFrameCornerRadiusBot
   if (key === undefined) return { styles: {}, className: "" }
 
   return {
-    styles: { borderBottomRightRadius: UNITS[key] },
+    styles: {},
     className: `rounded-br-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
   }
 }
@@ -357,13 +334,7 @@ export const computeFrameCornerRadius = (
   const bottomRight = computeFrameCornerRadiusBottomRight(p)
 
   return {
-    styles: {
-      ...(key === undefined ? {} : { borderRadius: UNITS[key] }),
-      ...topLeft.styles,
-      ...topRight.styles,
-      ...bottomLeft.styles,
-      ...bottomRight.styles,
-    },
+    styles: {},
     className: [
       key === undefined ? "" : `rounded-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
       topLeft.className,
@@ -625,7 +596,7 @@ const VECTOR_SIZE_CACHE = new Map<string, FigmaPropertiesReturn>()
  * Size a vector to its `width-` and `height-` flags; both are required. The box is pinned and never grows or shrinks,
  * matching how Figma keeps a vector at its own bounds inside auto layout; the viewBox scales to fit it. Returns a
  * shared, frozen object.
- * @example computeVectorSize({ "width-6": true, "height-6": true }) // { styles: { width: 24, height: 24, … }, className: "" }
+ * @example computeVectorSize({ "width-6": true, "height-6": true }) // { styles: {}, className: "w-6 h-6 min-w-6 … shrink-0" }
  */
 export const computeVectorSize = (p: FigmaVectorWidth & FigmaVectorHeight): FigmaPropertiesReturnError => {
   const widthKey = resolveUnitKey(p, "width-")
@@ -639,21 +610,12 @@ export const computeVectorSize = (p: FigmaVectorWidth & FigmaVectorHeight): Figm
   let size = VECTOR_SIZE_CACHE.get(cacheKey)
 
   if (size === undefined) {
-    const width = UNITS[widthKey]
-    const height = UNITS[heightKey]
+    const width = String(UNITS_TAILWIND[widthKey] ?? widthKey)
+    const height = String(UNITS_TAILWIND[heightKey] ?? heightKey)
 
     size = Object.freeze({
-      styles: Object.freeze({
-        width,
-        height,
-        minWidth: width,
-        minHeight: height,
-        maxWidth: width,
-        maxHeight: height,
-        flexGrow: 0,
-        flexShrink: 0,
-      }),
-      className: "",
+      styles: Object.freeze({}),
+      className: `w-${width} h-${height} min-w-${width} min-h-${height} max-w-${width} max-h-${height} grow-0 shrink-0`,
     })
     VECTOR_SIZE_CACHE.set(cacheKey, size)
   }
