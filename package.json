@@ -4,6 +4,8 @@
   "description": "",
   "main": "",
   "scripts": {
+    "lint": "biome check",
+    "format": "biome format --write",
     "typecheck": "tsc --noEmit",
     "components:sync-manual:plugin": "rsync -av --delete ./web ./native ./src ../unison-plugin/unison-components/",
     "components:sync-watch:plugin": "chokidar './web/**/*' './native/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
@@ -29,5 +31,6 @@
     "@types/react-dom": "^19.3.0",
     "chokidar-cli": "^3.0.0",
     "typescript": "^7.0.2"
-  }
+  },
+  "packageManager": "bun@1.4.3"
 }

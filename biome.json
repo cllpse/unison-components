@@ -32,7 +32,12 @@
                 "message": "Absolute imports are not allowed. Use relative imports instead (e.g., ./... or ../...)"
               },
               {
-                "group": ["@unison-components/web", "@unison-components/web/*", "@unison-components/native", "@unison-components/native/*"],
+                "group": [
+                  "@unison-components/web",
+                  "@unison-components/web/*",
+                  "@unison-components/native",
+                  "@unison-components/native/*"
+                ],
                 "message": "Importing from @unison-components/web or @unison-components/native is not allowed. Import directly using relative paths instead."
               }
             ]
