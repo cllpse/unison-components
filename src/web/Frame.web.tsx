@@ -1,5 +1,5 @@
+import type { Style, WebStyle } from "../../types/baseProperties"
 import FrameBase, { type Frame as FrameType } from "../base/Frame.base"
-import type { Style, WebStyle } from "../types/baseProperties"
 
 export type Frame = Omit<FrameType, "style"> & {
   style?: WebStyle

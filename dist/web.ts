@@ -1,5 +1,5 @@
-export type { ClassName, NativeStyle, Style, WebStyle } from "../src/types/baseProperties"
 export { default as Frame } from "../src/web/Frame.web"
 export { default as Text } from "../src/web/Text.web"
 export { default as Vector } from "../src/web/Vector.web"
+export type { ClassName, NativeStyle, Style, WebStyle } from "../types/baseProperties"
 export { COLORS, TOKENS, type Tokens } from "./tokens"

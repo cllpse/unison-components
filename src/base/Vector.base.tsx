@@ -1,8 +1,8 @@
 import { View } from "react-native"
 import Svg, { Path } from "react-native-svg"
-import type { ClassName, Style } from "../types/baseProperties"
-import type { FigmaFill, FigmaVectorHeight, FigmaVectorWidth } from "../types/figmaProperties"
-import { computeVectorFill, computeVectorSize } from "../utilities/computeProperties"
+import type { ClassName, Style } from "../../types/baseProperties"
+import type { FigmaFill, FigmaVectorHeight, FigmaVectorWidth } from "../../types/figmaProperties"
+import { computeVectorFill, computeVectorSize } from "../../utilities/computeProperties"
 
 export type Vector = FigmaFill &
   FigmaVectorWidth &

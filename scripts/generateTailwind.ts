@@ -15,7 +15,7 @@ import {
   TEXT_SIZES,
   TOKENS,
 } from "../dist/tokens"
-import { FLAGS, flagClasses } from "../src/maps"
+import { FLAGS, flagClasses } from "../maps"
 
 // A theme key with a dot (`0.5`) escapes it, as Tailwind's own theme does.
 const key = (name: string) => name.replace(".", "\\.")
@@ -75,6 +75,8 @@ const themeColors = (mode: "Light" | "Dark") =>
 const themeCss = [
   "",
   '@source "../src";',
+  '@source "../maps";',
+  '@source "../utilities";',
   "",
   "@theme {",
   ...theme,

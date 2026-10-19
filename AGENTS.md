@@ -24,21 +24,21 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   `bun run generate:tokens`: `TOKENS`, plus the scales under their public names (`COLORS`, `SPACING`, `RADIUS`, `CONTAINERS`,
   `SHADOWS`, `TEXT_SIZES`) and their types. Import the scales from there directly. Runtime code reads only the
   scales, so `TOKENS` (both modes, shadow layers, typography) stays out of app bundles unless a consumer imports it.
-- `src/types` — prop and return types; `src/maps` — the flag table built from the scales (`FLAGS`);
-  `src/utilities` — pure helpers.
+- `types` — prop and return types; `maps` — the flag table built from the scales (`FLAGS`);
+  `utilities` — pure helpers.
 
 ## Props: Figma flags
 
 - Styling props are boolean flags named in kebab-case after Figma: `autolayout-horizontal`, `width-fill`, `padding-4`,
   `corner-radius-full`, `fill-red-500`, `typography-sm`. Prefer adding a flag over a value prop.
-- Flag types live in `src/types/figmaProperties.ts` as `Figma<Thing>` types, built from the group lists in `src/maps`
+- Flag types live in `types/figmaProperties.ts` as `Figma<Thing>` types, built from the group lists in `maps`
   (`SPACING_GROUPS`, `RADIUS_GROUPS`, `COLOR_GROUPS`, `NAMED_FLAGS`) and the scales in `dist/tokens.ts` with mapped
   template-literal types (`SpacingFlags<"gap">`, `ColorFlags<"fill">`, `NamedFlags<"alignment">`). Never hand-write a
-  flag name there; add it to `src/maps` and it is typed, read, safelisted and checked from one place.
+  flag name there; add it to `maps` and it is typed, read, safelisted and checked from one place.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is
   exported under the component's name (`export type Frame = FigmaFrameAutolayout & … & { … }`).
 - Flags within a group are mutually exclusive; set at most one. If several are set anyway, the first in props order wins.
-- Every token-derived flag is a key of `FLAGS` (`src/maps/index.ts`), with the class it produces. A new
+- Every token-derived flag is a key of `FLAGS` (`maps/index.ts`), with the class it produces. A new
   token-derived flag group goes there too, so it is read, safelisted and checked like the others.
 - TypeScript does not check JSX attribute names that contain a hyphen, so a misspelled flag (`fill-red-55`) compiles.
   `readFlags` logs such props outside production builds instead.
@@ -52,7 +52,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 - Each flag group has a helper named `compute<Component><Group>` (`computeFramePadding`, `computeTextTypography`,
   `computeElementPointerEvents`). Helpers return `PropertiesResult` (`{ styles?, className? }`, from
-  `src/types/baseProperties.ts`): Tailwind classes, with inline `styles` only for what a class cannot express (a
+  `types/baseProperties.ts`): Tailwind classes, with inline `styles` only for what a class cannot express (a
   native-only style such as `FONT_FEATURE_STYLE`). iOS and Android get their styling from the classes through Uniwind.
 - Base components pass the joined classes both in the `$$css` style object (React Native Web) and as the `className`
   prop (Uniwind on iOS and Android; React Native Web drops it).
@@ -106,7 +106,7 @@ Beyond that:
 - When importing a component alongside its props type, alias the type: `import FrameBase, { type Frame as
   FrameType } from "../base/Frame.base"`.
 - Relative imports only; `src/*` and `@unison` paths are blocked by Biome.
-- Files in `src/utilities` either hold one function and are named after it (`readFlags.ts`), or hold the `compute*`
+- Files in `utilities` either hold one function and are named after it (`readFlags.ts`), or hold the `compute*`
   helpers (`computeProperties.ts`).
 - Leave a blank line before the final `return` and between logical blocks; one-line `if (…) return …` guards may be
   stacked without blank lines.

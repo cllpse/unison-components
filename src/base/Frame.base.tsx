@@ -12,7 +12,7 @@ import type {
   TailwindGroup,
   ViewAttributes,
   ViewReference,
-} from "../types/baseProperties"
+} from "../../types/baseProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -38,7 +38,7 @@ import type {
   FigmaStroke,
   FigmaStrokeHover,
   FigmaStrokeStyle,
-} from "../types/figmaProperties"
+} from "../../types/figmaProperties"
 import {
   computeElementPointerEvents,
   computeElementTailwindGroup,
@@ -60,7 +60,7 @@ import {
   computeFrameStroke,
   computeFrameStrokeHover,
   computeFrameWrap,
-} from "../utilities/computeProperties"
+} from "../../utilities/computeProperties"
 
 export type Frame = FigmaFrameAutolayout &
   FigmaFrameWidth &

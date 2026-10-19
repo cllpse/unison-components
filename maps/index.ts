@@ -10,7 +10,7 @@ import {
   SPACING,
   SPACING_TAILWIND,
   TEXT_SIZES,
-} from "../../dist/tokens"
+} from "../dist/tokens"
 
 // Every token-derived flag, keyed by its full name (`padding-4`, `fill-red-500`), built once at module load from the
 // token scales in dist/tokens.ts. Components look up the flags a props object actually sets instead of probing every
@@ -193,7 +193,7 @@ export const FLAG_PREFIXES: ReadonlySet<string> = new Set([...table.keys()].map(
 
 /**
  * The Tailwind classes a flag can produce in any component, for the safelist in scripts/generateTailwind.ts.
- * Classes that don't depend on a token (`w-fit`, `flex-row`) are literals in src/ and found by Tailwind's own scan.
+ * Classes that don't depend on a token (`w-fit`, `flex-row`) are literals in src/ and utilities/ and found by Tailwind's own scan.
  * @example flagClasses(FLAGS.get("width-4")) // ["w-4", "min-w-4", "max-w-4"]
  */
 export const flagClasses = (flag: Flag): string[] => {

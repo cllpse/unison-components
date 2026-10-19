@@ -1,5 +1,5 @@
 import { type TextProps as TextProperties, Text as TextReactNative } from "react-native"
-import type { ClassName, Style, TailwindGroupHoverFill } from "../types/baseProperties"
+import type { ClassName, Style, TailwindGroupHoverFill } from "../../types/baseProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -7,7 +7,7 @@ import type {
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
-} from "../types/figmaProperties"
+} from "../../types/figmaProperties"
 import {
   computeTextFill,
   computeTextFillHover,
@@ -16,7 +16,7 @@ import {
   computeTextTypographyAlignment,
   computeTextTypographyDecoration,
   FONT_FEATURE_STYLE,
-} from "../utilities/computeProperties"
+} from "../../utilities/computeProperties"
 
 export type Text = FigmaFill &
   FigmaFillHover &

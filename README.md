@@ -45,7 +45,7 @@ bun run generate:tailwind
 ```
 
 `bun run generate:tailwind:watch` regenerates _dist/tokens.ts_ and the stylesheets on every change to _dist/tokens.json_,
-`src/maps/` or the generators.
+`maps/` or the generators.
 
 Outside production builds, a prop that looks like a flag but isn't one (`fill-red-55`) logs a warning: TypeScript
 doesn't check hyphenated JSX attribute names, so the typo would otherwise be silently ignored.

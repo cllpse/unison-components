@@ -1,5 +1,5 @@
+import type { ViewAttributes } from "../../types/baseProperties"
 import FrameBase, { type Frame as FrameType } from "../base/Frame.base"
-import type { ViewAttributes } from "../types/baseProperties"
 
 export type Frame = Omit<FrameType, keyof ViewAttributes>
 
