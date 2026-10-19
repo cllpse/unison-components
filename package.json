@@ -8,10 +8,10 @@
     "format": "biome format --write",
     "typecheck": "tsc --noEmit",
     "tailwind:css": "bun scripts/generateTailwindCss.ts",
-    "components:sync-manual:plugin": "rsync -av --delete ./web ./native ./src ./tailwind.css ../unison-plugin/unison-components/",
-    "components:sync-watch:plugin": "chokidar './web/**/*' './native/**/*' './src/**/*' './tailwind.css' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
-    "components:sync-manual:playground-web": "rsync -av --delete ./web ./native ./src ./tailwind.css ../unison-playground-web/unison-components/",
-    "components:sync-watch:playground-web": "chokidar './web/**/*' './native/**/*' './src/**/*' './tailwind.css' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-playground-web/unison-components/{path}'; else rsync -aR '{path}' ../unison-playground-web/unison-components/; fi\""
+    "components:sync-manual:plugin": "rsync -av --delete ./dist ./src ../unison-plugin/unison-components/",
+    "components:sync-watch:plugin": "chokidar './dist/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
+    "components:sync-manual:playground-web": "rsync -av --delete ./dist ./src ../unison-playground-web/unison-components/",
+    "components:sync-watch:playground-web": "chokidar './dist/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-playground-web/unison-components/{path}'; else rsync -aR '{path}' ../unison-playground-web/unison-components/; fi\""
   },
   "author": "",
   "license": "ISC",

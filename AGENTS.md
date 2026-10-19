@@ -17,8 +17,8 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   libraries (e.g. `react-native-reanimated`) may only be imported here.
 - Platform-specific behavior belongs in the shells; small platform differences inside shared code use
   `Platform.select` / `Platform.OS`.
-- `web/index.ts` / `native/index.ts` are the public entry points. Every public export is listed there, sorted by
-  path.
+- `dist/web.ts` / `dist/native.ts` are the public entry points. Every public export is listed there, sorted by
+  path. `dist/` also holds the generated `tailwind.css`; consumers import only from `dist/`.
 - `src/types` — prop and return types; `src/constants` — design tokens; `src/utilities` — pure helpers.
 
 ## Props: Figma flags
@@ -53,7 +53,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   inserts its stylesheet first in `<head>` (see unison-playground-web's `globals.css`). Use arbitrary values or
   properties that also exist in Tailwind 3 (`min-w-[auto]`, `[overflow-wrap:anywhere]`). Classes built from tokens at
   runtime must be in the safelist in `scripts/generateTailwindCss.ts`; rerun `bun run tailwind:css` and commit
-  `tailwind.css`.
+  `dist/tailwind.css`.
 - Web shells add a BEM-style root class: `unison-components__<component>` (`unison-components__frame`, `unison-components__text`).
 - Utilities on the render path must not allocate or build strings per call; memoize on first use and return shared
   frozen objects (see `computeColor` / `extractColor`).
@@ -84,7 +84,7 @@ Beyond that:
   `const { children, className, style, ...rest } = p`.
 - When importing a component alongside its props type, alias the type: `import FrameBase, { type Frame as
   FrameType } from "../base/Frame.base"`.
-- Relative imports only; `src/*` and `@unison-components/*` paths are blocked by Biome.
+- Relative imports only; `src/*` and `@unison` paths are blocked by Biome.
 - Files in `src/utilities` either hold one function and are named after it (`computeColor.ts`), or group the
   `compute*` helpers for a family of props (`figmaPropertyHelpers.ts`, `elementPropertyHelpers.ts`).
 - Leave a blank line before the final `return` and between logical blocks; one-line `if (…) return …` guards may be

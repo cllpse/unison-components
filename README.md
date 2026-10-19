@@ -30,10 +30,10 @@ bun run components:sync-watch:playground-web
 
 ## Tailwind
 
-Consumers import _tailwind.css_ from their Tailwind 4 entry stylesheet (web, or Uniwind on iOS and Android):
+Consumers import _dist/tailwind.css_ from their Tailwind 4 entry stylesheet (web, or Uniwind on iOS and Android):
 
 ```css
-@import "./unison-components/tailwind.css";
+@import "./unison-components/dist/tailwind.css";
 ```
 
 It carries the library's colors as theme colors, a `@source` for the library's files and a safelist of the class names
