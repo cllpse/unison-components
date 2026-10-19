@@ -30,8 +30,10 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is
   exported under the component's name (`export type Frame = FigmaFrameFlow & … & { … }`).
 - Flags within a group are mutually exclusive; set at most one.
-- Unit keys follow the Tailwind scale. Fractional units use `p` (`0p5`, `1p5`); `05` is deprecated. Keys that are
-  not on Tailwind's default scale map through `UNITS_TAILWIND`.
+- Unit keys follow the Tailwind spacing scale. Fractional units use `p` (`0p5`, `1p5`); `05` and `1px` are
+  deprecated (use `0p5` and `px`). Keys whose Tailwind suffix differs from the key map through `UNITS_TAILWIND`.
+- Corner radius uses Tailwind's own radius names from `RADII` (`corner-radius-lg`), not the spacing keys. Shadows are
+  the tinted `small` / `large` plus Tailwind's scale from `SHADOWS` (`effect-shadow-md`).
 
 ## Computing styles
 

@@ -5,11 +5,11 @@
 // `bun run tailwind:css` after changing the tokens, and commit the result.
 import { writeFileSync } from "node:fs"
 import { COLORS } from "../src/constants/colors"
-import { UNITS, UNITS_TAILWIND } from "../src/constants/units"
+import { RADII, SHADOWS, UNITS, UNITS_TAILWIND } from "../src/constants/units"
 
 const units = Object.keys(UNITS) as (keyof typeof UNITS)[]
 const spacing = [...new Set(units.map((unit) => UNITS_TAILWIND[unit] ?? unit))]
-const radius = [...new Set(units.map((unit) => UNITS_TAILWIND[unit] ?? `[${UNITS[unit]}px]`))]
+const radius = Object.keys(RADII)
 
 const theme: string[] = []
 const colors: string[] = []
@@ -48,6 +48,7 @@ const css = [
   `@source inline("group-hover:text-{${colors.join(",")}}");`,
   `@source inline("{p,px,py,pl,pr,pt,pb,gap,w,h,min-w,min-h,max-w,max-h}-{${spacing.join(",")}}");`,
   `@source inline("rounded{,-tl,-tr,-bl,-br}-{${radius.join(",")}}");`,
+  `@source inline("shadow-{${SHADOWS.join(",")}}");`,
   ...shadows.map((shadow) => `@source inline("${shadow}");`),
   "",
 ].join("\n")

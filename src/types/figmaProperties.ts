@@ -1,5 +1,5 @@
 import type { COLORS } from "../constants/colors"
-import type { UNITS } from "../constants/units"
+import type { RADII, SHADOWS, UNITS } from "../constants/units"
 import type { ClassName, StyleNative, StyleWeb } from "./elementProperties"
 
 type Simplify<T> = {
@@ -12,7 +12,11 @@ type UnitsFlags<prefix extends string> = {
   [key in keyof typeof UNITS as `${prefix}${key & (string | number)}`]?: boolean
 }
 
-type AdditionalUnitsFlags<prefix extends string, Suffix extends string = "hug" | "fill" | "full" | "huge"> = {
+type RadiusFlags<prefix extends string> = {
+  [key in keyof typeof RADII as `${prefix}${key}`]?: boolean
+}
+
+type AdditionalUnitsFlags<prefix extends string, Suffix extends string = "hug" | "fill" | "full"> = {
   [key in Suffix as `${prefix}${key}`]?: boolean
 }
 
@@ -61,27 +65,17 @@ export type FigmaPaddingTop = Simplify<UnitsFlags<"padding-top-">>
 
 export type FigmaPaddingBottom = Simplify<UnitsFlags<"padding-bottom-">>
 
-export type FigmaFrameCornerRadius = Simplify<
-  UnitsFlags<"corner-radius-"> & AdditionalUnitsFlags<"corner-radius-", "full" | "huge">
->
+export type FigmaFrameCornerRadius = RadiusFlags<"corner-radius-">
 
-export type FigmaFrameCornerRadiusTopLeft = Simplify<
-  UnitsFlags<"corner-radius-top-left-"> & AdditionalUnitsFlags<"corner-radius-top-left-", "full" | "huge">
->
+export type FigmaFrameCornerRadiusTopLeft = RadiusFlags<"corner-radius-top-left-">
 
-export type FigmaFrameCornerRadiusTopRight = Simplify<
-  UnitsFlags<"corner-radius-top-right-"> & AdditionalUnitsFlags<"corner-radius-top-right-", "full" | "huge">
->
+export type FigmaFrameCornerRadiusTopRight = RadiusFlags<"corner-radius-top-right-">
 
-export type FigmaFrameCornerRadiusBottomLeft = Simplify<
-  UnitsFlags<"corner-radius-bottom-left-"> & AdditionalUnitsFlags<"corner-radius-bottom-left-", "full" | "huge">
->
+export type FigmaFrameCornerRadiusBottomLeft = RadiusFlags<"corner-radius-bottom-left-">
 
-export type FigmaFrameCornerRadiusBottomRight = Simplify<
-  UnitsFlags<"corner-radius-bottom-right-"> & AdditionalUnitsFlags<"corner-radius-bottom-right-", "full" | "huge">
->
+export type FigmaFrameCornerRadiusBottomRight = RadiusFlags<"corner-radius-bottom-right-">
 
-export type FigmaFrameBorderRadius = Simplify<UnitsFlags<"border-radius-">>
+export type FigmaFrameBorderRadius = RadiusFlags<"border-radius-">
 
 export type FigmaFrameFlow = {
   "flow-horizontal"?: boolean
@@ -121,11 +115,13 @@ export type FigmaFrameWrap = {
   wrap?: boolean
 }
 
-export type FigmaFrameEffectShadow = {
-  "effect-shadow-none"?: boolean
-  "effect-shadow-small"?: boolean
-  "effect-shadow-large"?: boolean
-}
+export type FigmaFrameEffectShadow = Simplify<
+  {
+    "effect-shadow-none"?: boolean
+    "effect-shadow-small"?: boolean
+    "effect-shadow-large"?: boolean
+  } & { [key in (typeof SHADOWS)[number] as `effect-shadow-${key}`]?: boolean }
+>
 
 export type FigmaFrameStrokeWeight = {
   "stroke-weight-small"?: boolean

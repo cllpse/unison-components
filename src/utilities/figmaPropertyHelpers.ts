@@ -1,6 +1,6 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import { COLORS } from "../constants/colors"
-import { UNITS, UNITS_TAILWIND } from "../constants/units"
+import { RADII, SHADOWS, UNITS, UNITS_TAILWIND } from "../constants/units"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -188,25 +188,28 @@ export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
   }
 }
 
-export const computeFrameGap = (p: FigmaFrameGap): FigmaPropertiesReturnError => {
-  let className = ""
-
-  for (const key in UNITS) {
-    if (p[`gap-${key}` as keyof FigmaFrameGap] || p[`gap-1px` as keyof FigmaFrameGap]) {
-      const unit = (p[`gap-1px`] ? "1px" : key) as keyof typeof UNITS
-      className = `gap-${UNITS_TAILWIND[unit] ?? unit}`
-
-      break
-    }
-  }
-
-  return { styles: {}, className }
-}
-
 const resolveUnitKey = <P extends object>(p: P, prefix: string): keyof typeof UNITS | undefined => {
   for (const key in UNITS) {
     if (p[`${prefix}${key}` as keyof P]) {
       return key as keyof typeof UNITS
+    }
+  }
+
+  return undefined
+}
+
+export const computeFrameGap = (p: FigmaFrameGap): FigmaPropertiesReturnError => {
+  const key = resolveUnitKey(p, "gap-")
+
+  if (key === undefined) return { styles: {}, className: "" }
+
+  return { styles: {}, className: `gap-${UNITS_TAILWIND[key] ?? key}` }
+}
+
+const resolveRadiusKey = <P extends object>(p: P, prefix: string): keyof typeof RADII | undefined => {
+  for (const key in RADII) {
+    if (p[`${prefix}${key}` as keyof P]) {
+      return key as keyof typeof RADII
     }
   }
 
@@ -276,47 +279,35 @@ export const computeFramePaddingBottom = (p: FigmaPaddingBottom): FigmaPropertie
 }
 
 export const computeFrameCornerRadiusTopLeft = (p: FigmaFrameCornerRadiusTopLeft): FigmaPropertiesReturn => {
-  const key = resolveUnitKey(p, "corner-radius-top-left-")
+  const key = resolveRadiusKey(p, "corner-radius-top-left-")
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return {
-    styles: {},
-    className: `rounded-tl-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
-  }
+  return { styles: {}, className: `rounded-tl-${key}` }
 }
 
 export const computeFrameCornerRadiusTopRight = (p: FigmaFrameCornerRadiusTopRight): FigmaPropertiesReturn => {
-  const key = resolveUnitKey(p, "corner-radius-top-right-")
+  const key = resolveRadiusKey(p, "corner-radius-top-right-")
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return {
-    styles: {},
-    className: `rounded-tr-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
-  }
+  return { styles: {}, className: `rounded-tr-${key}` }
 }
 
 export const computeFrameCornerRadiusBottomLeft = (p: FigmaFrameCornerRadiusBottomLeft): FigmaPropertiesReturn => {
-  const key = resolveUnitKey(p, "corner-radius-bottom-left-")
+  const key = resolveRadiusKey(p, "corner-radius-bottom-left-")
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return {
-    styles: {},
-    className: `rounded-bl-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
-  }
+  return { styles: {}, className: `rounded-bl-${key}` }
 }
 
 export const computeFrameCornerRadiusBottomRight = (p: FigmaFrameCornerRadiusBottomRight): FigmaPropertiesReturn => {
-  const key = resolveUnitKey(p, "corner-radius-bottom-right-")
+  const key = resolveRadiusKey(p, "corner-radius-bottom-right-")
 
   if (key === undefined) return { styles: {}, className: "" }
 
-  return {
-    styles: {},
-    className: `rounded-br-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
-  }
+  return { styles: {}, className: `rounded-br-${key}` }
 }
 
 export const computeFrameCornerRadius = (
@@ -327,7 +318,7 @@ export const computeFrameCornerRadius = (
     FigmaFrameCornerRadiusBottomLeft &
     FigmaFrameCornerRadiusBottomRight,
 ): FigmaPropertiesReturn => {
-  const key = resolveUnitKey(p, "border-radius-") ?? resolveUnitKey(p, "corner-radius-")
+  const key = resolveRadiusKey(p, "border-radius-") ?? resolveRadiusKey(p, "corner-radius-")
   const topLeft = computeFrameCornerRadiusTopLeft(p)
   const topRight = computeFrameCornerRadiusTopRight(p)
   const bottomLeft = computeFrameCornerRadiusBottomLeft(p)
@@ -336,7 +327,7 @@ export const computeFrameCornerRadius = (
   return {
     styles: {},
     className: [
-      key === undefined ? "" : `rounded-${UNITS_TAILWIND[key] ?? `[${UNITS[key]}px]`}`,
+      key === undefined ? "" : `rounded-${key}`,
       topLeft.className,
       topRight.className,
       bottomLeft.className,
@@ -370,9 +361,19 @@ export const computeFrameStrokeHover = (p: FigmaStrokeHover): FigmaPropertiesRet
   return computeColorClassName(p, "stroke-hover", "hover:outline")
 }
 
+// Tailwind's default shadows are black at low opacity, so unlike `small` and `large` they don't tint with the fill.
+const SHADOW_CLASSES = Object.fromEntries(SHADOWS.map((name) => [name, `shadow-${name}`])) as Record<
+  (typeof SHADOWS)[number],
+  string
+>
+
 export const computeFrameEffectShadow = (p: FigmaFrameEffectShadow): FigmaPropertiesReturn => {
   if (p["effect-shadow-none"]) {
     return { className: "" }
+  }
+
+  for (const name of SHADOWS) {
+    if (p[`effect-shadow-${name}`]) return { className: SHADOW_CLASSES[name] }
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: ...
