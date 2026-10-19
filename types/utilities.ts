@@ -11,7 +11,8 @@ export type Simplify<T> = {
  * component taking `p: Given & KnownOnly<Known, Given, Name>` makes a misspelled flag an error, which TypeScript
  * otherwise skips for hyphenated JSX attributes. The message is an object, not a string: a string literal would
  * conflict with the attribute's own `true` and collapse the props to `never`. Only the required attributes are added,
- * not all of `Known`: intersecting a Figma-flag type per use is several times slower to check.
+ * not all of `Known`: intersecting a Figma-flag type per use is several times slower to check. Constrain `Given` with
+ * `KnownAttributes<Known>` so editors still suggest `Known`'s attributes.
  */
 export type KnownOnly<Known, Given, Name extends string> = {
   [key in keyof Given]: key extends keyof Known
@@ -20,3 +21,9 @@ export type KnownOnly<Known, Given, Name extends string> = {
       ? Key | null
       : { "unknown attribute": `${key & string} is not a ${Name} attribute` }
 } & { [key in keyof Known as Known extends Required<Pick<Known, key>> ? key : never]: Known[key] }
+
+/**
+ * The constraint for a `KnownOnly` component's `Given`: editors suggest attributes from it, so it lists `Known`'s. The
+ * `Record` half lets `Given` be inferred from any attributes, so an unknown one still reaches `KnownOnly` and errors.
+ */
+export type KnownAttributes<Known> = { [key in keyof Known]?: Known[key] } | Record<string, unknown>
