@@ -1,8 +1,8 @@
 import { View } from "react-native"
 import Svg, { Path } from "react-native-svg"
-import type { ClassName, StyleNative, StyleWeb } from "../types/elementProperties"
+import type { ClassName, Style } from "../types/baseProperties"
 import type { FigmaFill, FigmaVectorHeight, FigmaVectorWidth } from "../types/figmaProperties"
-import { computeVectorFill, computeVectorSize } from "../utilities/figmaPropertyHelpers"
+import { computeVectorFill, computeVectorSize } from "../utilities/computeProperties"
 
 export type Vector = FigmaFill &
   FigmaVectorWidth &
@@ -14,20 +14,12 @@ export type Vector = FigmaFill &
     /** Figma's winding rule for the path. Defaults to `"nonzero"`. */
     fillRule?: "nonzero" | "evenodd"
 
-    style?: StyleNative & StyleWeb
+    style?: Style
     className?: ClassName
   }
 
 export default (p: Vector) => {
-  const fill = computeVectorFill(p)
-  const size = computeVectorSize(p)
-
-  if (size.error) throw new Error(size.error)
-
-  const styles = [size.styles, p.style]
-
-  const classes = [size.className, p.className ?? ""]
-  const className = classes.join(" ")
+  const className = [computeVectorSize(p).className, p.className].filter(Boolean).join(" ")
 
   // The Svg fills a View that carries the size and the className, because react-native-svg's web renderer does not
   // take React Native Web's `$$css` className passthrough. The `className` prop is for Uniwind on iOS and Android;
@@ -35,16 +27,16 @@ export default (p: Vector) => {
   return (
     <View
       style={[
-        styles,
+        p.style,
         {
-          // @ts-expect-error ...
+          // @ts-expect-error React Native Web's className passthrough
           $$css: true,
           className,
         },
       ]}
       className={className}
     >
-      <Svg width="100%" height="100%" viewBox={p.viewBox} color={fill.styles?.color as string}>
+      <Svg width="100%" height="100%" viewBox={p.viewBox} color={computeVectorFill(p)}>
         <Path d={p.path} fill="currentColor" fillRule={p.fillRule ?? "nonzero"} />
       </Svg>
     </View>

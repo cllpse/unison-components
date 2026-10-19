@@ -1,13 +1,23 @@
-import type { ReactNode, RefObject } from "react"
-import { Pressable, type PressableProps, type Role, View, type ViewInstance, type ViewProps } from "react-native"
-import type { ClassName, PointerEventsWeb, StyleNative, StyleWeb } from "../types/elementProperties"
-// import DebugError from "./DebugError.base"
+import {
+  Pressable,
+  type PressableProps as PressableProperties,
+  type ViewProps as ReactNativeViewProperties,
+  type Role,
+  View,
+} from "react-native"
+import type {
+  ClassName,
+  PointerEvents,
+  Style,
+  TailwindGroup,
+  ViewAttributes,
+  ViewElement,
+} from "../types/baseProperties"
 import type {
   FigmaFill,
   FigmaFillHover,
   FigmaFrameAlignment,
   FigmaFrameAutolayout,
-  FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
   FigmaFrameCornerRadiusBottomRight,
@@ -16,22 +26,22 @@ import type {
   FigmaFrameEffectShadow,
   FigmaFrameGap,
   FigmaFrameHeight,
+  FigmaFramePadding,
+  FigmaFramePaddingBottom,
+  FigmaFramePaddingHorizontal,
+  FigmaFramePaddingLeft,
+  FigmaFramePaddingRight,
+  FigmaFramePaddingTop,
+  FigmaFramePaddingVertical,
   FigmaFrameWidth,
   FigmaFrameWrap,
-  FigmaPadding,
-  FigmaPaddingBottom,
-  FigmaPaddingHorizontal,
-  FigmaPaddingLeft,
-  FigmaPaddingRight,
-  FigmaPaddingTop,
-  FigmaPaddingVertical,
   FigmaStroke,
   FigmaStrokeHover,
   FigmaStrokeStyle,
 } from "../types/figmaProperties"
-import { computeElementPointerEvents } from "../utilities/elementPropertyHelpers"
-
 import {
+  computeElementPointerEvents,
+  computeElementTailwindGroup,
   computeFrameAlignment,
   computeFrameAutolayout,
   computeFrameCornerRadius,
@@ -49,22 +59,22 @@ import {
   computeFrameSizing,
   computeFrameStroke,
   computeFrameStrokeHover,
-} from "../utilities/figmaPropertyHelpers"
+  computeFrameWrap,
+} from "../utilities/computeProperties"
 
 export type Frame = FigmaFrameAutolayout &
   FigmaFrameWidth &
   FigmaFrameHeight &
   FigmaFrameAlignment &
   FigmaFrameWrap &
-  FigmaFrameBorderRadius &
   FigmaFrameGap &
-  FigmaPadding &
-  FigmaPaddingVertical &
-  FigmaPaddingHorizontal &
-  FigmaPaddingLeft &
-  FigmaPaddingRight &
-  FigmaPaddingTop &
-  FigmaPaddingBottom &
+  FigmaFramePadding &
+  FigmaFramePaddingVertical &
+  FigmaFramePaddingHorizontal &
+  FigmaFramePaddingLeft &
+  FigmaFramePaddingRight &
+  FigmaFramePaddingTop &
+  FigmaFramePaddingBottom &
   FigmaFill &
   FigmaStroke &
   FigmaStrokeStyle &
@@ -76,147 +86,69 @@ export type Frame = FigmaFrameAutolayout &
   FigmaFrameCornerRadiusBottomLeft &
   FigmaFrameCornerRadiusBottomRight &
   FigmaFrameEffectShadow &
-  PointerEventsWeb & {
-    id?: ViewProps["id"]
+  PointerEvents &
+  TailwindGroup &
+  ViewAttributes &
+  ViewElement & {
+    onTouchStart?: PressableProperties["onTouchStart"]
+    onTouchEnd?: PressableProperties["onTouchEnd"]
 
-    ref?: RefObject<ViewInstance | null>
+    onPress?: PressableProperties["onPress"]
+    onPressIn?: PressableProperties["onPressIn"]
+    onPressOut?: PressableProperties["onPressOut"]
 
-    pointerEvents?: "box-none" | "auto"
-
-    onTouchStart?: PressableProps["onTouchStart"]
-    onTouchEnd?: PressableProps["onTouchEnd"]
-
-    onPress?: PressableProps["onPress"]
-    onPressIn?: PressableProps["onPressIn"]
-    onPressOut?: PressableProps["onPressOut"]
-
-    style?: StyleNative & StyleWeb
+    style?: Style
     className?: ClassName
 
-    role?: string
-    "aria-label"?: string
-    "aria-selected"?: boolean
-
-    children?: ViewProps["children"]
-
-    "tailwind-group"?: boolean
+    children?: ReactNativeViewProperties["children"]
   }
 
 export default (p: Frame) => {
-  const gap = computeFrameGap(p).className
-  const padding = computeFramePadding(p)
-  const paddingVertical = computeFramePaddingVertical(p)
-  const paddingHorizontal = computeFramePaddingHorizontal(p)
-  const paddingLeft = computeFramePaddingLeft(p)
-  const paddingRight = computeFramePaddingRight(p)
-  const paddingTop = computeFramePaddingTop(p)
-  const paddingBottom = computeFramePaddingBottom(p)
-  const fill = computeFrameFill(p).className
-  const stroke = computeFrameStroke(p).className
-  const fillHover = computeFrameFillHover(p).className
-  const cornerRadius = computeFrameCornerRadius(p)
-  const effectShadow = computeFrameEffectShadow(p).className
-  const strokeHover = computeFrameStrokeHover(p).className
-  const pointerEvents = computeElementPointerEvents(p).className
-
-  const flow = computeFrameAutolayout(p).className
-  const alignment = computeFrameAlignment(p).className
-  const sizing = computeFrameSizing(p)
-
-  const styles = [
-    sizing.styles,
-    p.style,
-    padding.styles,
-    paddingVertical.styles,
-    paddingHorizontal.styles,
-    paddingLeft.styles,
-    paddingRight.styles,
-    paddingTop.styles,
-    paddingBottom.styles,
-    cornerRadius.styles,
-  ]
-
-  const classes = [
+  const className = [
     "flex",
-    flow,
-    p.wrap ? "flex-wrap" : "",
-    alignment,
-    sizing.className,
-    gap,
-    padding.className,
-    paddingVertical.className,
-    paddingHorizontal.className,
-    paddingLeft.className,
-    paddingRight.className,
-    paddingTop.className,
-    paddingBottom.className,
-    fill,
-    stroke,
-    fillHover,
-    strokeHover,
-    cornerRadius.className,
-    effectShadow,
-    pointerEvents,
-    p["tailwind-group"] ? "group" : "",
-    p.className ?? "",
+    computeFrameAutolayout(p).className,
+    computeFrameWrap(p).className,
+    computeFrameAlignment(p).className,
+    computeFrameSizing(p).className,
+    computeFrameGap(p).className,
+    computeFramePadding(p).className,
+    computeFramePaddingVertical(p).className,
+    computeFramePaddingHorizontal(p).className,
+    computeFramePaddingLeft(p).className,
+    computeFramePaddingRight(p).className,
+    computeFramePaddingTop(p).className,
+    computeFramePaddingBottom(p).className,
+    computeFrameFill(p).className,
+    computeFrameStroke(p).className,
+    computeFrameFillHover(p).className,
+    computeFrameStrokeHover(p).className,
+    computeFrameCornerRadius(p).className,
+    computeFrameEffectShadow(p).className,
+    computeElementPointerEvents(p).className,
+    computeElementTailwindGroup(p).className,
+    p.className,
   ]
+    .filter(Boolean)
+    .join(" ")
 
-  const className = classes.join(" ")
-
-  let r: ReactNode = null
-
-  if (p.onPress || p.onPressIn || p.onPressOut) {
-    r = (
-      <Pressable
-        id={p.id}
-        ref={p.ref}
-        role={p.role as Role}
-        aria-label={p["aria-label"]}
-        aria-selected={p["aria-selected"]}
-        onTouchStart={p.onTouchStart}
-        onTouchEnd={p.onTouchEnd}
-        onPress={p.onPress}
-        onPressIn={p.onPressIn}
-        onPressOut={p.onPressOut}
-        style={[
-          styles,
-          {
-            // @ts-expect-error ...
-            $$css: true,
-            className,
-          },
-        ]}
-        className={className}
-        pointerEvents={p.pointerEvents}
-      >
-        {p.children}
-      </Pressable>
-    )
-  } else {
-    r = (
-      <View
-        id={p.id}
-        ref={p.ref}
-        role={p.role as Role}
-        aria-label={p["aria-label"]}
-        aria-selected={p["aria-selected"]}
-        onTouchStart={p.onTouchStart}
-        onTouchEnd={p.onTouchEnd}
-        style={[
-          styles,
-          {
-            // @ts-expect-error ...
-            $$css: true,
-            className,
-          },
-        ]}
-        className={className}
-        pointerEvents={p.pointerEvents}
-      >
-        {p.children}
-      </View>
-    )
+  const props = {
+    id: p.id,
+    ref: p.ref,
+    role: p.role as Role,
+    "aria-label": p["aria-label"],
+    "aria-selected": p["aria-selected"],
+    onTouchStart: p.onTouchStart,
+    onTouchEnd: p.onTouchEnd,
+    // React Native Web's className passthrough; React Native's style types don't know `$$css`.
+    style: [p.style, { $$css: true, className }] as ReactNativeViewProperties["style"],
+    className,
+    pointerEvents: p.pointerEvents,
+    children: p.children,
   }
 
-  return r
+  if (p.onPress || p.onPressIn || p.onPressOut) {
+    return <Pressable {...props} onPress={p.onPress} onPressIn={p.onPressIn} onPressOut={p.onPressOut} />
+  }
+
+  return <View {...props} />
 }

@@ -1,4 +1,4 @@
-# Frame
+# unison-components
 
 This library is shared between web and native (iOS/Android) using platform extensions.
 
@@ -41,11 +41,14 @@ library's classes take the tokens' values, plus a `@source` for the library's fi
 the library builds at runtime. It is generated from the tokens; rerun and commit it after changing them:
 
 ```sh
-bun run tailwind:css
+bun run generate:tailwind
 ```
 
-`bun run tailwind:css:watch` regenerates _dist/tokens.ts_ and the stylesheet on every change to _dist/tokens.json_,
-`src/constants/` or the generators.
+`bun run generate:tailwind:watch` regenerates _dist/tokens.ts_ and the stylesheets on every change to _dist/tokens.json_,
+`src/maps/` or the generators.
+
+Outside production builds, a prop that looks like a flag but isn't one (`fill-red-55`) logs a warning: TypeScript
+doesn't check hyphenated JSX attribute names, so the typo would otherwise be silently ignored.
 
 In dark mode (`@variant dark`, read by Tailwind as `prefers-color-scheme` and by Uniwind as its dark theme) the colors
 take the tokens' Dark values.
@@ -78,10 +81,10 @@ _tokens.json_: it creates the four collections in one go, with each variable's s
 value order, then the `shadow-<name>` effect styles and `text-<size>` text styles bound to them. Importing again
 updates everything in place.
 
-_dist/tokens.ts_ is the same file as TypeScript, generated with `bun run tokens:ts`; commit it with _tokens.json_. It
-is the library's only source of design values: `COLORS`, `UNITS`, `RADII`, `SHADOWS` and `TEXT_SIZES` in
-`src/constants/` are derived from it, and so are the flags. It's exported as `TOKENS`, keyed by collection, mode and
-Figma's variable name, with exact types:
+_dist/tokens.ts_ is the same file as TypeScript, generated with `bun run generate:tokens`; commit it with _tokens.json_. It
+is the library's only source of design values. Besides the scales the components read (`COLORS`, `SPACING`, `RADIUS`,
+`CONTAINERS`, `SHADOWS`, `TEXT_SIZES`), from which the flags are built, it exports everything as `TOKENS`, keyed by
+collection, mode and Figma's variable name, with exact types:
 
 ```ts
 import { TOKENS } from "./unison-components/dist/web"

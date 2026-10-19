@@ -1,20 +1,21 @@
 import FrameBase, { type Frame as FrameType } from "../base/Frame.base"
-import type { StyleNative, StyleWeb } from "../types/elementProperties"
+import type { Style, WebStyle } from "../types/baseProperties"
 
 export type Frame = Omit<FrameType, "style"> & {
-  style?: StyleWeb
+  style?: WebStyle
 }
 
+const FRAME_CLASSES =
+  "unison-components__frame [corner-shape:round] transition-[outline-color,background-color] duration-[120ms] ease-out"
+
 export default (p: Frame) => {
-  const { children, style, className, ...rest } = p
+  const { style, className, ...rest } = p
 
   return (
     <FrameBase
-      className={`unison-components__frame [corner-shape:round] transition-[outline-color,background-color] duration-[120ms] ease-out ${className ?? ""}`}
-      style={style as StyleWeb & StyleNative}
       {...rest}
-    >
-      {children}
-    </FrameBase>
+      className={className ? `${FRAME_CLASSES} ${className}` : FRAME_CLASSES}
+      style={style as Style}
+    />
   )
 }
