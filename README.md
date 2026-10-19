@@ -1,121 +1,152 @@
 # unison-components
 
-This library is shared between web and native (iOS/Android) using platform extensions.
+A React Native component library whose props mirror Figma's design vocabulary. It renders on web through React Native
+Web and on iOS and Android through React Native, and it is the code the Unison Figma plugin generates against. Three
+components are public: `Frame`, `Text` and `Vector`.
 
-Only files ending with _".web.tsx / .web.ts"_ can be used on web, and only files ending with _".native.tsx / .native.ts"_ can be used on native.
+## Requirements
 
-Base files (_".base.tsx / .base.ts"_) should never be directly consumed.
-
-
-## Platform specificity
-
-Platform-specific extensions are thin shells which wraps base components.
-
-As an example; the Frame component is exposed to native through _"Frame.native.tsx"_ and to web through _"Frame.web.tsx"_.
-
-Because native uses the React Native Reanimated library for animations (a library which is React Native exclusive, and does not compile to web); _"Frame.native.tsx"_ injects animations into the base component and returns it, whereas _"Frame.web.tex"_ just returns the base component - thereby allowing platform-specific augmentations.
-
-A base component should always be able to compile to both web and iOS/Android.
-
-## Active development
-
-Watch for local file changes, and copy them directly to the _unison-components_ submodule in _../unison-plugin/_ or _../unison-playground-web/_.
+- [Bun](https://bun.sh) 1.4.3
+- Tailwind 4 in the consuming app (Uniwind on iOS and Android)
 
 ```sh
-bun run components:sync-manual:plugin
-bun run components:sync-watch:plugin
-bun run components:sync-manual:playground-web
-bun run components:sync-watch:playground-web
+bun install
 ```
 
-## Tailwind
+## Using the library
 
-Consumers import _dist/tailwind.css_ from their Tailwind 4 entry stylesheet (web, or Uniwind on iOS and Android):
+Consumers add the library as a git submodule and wire up two things:
+
+- A `@unison` path alias for _unison-components/dist/web_ (web) or _unison-components/dist/native_ (iOS and Android).
+  Import components only from there; nothing else in the library is public.
+- The generated stylesheet, imported from the app's Tailwind entry stylesheet:
 
 ```css
 @import "./unison-components/dist/tailwind.css";
 ```
 
-It carries every token as a Tailwind theme value (colors, spacing, radius, shadows, text sizes and weights), so the
-library's classes take the tokens' values, plus a `@source` for the library's files and a safelist of the class names
-the library builds at runtime. It is generated from the tokens; rerun and commit it after changing them:
+The stylesheet needs no build step in the consumer: it is generated and committed here. See
+[unison-playground-web](https://github.com/cllpse/unison-playground-web) and
+[unison-playground-expo](https://github.com/cllpse/unison-playground-expo) for working setups.
 
-```sh
-bun run generate:tailwind
+```tsx
+import { Frame, Text, Vector } from "@unison"
+
+<Frame autolayout-vertical gap-4 padding-4 width-fill corner-radius-lg fill-white effect-shadow-md>
+  <Text fill-black typography-lg>Hello</Text>
+  <Vector path="M0 0h24v24H0z" viewBox="0 0 24 24" width-6 height-6 fill-red-500 />
+</Frame>
 ```
 
-`bun run generate:tailwind:watch` regenerates _dist/tokens.ts_ and the stylesheets on every change to _dist/tokens.json_,
-`maps/` or the generators.
+## Flags
 
-A prop that isn't one of the component's (`fill-red-55`) is a type error, "fill-red-55 is not a Frame attribute", and
-outside production builds a prop that looks like a flag but isn't one also logs a warning.
+Styling is set with boolean, hyphenated flags named after Figma's properties. Components emit Tailwind classes only,
+no inline styles.
 
-In dark mode (`@variant dark`, read by Tailwind as `prefers-color-scheme` and by Uniwind as its dark theme) the colors
-take the tokens' Dark values.
+- From the tokens: `fill-`, `fill-hover-`, `stroke-` and `stroke-hover-<color>` (`fill-red-500`, `fill-white`),
+  `width-` and `height-<spacing>` (`width-4`), `width-<container>` (`width-md`), `padding-` and `gap-<spacing>` (with
+  `-vertical`, `-horizontal` and per-side variants), `corner-radius-<radius>`, `effect-shadow-<shadow>` and
+  `typography-<size>`.
+- Fixed: `autolayout-horizontal` / `-vertical`, `width-fill` / `width-hug` (and `height-`), `alignment-<position>`,
+  `stroke-style-dashed` / `-solid`, `typography-align-<side>`, `typography-decoration-underline`, `effect-shadow-none`
+  and `pointer-events-none` / `-auto`.
+- Set at most one flag per group; if several are set, the first wins.
+- An unknown or misspelled flag (`fill-red-55`) is a type error, and outside production builds it is also logged.
+- `Vector` takes `path`, `viewBox` and an optional `fillRule`, and needs both a `width-` and a `height-` flag.
 
-## Type checking
+Known gaps: there are no letter-spacing, line-height or font-family flags, and a `Vector` fill keeps its Light color in
+dark mode.
 
-```sh
-bun run typecheck
-```
+## Design tokens
 
-## Releasing
+_dist/design-tokens.json_ is the source of truth for every design value in the library. Every token-derived flag above
+is built from it, so adding, renaming or removing a token adds, renames or removes flags.
 
-Normal git flow applies; create feature branch, create pull request, merge pull request.
+It is hand-maintained, in Figma's own variable export format (W3C Design Tokens), one top-level key per Figma
+collection, then one key per mode:
 
-## Figma variables
+| Collection | Modes       | Variables                                       | Flags                                            |
+| ---------- | ----------- | ----------------------------------------------- | ------------------------------------------------ |
+| colors     | Light, Dark | `fill-<hue>-<shade>`, `fill-<name>`             | `fill-`, `fill-hover-`, `stroke-`, `stroke-hover-` |
+| units      | Default     | `spacing-<key>`, `radius-<name>`, `container-<name>` | `width-`, `height-`, `padding-`, `gap-`, `corner-radius-` |
+| typography | Default     | `font-size-<size>`, `line-height-<size>`, `font-weight-<name>` | `typography-<size>`                 |
+| shadows    | Default     | `shadow-<name>-<layer>-<offset-x, offset-y, blur, spread, color>` | `effect-shadow-<name>`        |
 
-_dist/tokens.json_ holds every Figma variable and is read-only. Its top-level keys are the collections,
-then each collection's modes; a mode holds its tokens in the format of Figma's own export (below). Names are flat (no
-`/` groups):
+Rules the generator relies on:
 
-| Collection | Modes       | Variables                                                                               |
-| ---------- | ----------- | --------------------------------------------------------------------------------------- |
-| colors     | Light, Dark | Tailwind's palette (`fill-red-500`) plus the project's own neutrals                          |
-| units      | Default     | `spacing-<unit>`, `radius-<name>` and `container-<name>` (Tailwind's container widths, in px) |
-| typography | Default     | Tailwind's `font-size-<name>`, `line-height-<name>` and `font-weight-<name>`            |
-| shadows    | Default     | Tailwind's box shadows, `shadow-<name>-<layer>-<offset-x, offset-y, blur, spread, color>` |
+- Color names are `fill-<hue>-<shade>` or `fill-<name>`; anything else stops the build. Light and Dark must hold the
+  same names.
+- Numbers are pixels. Fractions spell the dot as `p` (`spacing-1p5` gives `padding-1p5`), since a token name can't
+  hold a dot.
+- `spacing-full` is Figma's 999px stand-in for 100% (`width-full`), not a size.
+- Every `font-size-<size>` needs a matching `line-height-<size>`.
+- Names are flat: a `/` in a Figma name would export as nested groups.
 
-To import them into Figma, press the plugin's import button (next to back and refresh) and pick
-_tokens.json_: it creates the four collections in one go, with each variable's scopes and number variables in
-value order, then the `shadow-<name>` effect styles and `text-<size>` text styles bound to them. Importing again
-updates everything in place.
+The same file imports into Figma: press the plugin's import button and pick _design-tokens.json_. It creates or updates
+the four collections, plus the `shadow-<name>` effect styles and `text-<size>` text styles the plugin reads shadows and
+typography from.
 
-_dist/tokens.ts_ is the same file as TypeScript, generated with `bun run generate:tokens`; commit it with _tokens.json_. It
-is the library's only source of design values. Besides the scales the components read (`COLORS`, `SPACING`, `RADIUS`,
-`CONTAINERS`, `SHADOWS`, `TEXT_SIZES`), from which the flags are built, it exports everything as `TOKENS`, keyed by
-collection, mode and Figma's variable name, with exact types:
+### How it is consumed
+
+Two generated files, both committed, carry the tokens into the library and its consumers:
+
+1. `bun run generate:tokens` writes _dist/design-tokens.ts_: `TOKENS` (every collection and mode, values as hex or
+   pixels, with exact types) and the scales the components read (`COLORS`, `SPACING`, `RADIUS`, `CONTAINERS`,
+   `SHADOWS`, `TEXT_SIZES`). The flag table in _maps/_ and the flag types in _types/_ are built from these scales.
+2. `bun run generate:tailwind` writes _dist/tailwind.css_ from _dist/design-tokens.ts_ and _maps/_: every token as a
+   Tailwind theme value, the Light and Dark colors as `@variant light` / `@variant dark` blocks, `@source` lines for the
+   library's files and a safelist of every class a flag can produce (the classes are built at runtime, so Tailwind
+   can't find them by scanning).
+
+`TOKENS` can also be imported directly when an app needs a raw value:
 
 ```ts
 import { TOKENS } from "./unison-components/dist/design-tokens"
 
-TOKENS.colors.Dark["fill-neutral-50"] // "#161616"
+TOKENS.colors.Dark["fill-white"] // "#000000"
 TOKENS.units.Default["spacing-4"] // 16
-TOKENS.typography.Default["line-height-sm"] // 20
 ```
 
-The unit names are the ones the plugin resolves to flags, which match on the last part of the name: `spacing-1p5` to
-`padding-1p5`, `radius-lg` to `corner-radius-lg`. Fractions use `p`, since a token name can't contain a dot.
+### Changing tokens
 
-A shadow can't be bound to one variable, so the plugin reads it from its effect style's name (`shadow-md` to
-`effect-shadow-md`), and a text style named `text-<size>` gives `typography-<size>`.
+1. Edit _dist/design-tokens.json_ (or export it from Figma).
+2. Regenerate, in this order, since the stylesheet is built from the TypeScript:
 
-### Export format
+   ```sh
+   bun run generate:tokens
+   bun run generate:tailwind
+   ```
 
-As Figma's native variable export writes it, one file per mode:
+   Or keep both running while editing; the tailwind watcher picks up each new _design-tokens.ts_:
 
-- **Standard**: W3C Design Tokens (DTCG). Each token has `$type` and `$value`; Figma-specific data lives under
-  `$extensions` with `com.figma.*` keys.
-- **One file per mode**: the file is named after the mode (`Light.tokens.json`) and repeats it at the root as
-  `$extensions["com.figma.modeName"]`. Every file has the same variable names; only the values differ.
-- **Collection**: not written to the file. You pick the collection when importing.
-- **Names**: the variable name is the key, as named in Figma (`neutral-50`, flat, with a dash). A Figma name with slashes
-  (`color/neutral/50`) would export as nested groups (`{"color": {"neutral": {"50": {...}}}}`) instead.
-- **Numbers**: `$type: "number"` with a plain `$value` (`16`), in pixels.
-- **Colors**: `$type: "color"`, and `$value` is an object: `colorSpace` (`"srgb"`), `components` (red, green and blue as
-  0 to 1 floats), `alpha` (0 to 1) and `hex` (`"#F9F9F9"`, uppercase, no alpha).
-- **Identity**: `com.figma.variableId` (`"VariableID:1:4"`) is the variable's id in the source file, the same in every
-  mode. On import, a matching id updates that variable; a token without one creates a new variable.
-- **Scopes**: `com.figma.scopes`, a list of Figma scopes (`["ALL_SCOPES"]`, `["GAP"]`, `["FONT_SIZE"]`).
-- **Not in this export**: aliases (a DTCG alias would be a `$value` of `"{neutral-50}"`), code syntax, descriptions and
-  hidden-from-publishing flags.
+   ```sh
+   bun run generate:tokens:watch
+   bun run generate:tailwind:watch
+   ```
+
+3. Run `bun run typecheck`: a removed or renamed token turns every place that still uses its flag into a type error.
+4. Commit _design-tokens.json_, _design-tokens.ts_ and _tailwind.css_ together.
+5. Move the consumers' submodules to the new commit (or sync them, below).
+
+From the parent [unison](https://github.com/cllpse/unison) repository the same scripts run as
+`bun run components:<script>`.
+
+## Platform files
+
+Files under _src/_ use platform extensions: _.web.tsx_ is used only on web, _.native.tsx_ only on iOS and Android, and
+_.base.tsx_ is shared by both and never imported directly. The platform files are thin shells around the base
+component, so platform-only libraries (such as React Native Reanimated) stay out of the shared code.
+
+## Scripts
+
+- `bun run generate:tokens` / `generate:tokens:watch` - write _dist/design-tokens.ts_ from _dist/design-tokens.json_
+- `bun run generate:tailwind` / `generate:tailwind:watch` - write _dist/tailwind.css_ from the tokens and _maps/_
+- `bun run components:sync-manual:plugin` / `components:sync-watch:plugin` - copy the library into
+  _../unison-plugin/unison-components_ once, or on every change
+- `bun run components:sync-manual:playground-web` / `components:sync-watch:playground-web` - the same for
+  _../unison-playground-web/unison-components_
+- `bun run lint` - Biome check
+- `bun run format` - Biome format, writing changes
+- `bun run typecheck` - `tsc --noEmit`
+
+Conventions for working on the library itself are in _AGENTS.md_.
