@@ -142,25 +142,30 @@ export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
   const widthClass = exactWidth !== "" ? `w-${widthUnit}` : widthFill ? "w-full" : "w-fit"
   const heightClass = exactHeight !== "" ? `h-${heightUnit}` : heightFill ? "h-full" : "h-fit"
 
+  // `full` is 100% of the parent, so like fill it has to yield to siblings: pinned with `shrink-0`, a full frame beside
+  // a fixed sibling overflows the parent by that sibling's width.
+  const widthYields = widthFill || exactWidth === "full"
+  const heightYields = heightFill || exactHeight === "full"
+
   // `flex-shrink`/`flex-grow` only act on the main axis and a frame can't know its parent's direction, so the axis
   // floors below carry the per-axis intent instead.
   //
   // - Exact axes are pinned with matching `min-*`/`max-*` so flex can neither grow nor shrink them — the exact size
   //   holds even when that axis is the parent's main axis.
-  // - Fill axes get `min-*: 0` so they can shrink past their own content (text truncates) and always yield space to
+  // - Fill and full axes get `min-*: 0` so they can shrink past their own content (text truncates) and always yield space to
   //   fixed siblings, instead of overflowing them when the container is constrained from the outside (max-width /
   //   fixed width).
   // - Hug axes keep `min-*: auto` so they never shrink below their content.
   const widthFloor =
     exactWidth !== "" && exactWidth !== "full"
       ? `min-w-${widthUnit} max-w-${widthUnit}`
-      : widthFill
+      : widthYields
         ? "min-w-0"
         : "min-w-[auto]"
   const heightFloor =
     exactHeight !== "" && exactHeight !== "full"
       ? `min-h-${heightUnit} max-h-${heightUnit}`
-      : heightFill
+      : heightYields
         ? "min-h-0"
         : "min-h-[auto]"
 
@@ -179,7 +184,7 @@ export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
     }
   }
 
-  if (!widthFill && !heightFill) {
+  if (!widthYields && !heightYields) {
     // Hug/exact on both axes → rigid box (equivalent to `flex-none`).
     return {
       styles: {},
@@ -187,7 +192,7 @@ export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
     }
   }
 
-  // Exactly one axis fills: let the filling axis shrink so it yields space to fixed siblings (instead of overflowing
+  // At least one axis fills or is full: let it shrink so it yields space to fixed siblings (instead of overflowing
   // them). Any exact sibling axis is already pinned above, so `shrink` can't collapse it below its exact size.
   return {
     styles: {},
