@@ -47,8 +47,8 @@ bun run generate:tailwind
 `bun run generate:tailwind:watch` regenerates _dist/tokens.ts_ and the stylesheets on every change to _dist/tokens.json_,
 `maps/` or the generators.
 
-Outside production builds, a prop that looks like a flag but isn't one (`fill-red-55`) logs a warning: TypeScript
-doesn't check hyphenated JSX attribute names, so the typo would otherwise be silently ignored.
+A prop that isn't one of the component's (`fill-red-55`) is a type error, "fill-red-55 is not a Frame attribute", and
+outside production builds a prop that looks like a flag but isn't one also logs a warning.
 
 In dark mode (`@variant dark`, read by Tailwind as `prefers-color-scheme` and by Uniwind as its dark theme) the colors
 take the tokens' Dark values.
@@ -87,7 +87,7 @@ is the library's only source of design values. Besides the scales the components
 collection, mode and Figma's variable name, with exact types:
 
 ```ts
-import { TOKENS } from "./unison-components/dist/web"
+import { TOKENS } from "./unison-components/dist/design-tokens"
 
 TOKENS.colors.Dark["fill-neutral-50"] // "#161616"
 TOKENS.units.Default["spacing-4"] // 16

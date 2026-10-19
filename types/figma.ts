@@ -10,10 +10,7 @@ import type {
   TEXT_SIZES,
 } from "../dist/design-tokens"
 import type { ColorGroup, NamedFlagGroup, NamedFlagName, RadiusGroup, SizeMode, SpacingGroup } from "../maps"
-
-type Simplify<T> = {
-  [KeyType in keyof T]: T[KeyType]
-}
+import type { Simplify } from "./utilities"
 
 /** `<group>-<key>` boolean flags for every key. */
 type GroupFlags<Group extends string, Key extends string> = { [key in Key as `${Group}-${key}`]?: boolean }

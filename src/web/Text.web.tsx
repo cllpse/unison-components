@@ -1,3 +1,4 @@
+import type { KnownOnly } from "../../types/utilities"
 import TextBase, { type Text as TextType } from "../base/Text.base"
 
 export type Text = TextType
@@ -15,8 +16,8 @@ const TEXT_CLASSES = [
   "[&_a:hover]:decoration-[color-mix(in_oklab,currentColor_0%,transparent)]",
 ].join(" ")
 
-export default (p: Text) => {
-  const { className, ...rest } = p
+export default <Given,>(p: Given & KnownOnly<Text, Given, "Text">) => {
+  const { className, ...rest } = p as Text
 
   return <TextBase {...rest} className={className ? `${TEXT_CLASSES} ${className}` : TEXT_CLASSES} />
 }

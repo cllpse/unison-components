@@ -5,14 +5,7 @@ import {
   type Role,
   View,
 } from "react-native"
-import type {
-  ClassName,
-  PointerEvents,
-  Style,
-  TailwindGroup,
-  ViewAttributes,
-  ViewReference,
-} from "../../types/baseProperties"
+import type { ClassName, PointerEvents, Style, TailwindGroup, ViewAttributes, ViewReference } from "../../types/base"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -38,7 +31,7 @@ import type {
   FigmaStroke,
   FigmaStrokeHover,
   FigmaStrokeStyle,
-} from "../../types/figmaProperties"
+} from "../../types/figma"
 import {
   computeElementPointerEvents,
   computeElementTailwindGroup,

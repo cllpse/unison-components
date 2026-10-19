@@ -1,6 +1,6 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import type { ColorClassPrefix, ColorFlag, FlagSet, SizeFlag } from "../maps"
-import type { PointerEvents, PropertiesResult, TailwindGroup, TailwindGroupHoverFill } from "../types/baseProperties"
+import type { PointerEvents, PropertiesResult, TailwindGroup, TailwindGroupHoverFill } from "../types/base"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -31,7 +31,7 @@ import type {
   FigmaTypographyDecoration,
   FigmaVectorHeight,
   FigmaVectorWidth,
-} from "../types/figmaProperties"
+} from "../types/figma"
 import { readFlags } from "./readFlags"
 
 // Every helper returns a shared, frozen object: token-derived flags are read through readFlags (one walk of the props

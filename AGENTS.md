@@ -31,7 +31,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 - Styling props are boolean flags named in kebab-case after Figma: `autolayout-horizontal`, `width-fill`, `padding-4`,
   `corner-radius-full`, `fill-red-500`, `typography-sm`. Prefer adding a flag over a value prop.
-- Flag types live in `types/figmaProperties.ts` as `Figma<Thing>` types, built from the group lists in `maps`
+- Flag types live in `types/figma.ts` as `Figma<Thing>` types, built from the group lists in `maps`
   (`SPACING_GROUPS`, `RADIUS_GROUPS`, `COLOR_GROUPS`, `NAMED_FLAGS`) and the scales in `dist/design-tokens.ts` with mapped
   template-literal types (`SpacingFlags<"gap">`, `ColorFlags<"fill">`, `NamedFlags<"alignment">`). Never hand-write a
   flag name there; add it to `maps` and it is typed, read, safelisted and checked from one place.
@@ -40,8 +40,10 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - Flags within a group are mutually exclusive; set at most one. If several are set anyway, the first in props order wins.
 - Every token-derived flag is a key of `FLAGS` (`maps/index.ts`), with the class it produces. A new
   token-derived flag group goes there too, so it is read, safelisted and checked like the others.
-- TypeScript does not check JSX attribute names that contain a hyphen, so a misspelled flag (`fill-red-55`) compiles.
-  `readFlags` logs such props outside production builds instead.
+- TypeScript does not check JSX attribute names that contain a hyphen, so the platform shells are generic over the
+  props they are given and take `p: Given & KnownOnly<Component, Given, "Component">` (`types/utilities.ts`): a
+  misspelled flag (`fill-red-55`) is a type error. `readFlags` also logs such props outside production builds, for
+  untyped callers.
 - Unit keys are the tokens' `spacing-` names. Fractional units use `p` (`0p5`, `1p5`); keys whose Tailwind suffix
   differs from the key map through `SPACING_TAILWIND`.
 - Corner radius uses the tokens' `radius-` names from `RADIUS` (`corner-radius-lg`), not the spacing keys. Shadows are
@@ -52,7 +54,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 - Each flag group has a helper named `compute<Component><Group>` (`computeFramePadding`, `computeTextTypography`,
   `computeElementPointerEvents`). Helpers return `PropertiesResult` (`{ styles?, className? }`, from
-  `types/baseProperties.ts`): Tailwind classes, with inline `styles` only for what a class cannot express (a
+  `types/base.ts`): Tailwind classes, with inline `styles` only for what a class cannot express (a
   native-only style such as `FONT_FEATURE_STYLE`). iOS and Android get their styling from the classes through Uniwind.
 - Base components pass the joined classes both in the `$$css` style object (React Native Web) and as the `className`
   prop (Uniwind on iOS and Android; React Native Web drops it).
