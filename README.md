@@ -162,11 +162,15 @@ component, so platform-only libraries (such as React Native Reanimated) stay out
 
 ## Publishing
 
-1. `npm login` once per machine (`bun publish` reads the same credentials).
-2. Bump the version with `npm version patch` or `npm version minor`; below 1.0 a breaking flag or prop change bumps the
-   minor.
-3. `bun publish`. `prepublishOnly` typechecks, lints and builds first. Check what will ship with `bun run build && npm
-   pack --dry-run`.
-4. `git push --follow-tags`.
+Log in once per machine with `npm login` (`bun publish` reads the same credentials). Then release with one command:
 
-Conventions for working on the library itself are in _AGENTS.md_.
+```sh
+bun run release:patch   # 0.1.0 -> 0.1.1
+bun run release:minor   # 0.1.0 -> 0.2.0; below 1.0, use it for a breaking flag or prop change
+bun run release:major   # 0.1.0 -> 1.0.0
+```
+
+Each one checks the npm login, typechecks and lints, bumps the version in a `Release <version>` commit with a
+`v<version>` tag, builds and publishes, and pushes the commit and tag. It needs a clean working tree. If publishing fails
+after the bump, fix the cause and run `bun publish && git push --follow-tags`. Check what will ship with
+`bun run build && npm pack --dry-run`.

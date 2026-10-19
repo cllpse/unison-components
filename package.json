@@ -1,7 +1,18 @@
 {
   "name": "unison-components",
   "version": "0.1.0",
-  "description": "React Native components whose props mirror Figma's design vocabulary, for web and native.",
+  "description": "A React Native component library whose props mirror Figma's design vocabulary. Renders on web through React Native Web and on iOS and Android through React Native; the code the Unison Figma plugin generates against.",
+  "keywords": [
+    "react-native",
+    "react-native-web",
+    "figma",
+    "design-system",
+    "design-tokens",
+    "tailwind",
+    "uniwind",
+    "components",
+    "unison"
+  ],
   "license": "ISC",
   "author": "cllpse",
   "repository": {
@@ -9,6 +20,9 @@
     "url": "git+https://github.com/cllpse/unison-components.git"
   },
   "homepage": "https://github.com/cllpse/unison-components#readme",
+  "bugs": {
+    "url": "https://github.com/cllpse/unison-components/issues"
+  },
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -53,6 +67,10 @@
     "build": "rm -rf build && tsc -p tsconfig.build.json && cp dist/design-tokens.json dist/tailwind.css build/dist/",
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "prepublishOnly": "bun run typecheck && bun run lint && bun run build",
+    "release:patch": "bun run release-checks && npm version patch -m \"Release %s\" && bun publish && git push --follow-tags",
+    "release:minor": "bun run release-checks && npm version minor -m \"Release %s\" && bun publish && git push --follow-tags",
+    "release:major": "bun run release-checks && npm version major -m \"Release %s\" && bun publish && git push --follow-tags",
+    "release-checks": "npm whoami && bun run typecheck && bun run lint",
     "lint": "biome check",
     "format": "biome format --write",
     "typecheck": "tsc --noEmit",
