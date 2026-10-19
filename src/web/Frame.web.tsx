@@ -6,8 +6,7 @@ export type Frame = Omit<FrameType, "style"> & {
   style?: WebStyle
 }
 
-const FRAME_CLASSES =
-  "unison-components__frame [corner-shape:round] transition-[outline-color,background-color] duration-[120ms] ease-out"
+const FRAME_CLASSES = "unison-components__frame [corner-shape:round]"
 
 export default <Given,>(p: Given & KnownOnly<Frame, Given, "Frame">) => {
   const { style, className, ...rest } = p as Frame
