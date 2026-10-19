@@ -1,4 +1,4 @@
-// Generates dist/tailwind.css from the tokens (dist/tokens.ts, generated from dist/tokens.json): every token as a
+// Generates dist/tailwind.css from the tokens (dist/design-tokens.ts, generated from dist/design-tokens.json): every token as a
 // Tailwind theme value, so the classes the library builds (`bg-red-500`, `p-4`, `rounded-lg`, `shadow-md`, `text-sm`)
 // take the tokens' values; the colors' Light and Dark values as themes; a `@source` for the library's own files; and a
 // safelist of every class name a flag can produce (e.g. `bg-red-500` for `fill-red-500`), which Tailwind can't find by
@@ -14,7 +14,7 @@ import {
   type SpacingPixelKey,
   TEXT_SIZES,
   TOKENS,
-} from "../dist/tokens"
+} from "../dist/design-tokens"
 import { FLAGS, flagClasses } from "../maps"
 
 // A theme key with a dot (`0.5`) escapes it, as Tailwind's own theme does.

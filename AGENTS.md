@@ -18,9 +18,9 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - Platform-specific behavior belongs in the shells; small platform differences inside shared code use
   `Platform.select` / `Platform.OS`.
 - `dist/web.ts` / `dist/native.ts` are the public entry points. Every public export is listed there, sorted by
-  path. `dist/` also holds the generated `tokens.ts` and `tailwind.css`;
+  path. `dist/` also holds the generated `design-tokens.ts` and `tailwind.css`;
   consumers import only from `dist/`.
-- `dist/tokens.ts` — generated from `dist/tokens.json`, the only source of design values (never hard-code one), by
+- `dist/design-tokens.ts` — generated from `dist/design-tokens.json`, the only source of design values (never hard-code one), by
   `bun run generate:tokens`: `TOKENS`, plus the scales under their public names (`COLORS`, `SPACING`, `RADIUS`, `CONTAINERS`,
   `SHADOWS`, `TEXT_SIZES`) and their types. Import the scales from there directly. Runtime code reads only the
   scales, so `TOKENS` (both modes, shadow layers, typography) stays out of app bundles unless a consumer imports it.
@@ -32,7 +32,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - Styling props are boolean flags named in kebab-case after Figma: `autolayout-horizontal`, `width-fill`, `padding-4`,
   `corner-radius-full`, `fill-red-500`, `typography-sm`. Prefer adding a flag over a value prop.
 - Flag types live in `types/figmaProperties.ts` as `Figma<Thing>` types, built from the group lists in `maps`
-  (`SPACING_GROUPS`, `RADIUS_GROUPS`, `COLOR_GROUPS`, `NAMED_FLAGS`) and the scales in `dist/tokens.ts` with mapped
+  (`SPACING_GROUPS`, `RADIUS_GROUPS`, `COLOR_GROUPS`, `NAMED_FLAGS`) and the scales in `dist/design-tokens.ts` with mapped
   template-literal types (`SpacingFlags<"gap">`, `ColorFlags<"fill">`, `NamedFlags<"alignment">`). Never hand-write a
   flag name there; add it to `maps` and it is typed, read, safelisted and checked from one place.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is

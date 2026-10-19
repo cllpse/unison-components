@@ -1,4 +1,4 @@
-// The flag types are built from the same group lists as the flag table in maps and the scales in dist/tokens.ts,
+// The flag types are built from the same group lists as the flag table in maps and the scales in dist/design-tokens.ts,
 // so a group or token added there gets its props here; no flag name is written out by hand.
 import type {
   CONTAINERS,
@@ -8,7 +8,7 @@ import type {
   SPACING,
   SpacingPixelKey,
   TEXT_SIZES,
-} from "../dist/tokens"
+} from "../dist/design-tokens"
 import type { ColorGroup, NamedFlagGroup, NamedFlagName, RadiusGroup, SizeMode, SpacingGroup } from "../maps"
 
 type Simplify<T> = {

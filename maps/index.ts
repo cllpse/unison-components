@@ -10,10 +10,10 @@ import {
   SPACING,
   SPACING_TAILWIND,
   TEXT_SIZES,
-} from "../dist/tokens"
+} from "../dist/design-tokens"
 
 // Every token-derived flag, keyed by its full name (`padding-4`, `fill-red-500`), built once at module load from the
-// token scales in dist/tokens.ts. Components look up the flags a props object actually sets instead of probing every
+// token scales in dist/design-tokens.ts. Components look up the flags a props object actually sets instead of probing every
 // scale key per group, which kept a Frame render at ~25µs (about 500 string builds and misses); see readFlags. The same
 // table gives the class names each flag can produce, which the Tailwind safelists are built from.
 

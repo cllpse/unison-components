@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!dist/tailwind.css", "!dist/tokens.json"]
+    "includes": ["**", "!dist/tailwind.css", "!dist/design-tokens.json"]
   },
   "formatter": {
     "enabled": true,
