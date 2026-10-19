@@ -3,7 +3,6 @@
   "compilerOptions": {
     "jsx": "react-native",
     "noImplicitAny": true,
-    "resolveJsonModule": true,
     "skipLibCheck": true
   },
   "include": ["**/*.ts", "**/*.tsx"],

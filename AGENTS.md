@@ -19,21 +19,23 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   `Platform.select` / `Platform.OS`.
 - `dist/web.ts` / `dist/native.ts` are the public entry points. Every public export is listed there, sorted by
   path. `dist/` also holds the generated `tailwind.css`; consumers import only from `dist/`.
-- `src/types` — prop and return types; `src/constants` — design tokens; `src/utilities` — pure helpers.
+- `src/types` — prop and return types; `src/constants` — values derived from `dist/tokens.ts` (generated from
+  `dist/tokens.json`, the only source of design values; never hard-code one); `src/utilities` — pure helpers.
 
 ## Props: Figma flags
 
 - Styling props are boolean flags named in kebab-case after Figma: `autolayout-horizontal`, `width-fill`, `padding-4`,
-  `corner-radius-full`, `fill-primary-500`, `typography-body-wrap`. Prefer adding a flag over a value prop.
+  `corner-radius-full`, `fill-red-500`, `typography-sm`. Prefer adding a flag over a value prop.
 - Flag types live in `src/types/figmaProperties.ts` as `Figma<Thing>` types. Generate them from the tokens with
   mapped template-literal types (`UnitsFlags<"gap-">`, `Color<"fill-">`) instead of hand-writing every key.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is
   exported under the component's name (`export type Frame = FigmaFrameAutolayout & … & { … }`).
 - Flags within a group are mutually exclusive; set at most one.
-- Unit keys follow the Tailwind spacing scale. Fractional units use `p` (`0p5`, `1p5`); `05` and `1px` are
-  deprecated (use `0p5` and `px`). Keys whose Tailwind suffix differs from the key map through `UNITS_TAILWIND`.
-- Corner radius uses Tailwind's own radius names from `RADII` (`corner-radius-lg`), not the spacing keys. Shadows are
-  the tinted `small` / `large` plus Tailwind's scale from `SHADOWS` (`effect-shadow-md`).
+- Unit keys are the tokens' `spacing-` names. Fractional units use `p` (`0p5`, `1p5`); keys whose Tailwind suffix
+  differs from the key map through `UNITS_TAILWIND`.
+- Corner radius uses the tokens' `radius-` names from `RADII` (`corner-radius-lg`), not the spacing keys. Shadows are
+  the tokens' `shadow-` names from `SHADOWS` (`effect-shadow-md`), text sizes their `font-size-` names
+  (`typography-sm`).
 
 ## Computing styles
 

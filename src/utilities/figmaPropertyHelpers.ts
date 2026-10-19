@@ -1,6 +1,6 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import { COLORS } from "../constants/colors"
-import { RADII, SHADOWS, TEXT_SIZES, UNITS, UNITS_TAILWIND } from "../constants/units"
+import { CONTAINERS, RADII, SHADOWS, TEXT_SIZES, UNITS, UNITS_TAILWIND } from "../constants/units"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -127,6 +127,13 @@ export const computeFrameSizing = (p: FigmaFrameWidth & FigmaFrameHeight): Figma
     }
   }
 
+  // A container width (`width-md`) is exact too; its Tailwind suffix is its name (`w-md`).
+  for (const key in CONTAINERS) {
+    if (p[`width-${key}` as keyof FigmaFrameWidth]) {
+      exactWidth = key
+    }
+  }
+
   const widthFill = exactWidth === "" && p["width-fill"]
   const heightFill = exactHeight === "" && p["height-fill"]
   const widthUnit = UNITS_TAILWIND[exactWidth as keyof typeof UNITS] ?? exactWidth
@@ -198,12 +205,20 @@ const resolveUnitKey = <P extends object>(p: P, prefix: string): keyof typeof UN
   return undefined
 }
 
+// `gap-` sets both directions; `gap-horizontal-` (between items in a row) and `gap-vertical-` (between rows) override
+// one direction each.
 export const computeFrameGap = (p: FigmaFrameGap): FigmaPropertiesReturnError => {
-  const key = resolveUnitKey(p, "gap-")
+  const both = resolveUnitKey(p, "gap-")
+  const horizontal = resolveUnitKey(p, "gap-horizontal-")
+  const vertical = resolveUnitKey(p, "gap-vertical-")
 
-  if (key === undefined) return { styles: {}, className: "" }
+  const classes = [
+    both === undefined ? "" : `gap-${UNITS_TAILWIND[both] ?? both}`,
+    horizontal === undefined ? "" : `gap-x-${UNITS_TAILWIND[horizontal] ?? horizontal}`,
+    vertical === undefined ? "" : `gap-y-${UNITS_TAILWIND[vertical] ?? vertical}`,
+  ]
 
-  return { styles: {}, className: `gap-${UNITS_TAILWIND[key] ?? key}` }
+  return { styles: {}, className: classes.filter(Boolean).join(" ") }
 }
 
 const resolveRadiusKey = <P extends object>(p: P, prefix: string): keyof typeof RADII | undefined => {
@@ -361,7 +376,6 @@ export const computeFrameStrokeHover = (p: FigmaStrokeHover): FigmaPropertiesRet
   return computeColorClassName(p, "stroke-hover", "hover:outline")
 }
 
-// Tailwind's default shadows are black at low opacity, so unlike `small` and `large` they don't tint with the fill.
 const SHADOW_CLASSES = Object.fromEntries(SHADOWS.map((name) => [name, `shadow-${name}`])) as Record<
   (typeof SHADOWS)[number],
   string
@@ -376,36 +390,6 @@ export const computeFrameEffectShadow = (p: FigmaFrameEffectShadow): FigmaProper
     if (p[`effect-shadow-${name}`]) return { className: SHADOW_CLASSES[name] }
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: ...
-  const fill = computeFrameFill(p as any)
-
-  if (fill.className === "bg-white") {
-    if (p["effect-shadow-small"]) {
-      return { className: `shadow-[0_4px_4px_0_color-mix(in_oklab,${COLORS.neutral[200]},transparent)]` }
-    }
-
-    if (p["effect-shadow-large"]) {
-      return { className: `shadow-[0_4px_16px_0_color-mix(in_oklab,${COLORS.neutral[200]},transparent)]` }
-    }
-  }
-
-  const colorName = fill.className?.replace("bg-", "")?.split("-")[0] as keyof typeof COLORS
-
-  const palette = COLORS[colorName]
-  const color = typeof palette === "object" && "100" in palette ? palette[100] : undefined
-
-  if (color) {
-    const shadowColor = `color-mix(in_oklab,${color},transparent)`
-
-    if (p["effect-shadow-small"]) {
-      return { className: `shadow-[0_4px_4px_0_${shadowColor}]` }
-    }
-
-    if (p["effect-shadow-large"]) {
-      return { className: `shadow-[0_4px_16px_0_${shadowColor}]` }
-    }
-  }
-
   return { styles: { boxShadow: "none" }, className: "" }
 }
 
@@ -415,112 +399,8 @@ const TEXT_SIZE_CLASSES = Object.fromEntries(TEXT_SIZES.map((name) => [name, `te
 >
 
 export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturnError => {
-  // Tailwind's text sizes, set with the `unison-text/<size>` text styles. The font is the consumer's default.
   for (const name of TEXT_SIZES) {
     if (p[`typography-${name}`]) return { className: TEXT_SIZE_CLASSES[name] }
-  }
-
-  if (p["typography-timecode"]) {
-    return {
-      className: "font-['iAWriterDuo'] font-bold text-[64px] leading-[64px]",
-    }
-  }
-
-  if (p["typography-display-wrap"]) {
-    return {
-      className:
-        "font-['SharpGrotesk25'] not-italic font-medium text-[22px] leading-[30px] text-ellipsis overflow-y-hidden w-full",
-    }
-  }
-
-  if (p["typography-header-wrap"]) {
-    return {
-      className: "font-['SharpGrotesk20'] not-italic font-medium text-[15px] leading-[25px]",
-    }
-  }
-
-  if (p["typography-header-small-wrap"]) {
-    return {
-      className: "font-['SharpGrotesk20'] not-italic font-medium text-[14px] leading-[21px]",
-    }
-  }
-
-  if (p["typography-body-wrap"]) {
-    return {
-      className: "font-['SharpGrotesk20'] not-italic font-normal text-[15px] leading-[25px]",
-    }
-  }
-
-  if (p["typography-body-nowrap"]) {
-    return {
-      className:
-        "font-['SharpGrotesk20'] not-italic font-normal text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
-    }
-  }
-
-  if (p["typography-body-small-wrap"]) {
-    return {
-      className: "font-['SharpGrotesk20'] not-italic font-normal text-[14px] leading-[25px]",
-    }
-  }
-
-  if (p["typography-body-small-nowrap"]) {
-    return {
-      className:
-        "font-['SharpGrotesk20'] not-italic font-normal text-[14px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
-    }
-  }
-
-  if (p["typography-label-wrap"]) {
-    return {
-      className: "font-['SharpGrotesk20'] not-italic font-medium text-[15px] leading-[25px]",
-    }
-  }
-
-  if (p["typography-label-nowrap"]) {
-    return {
-      className:
-        "font-['SharpGrotesk20'] not-italic font-medium text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
-    }
-  }
-
-  if (p["typography-label-small-wrap"]) {
-    return {
-      className: "font-['SharpGrotesk20'] not-italic font-medium text-[14px] leading-[21px]",
-    }
-  }
-
-  if (p["typography-label-small-nowrap"]) {
-    return {
-      className:
-        "font-['SharpGrotesk20'] not-italic font-medium text-[14px] leading-[21px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
-    }
-  }
-
-  if (p["typography-mono-wrap"]) {
-    return {
-      className: "font-mono not-italic font-normal text-[15px] leading-[25px]",
-    }
-  }
-
-  if (p["typography-mono-nowrap"]) {
-    return {
-      className:
-        "font-mono not-italic font-normal text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
-    }
-  }
-
-  if (p["typography-mono-small-wrap"]) {
-    return {
-      className: "font-mono not-italic font-normal text-[14px] leading-[21px]",
-    }
-  }
-
-  if (p["typography-mono-small-nowrap"]) {
-    return {
-      className:
-        "font-mono not-italic font-normal text-[14px] leading-[21px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
-    }
   }
 
   return { error: '<Text /> – missing "typography-" property' }
@@ -587,7 +467,7 @@ export const computeIconFill = (p: FigmaFill): FigmaPropertiesReturn => {
 /**
  * Resolve a vector's fill flag to a color value, since SVG paths take a paint value rather than a Tailwind class.
  * Without a fill flag the path inherits `currentColor`, so a parent's text color tints it.
- * @example computeVectorFill({ "fill-primary-500": true }) // { styles: { color: "#BD7FFF" }, className: "" }
+ * @example computeVectorFill({ "fill-red-500": true }) // { styles: { color: "#FB2C36" }, className: "" }
  */
 export const computeVectorFill = (p: FigmaFill): FigmaPropertiesReturn => {
   const flag = extractColor("fill", p)

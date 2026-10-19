@@ -23,7 +23,7 @@ type ComputeColor = {
 
 /**
  * Compute the flag property for a color. Returns a shared, frozen object.
- * @example computeColor("fill", "primary", 500) // { "fill-primary-500": true }
+ * @example computeColor("fill", "red", "500") // { "fill-red-500": true }
  * @example computeColor("stroke-hover", "white") // { "stroke-hover-white": true }
  */
 export const computeColor: ComputeColor = (kind: ColorFlagKind, color: ColorName, shade?: PropertyKey) => {

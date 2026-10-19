@@ -1,5 +1,5 @@
 import type { COLORS } from "../constants/colors"
-import type { RADII, SHADOWS, TEXT_SIZES, UNITS } from "../constants/units"
+import type { CONTAINERS, RADII, SHADOWS, TEXT_SIZES, UNITS } from "../constants/units"
 import type { ClassName, StyleNative, StyleWeb } from "./elementProperties"
 
 type Simplify<T> = {
@@ -45,11 +45,16 @@ export type FigmaPropertiesReturn = {
   className?: ClassName
 }
 
-export type FigmaFrameWidth = Simplify<UnitsFlags<"width-"> & AdditionalUnitsFlags<"width-", "hug" | "fill">>
+/** Width also takes Tailwind's container scale (`width-md`, 448px). */
+export type FigmaFrameWidth = Simplify<
+  UnitsFlags<"width-"> &
+    AdditionalUnitsFlags<"width-", "hug" | "fill"> & { [key in keyof typeof CONTAINERS as `width-${key}`]?: boolean }
+>
 
 export type FigmaFrameHeight = Simplify<UnitsFlags<"height-"> & AdditionalUnitsFlags<"height-", "hug" | "fill">>
 
-export type FigmaFrameGap = Simplify<UnitsFlags<"gap-">>
+/** `gap-` spaces items and wrapped rows alike; `gap-horizontal-` and `gap-vertical-` set one direction each. */
+export type FigmaFrameGap = Simplify<UnitsFlags<"gap-"> & UnitsFlags<"gap-horizontal-"> & UnitsFlags<"gap-vertical-">>
 
 export type FigmaPadding = Simplify<UnitsFlags<"padding-">>
 
@@ -116,8 +121,6 @@ export type FigmaFrameWrap = {
 export type FigmaFrameEffectShadow = Simplify<
   {
     "effect-shadow-none"?: boolean
-    "effect-shadow-small"?: boolean
-    "effect-shadow-large"?: boolean
   } & { [key in (typeof SHADOWS)[number] as `effect-shadow-${key}`]?: boolean }
 >
 
@@ -126,29 +129,7 @@ export type FigmaFrameStrokeWeight = {
   "stroke-weight-large"?: boolean
 }
 
-export type FigmaTypography = {
-  "typography-timecode"?: boolean
-
-  "typography-display-wrap"?: boolean
-
-  "typography-header-wrap"?: boolean
-  "typography-header-small-wrap"?: boolean
-
-  "typography-body-wrap"?: boolean
-  "typography-body-nowrap"?: boolean
-  "typography-body-small-wrap"?: boolean
-  "typography-body-small-nowrap"?: boolean
-
-  "typography-mono-wrap"?: boolean
-  "typography-mono-nowrap"?: boolean
-  "typography-mono-small-wrap"?: boolean
-  "typography-mono-small-nowrap"?: boolean
-
-  "typography-label-wrap"?: boolean
-  "typography-label-nowrap"?: boolean
-  "typography-label-small-wrap"?: boolean
-  "typography-label-small-nowrap"?: boolean
-} & { [key in (typeof TEXT_SIZES)[number] as `typography-${key}`]?: boolean }
+export type FigmaTypography = { [key in (typeof TEXT_SIZES)[number] as `typography-${key}`]?: boolean }
 
 export type FigmaTypographyAlignment = {
   "typography-align-left"?: boolean

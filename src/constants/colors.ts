@@ -1,197 +1,58 @@
-import tokens from "../../dist/tokens.json"
+// The library's colors, read from the tokens (dist/tokens.ts, generated from dist/tokens.json): the colors collection's
+// `fill-<hue>-<shade>` variables become palettes and `fill-<name>` ones plain colors, with their Light mode values.
+// The Dark values reach only the generated tailwind.css. `currentcolor` and `transparent` are CSS keywords, not tokens.
+import { TOKENS } from "../../dist/tokens"
 
-const UNISON_COLORS = {
-  currentcolor: "currentColor",
-  transparent: "transparent",
+type ColorToken = keyof typeof TOKENS.colors.Light
 
-  black: "#000000",
-  white: "#FFFFFF",
+type Hue = { [Name in ColorToken]: Name extends `fill-${infer Hue}-${string}` ? Hue : never }[ColorToken]
 
-  // purple
-  primary: {
-    0: "#FFFFFF00",
-    brand: "#9225FF",
-    900: "#4A00B0",
-    800: "#6B12D6",
-    700: "#9225FF",
-    600: "#A852FF",
-    500: "#BD7FFF",
-    400: "#D1A3FF",
-    300: "#E1C4FF",
-    200: "#EEDEFF",
-    100: "#F6EFFF",
-    50: "#FAF7FF",
-  },
+type Shade<H extends Hue> = {
+  [Name in ColorToken]: Name extends `fill-${H}-${infer Shade}` ? Shade : never
+}[ColorToken]
 
-  // pink
-  secondary: {
-    0: "#FFFFFF00",
-    brand: "#E93BCC",
-    900: "#9E1287",
-    800: "#D117B2",
-    700: "#E93BCC",
-    600: "#EE63D7",
-    500: "#F28CE1",
-    400: "#F6ACEA",
-    300: "#F9CAF1",
-    200: "#FCE1F7",
-    100: "#FDF1FB",
-    50: "#FEF8FD",
-  },
+type Plain = {
+  [Name in ColorToken]: Name extends `fill-${infer Plain}`
+    ? Plain extends `${string}-${string}`
+      ? never
+      : Plain
+    : never
+}[ColorToken]
 
-  // blue
-  tertiary: {
-    0: "#FFFFFF00",
-    brand: "#39A4EB",
-    900: "#1066A0",
-    800: "#1587D3",
-    700: "#39A4EB",
-    600: "#62B7EF",
-    500: "#8BC9F3",
-    400: "#ABD9F7",
-    300: "#C9E6FA",
-    200: "#E1F1FC",
-    100: "#F0F8FE",
-    50: "#F8FCFE",
-  },
+type Colors = { currentcolor: "currentColor"; transparent: "transparent" } & {
+  [Name in Plain]: (typeof TOKENS.colors.Light)[`fill-${Name}`]
+} & {
+  [H in Hue]: { [S in Shade<H>]: (typeof TOKENS.colors.Light)[`fill-${H}-${S}` & ColorToken] }
+}
 
-  // yellow
-  tentative: {
-    0: "#FFFFFF00",
-    brand: "#FFC900",
-    900: "#514100",
-    800: "#6C5700",
-    700: "#8E7200",
-    600: "#9E7F00",
-    500: "#A48600",
-    400: "#BD9E00",
-    300: "#D0B900",
-    200: "#E0D25D",
-    100: "#F1E9B8",
-    50: "#F8F4E3",
-  },
-
-  // green
-  positive: {
-    0: "#F1FFF5",
-    brand: "#1C8744",
-    900: "#004D20",
-    800: "#00682A",
-    700: "#008737",
-    600: "#009645",
-    500: "#009E52",
-    400: "#00B965",
-    300: "#61CE8E",
-    200: "#9DDEB6",
-    100: "#CEF1D9",
-    50: "#E4F8EA",
-  },
-
-  // red
-  negative: {
-    0: "#FFFFFF00",
-    brand: "#F94D3F",
-    900: "#7E1F02",
-    800: "#AA2900",
-    700: "#DF2F03",
-    600: "#EA4921",
-    500: "#E45F3D",
-    400: "#F28260",
-    300: "#FFA086",
-    200: "#FFBDA9",
-    100: "#FFDBD1",
-    50: "#FFEDE8",
-  },
-
-  // gray
-  neutral: {
-    0: "#FFFFFF00",
-    brand: "#1A1A1A",
-    900: "#000000",
-    800: "#0D0D0D",
-    700: "#1A1A1A",
-    600: "#808080",
-    500: "#969696",
-    400: "#BDBDBD",
-    300: "#E5E5E5",
-    200: "#EDEDED",
-    100: "#F5F5F5",
-    50: "#F7F7F7",
-  },
-
-  // gray surface
-  neutralsurface: {
-    0: "#FFFFFF00",
-    brand: "#FFFFFF",
-    900: "#575757",
-    800: "#707070",
-    700: "#8F8F8F",
-    600: "#A6A6A6",
-    500: "#BDBDBD",
-    400: "#CFCFCF",
-    300: "#DEDEDE",
-    200: "#E8E8E8",
-    100: "#F2F2F2",
-    50: "#F7F7F7",
-  },
-
-  // text
-  text: {
-    0: "#FFFFFF00",
-    brand: "#FFFFFF",
-    900: "#FFFFFF",
-    800: "#000000",
-    700: "#222222",
-    600: "#FFFFFF",
-    500: "#BDBDBD",
-    400: "#C9C9C9",
-    300: "#FFFFFF",
-    200: "#FFFFFF",
-    100: "#FFFFFF",
-    50: "#FFFFFF",
-  },
-} as const
-
-type ColorTokenName = Exclude<keyof typeof tokens.colors.Light, "$extensions">
-
-/** The Tailwind hues in dist/tokens.json (`fill-red-500`), except neutral, which the library defines itself. */
-type TailwindHue = Exclude<
-  { [Name in ColorTokenName]: Name extends `fill-${infer Hue}-${string}` ? Hue : never }[ColorTokenName],
-  "neutral"
->
-
-type TailwindShade<Hue extends string> = {
-  [Name in ColorTokenName]: Name extends `fill-${Hue}-${infer Shade}` ? Shade : never
-}[ColorTokenName]
-
-/**
- * Tailwind's palette, read from the tokens' Light mode: `{ red: { 50: "#FEF2F2", … }, … }`. Dark mode values only
- * reach the generated tailwind.css.
- */
-export const TAILWIND_COLORS = (() => {
-  const palette: Record<string, Record<string, string>> = {}
-
-  for (const [name, token] of Object.entries(tokens.colors.Light)) {
-    const [, hue, shade] = name.match(/^fill-([a-z]+)-(\d+)$/) ?? []
-
-    if (!hue || hue === "neutral" || !("$value" in token)) continue
-
-    palette[hue] ??= {}
-    palette[hue][shade] = token.$value.hex
+/** `{ currentcolor, transparent, white: "#FFFFFF", …, red: { 50: "#FEF2F2", … }, … }` */
+export const COLORS = (() => {
+  const colors: Record<string, string | Record<string, string>> = {
+    currentcolor: "currentColor",
+    transparent: "transparent",
   }
 
-  return palette as { [Hue in TailwindHue]: { [Shade in TailwindShade<Hue>]: string } }
-})()
+  for (const [name, hex] of Object.entries(TOKENS.colors.Light)) {
+    const [, hue, shade] = name.match(/^fill-([a-z]+)-(\d+)$/) ?? []
 
-export const COLORS = { ...UNISON_COLORS, ...TAILWIND_COLORS }
+    if (hue) {
+      const palette = (colors[hue] ?? {}) as Record<string, string>
+
+      palette[shade] = hex
+      colors[hue] = palette
+    } else {
+      colors[name.replace(/^fill-/, "")] = hex
+    }
+  }
+
+  return colors as Colors
+})()
 
 export type ColorName = keyof typeof COLORS
 
-type PaletteColorName = {
-  [K in ColorName]: (typeof COLORS)[K] extends { brand: string } ? K : never
-}[ColorName]
+type PaletteColorName = { [Name in ColorName]: (typeof COLORS)[Name] extends string ? never : Name }[ColorName]
 
-export type ColorShade = keyof (typeof COLORS)[PaletteColorName]
+export type ColorShade = { [Name in PaletteColorName]: keyof (typeof COLORS)[Name] }[PaletteColorName]
 
 export type ColorNameAndShade = {
   [Name in ColorName]: (typeof COLORS)[Name] extends string

@@ -1,15 +1,8 @@
 export { COLORS } from "../src/constants/colors"
-export {
-  type ColorVariableName,
-  type ShadowVariableName,
-  type TypographyVariableName,
-  type UnitVariableName,
-  VARIABLES,
-  type VariableMode,
-} from "../src/constants/variables"
 export type { ClassName, StyleNative, StyleWeb } from "../src/types/elementProperties"
 export { type ColorFlagKind, type ColorFlagProps, computeColor } from "../src/utilities/computeColor"
 export { type ExtractedColor, extractColor } from "../src/utilities/extractColor"
 export { default as Frame } from "../src/web/Frame.web"
 export { default as Text } from "../src/web/Text.web"
 export { default as Vector } from "../src/web/Vector.web"
+export { TOKENS, type Tokens } from "./tokens"

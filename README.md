@@ -36,18 +36,19 @@ Consumers import _dist/tailwind.css_ from their Tailwind 4 entry stylesheet (web
 @import "./unison-components/dist/tailwind.css";
 ```
 
-It carries the library's colors as theme colors, a `@source` for the library's files and a safelist of the class names
+It carries every token as a Tailwind theme value (colors, spacing, radius, shadows, text sizes and weights), so the
+library's classes take the tokens' values, plus a `@source` for the library's files and a safelist of the class names
 the library builds at runtime. It is generated from the tokens; rerun and commit it after changing them:
 
 ```sh
 bun run tailwind:css
 ```
 
-`bun run tailwind:css:watch` does the same on every change to `src/constants/` or the generator.
+`bun run tailwind:css:watch` regenerates _dist/tokens.ts_ and the stylesheet on every change to _dist/tokens.json_,
+`src/constants/` or the generators.
 
-Besides the library's own palettes, the colors include Tailwind's hues from _dist/tokens.json_ (`fill-red-500`,
-`stroke-sky-300`; all but neutral, which the library defines itself). In dark mode (`@variant dark`, read by Tailwind
-as `prefers-color-scheme` and by Uniwind as its dark theme) those hues take the tokens' Dark values.
+In dark mode (`@variant dark`, read by Tailwind as `prefers-color-scheme` and by Uniwind as its dark theme) the colors
+take the tokens' Dark values.
 
 ## Type checking
 
@@ -68,7 +69,7 @@ then each collection's modes; a mode holds its tokens in the format of Figma's o
 | Collection | Modes       | Variables                                                                               |
 | ---------- | ----------- | --------------------------------------------------------------------------------------- |
 | colors     | Light, Dark | Tailwind's palette (`fill-red-500`) plus the project's own neutrals                          |
-| units      | Default     | `spacing-<unit>` (the `UNITS` keys) and `radius-<name>` (`RADII`)                       |
+| units      | Default     | `spacing-<unit>`, `radius-<name>` and `container-<name>` (Tailwind's container widths, in px) |
 | typography | Default     | Tailwind's `font-size-<name>`, `line-height-<name>` and `font-weight-<name>`            |
 | shadows    | Default     | Tailwind's box shadows, `shadow-<name>-<layer>-<offset-x, offset-y, blur, spread, color>` |
 
@@ -77,17 +78,17 @@ _tokens.json_: it creates the four collections in one go, with each variable's s
 value order, then the `shadow-<name>` effect styles and `text-<size>` text styles bound to them. Importing again
 updates everything in place.
 
-_dist/tokens.ts_ is the same file as TypeScript (`TOKENS.colors.Dark["fill-neutral-50"]`, typed `as const`), generated
-with `bun run tokens:ts`; commit it with _tokens.json_.
-
-Read them in code through `VARIABLES`, keyed by Figma's variable name (typed, so an unknown name doesn't compile):
+_dist/tokens.ts_ is the same file as TypeScript, generated with `bun run tokens:ts`; commit it with _tokens.json_. It
+is the library's only source of design values: `COLORS`, `UNITS`, `RADII`, `SHADOWS` and `TEXT_SIZES` in
+`src/constants/` are derived from it, and so are the flags. It's exported as `TOKENS`, keyed by collection, mode and
+Figma's variable name, with exact types:
 
 ```ts
-import { VARIABLES } from "./unison-components/dist/web"
+import { TOKENS } from "./unison-components/dist/web"
 
-VARIABLES.color.dark["fill-neutral-50"] // "#161616"
-VARIABLES.units["spacing-4"] // 16
-VARIABLES.typography["line-height-sm"] // 20
+TOKENS.colors.Dark["fill-neutral-50"] // "#161616"
+TOKENS.units.Default["spacing-4"] // 16
+TOKENS.typography.Default["line-height-sm"] // 20
 ```
 
 The unit names are the ones the plugin resolves to flags, which match on the last part of the name: `spacing-1p5` to

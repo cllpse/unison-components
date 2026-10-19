@@ -31,14 +31,14 @@ const parse = (kind: ColorFlagKind, key: string): ExtractedColor | null => {
 
   return Object.freeze({
     color: color as ColorName,
-    shade: (Number.isNaN(Number(shade)) ? shade : Number(shade)) as ColorShade,
+    shade: shade as ColorShade,
   })
 }
 
 /**
  * Extract the first enabled color flag of a given kind from a props object. Returns a shared, frozen object.
- * @example extractColor("fill", { "fill-primary-500": true }) // { color: "primary", shade: 500 }
- * @example extractColor("fill", { "fill-hover-primary-500": true }) // undefined
+ * @example extractColor("fill", { "fill-red-500": true }) // { color: "red", shade: "500" }
+ * @example extractColor("fill", { "fill-hover-red-500": true }) // undefined
  */
 export const extractColor = (kind: ColorFlagKind, flags: object): ExtractedColor | undefined => {
   const cache = CACHE[kind]

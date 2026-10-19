@@ -1,51 +1,75 @@
-// Generates dist/tailwind.css from the design tokens: the library's colors as Tailwind theme colors, a `@source` for
-// the library's own files, and a safelist of the class names it builds at runtime (e.g. `bg-${color}-${shade}`), which
-// Tailwind can't find by scanning the source. Consumers import the result
-// (`@import "unison-components/dist/tailwind.css"`) and need no build step of their own. Rerun with
-// `bun run tailwind:css` after changing the tokens, and commit the result.
+// Generates dist/tailwind.css from the tokens (dist/tokens.ts, generated from dist/tokens.json): every token as a
+// Tailwind theme value, so the classes the library builds (`bg-red-500`, `p-4`, `rounded-lg`, `shadow-md`, `text-sm`)
+// take the tokens' values; the colors' Dark values for dark mode; a `@source` for the library's own files; and a
+// safelist of the class names it builds at runtime (e.g. `bg-${color}-${shade}`), which Tailwind can't find by scanning
+// the source. Consumers import the result (`@import "unison-components/dist/tailwind.css"`) and need no build step of
+// their own. Rerun with `bun run tailwind:css` after changing the tokens, and commit the result.
 import { writeFileSync } from "node:fs"
-import tokens from "../dist/tokens.json"
-import { COLORS, TAILWIND_COLORS } from "../src/constants/colors"
-import { RADII, SHADOWS, TEXT_SIZES, UNITS, UNITS_TAILWIND } from "../src/constants/units"
+import { TOKENS } from "../dist/tokens"
+import { COLORS } from "../src/constants/colors"
+import { CONTAINERS, RADII, SHADOWS, TEXT_SIZES, UNITS, UNITS_TAILWIND } from "../src/constants/units"
 
-const units = Object.keys(UNITS) as (keyof typeof UNITS)[]
-const spacing = [...new Set(units.map((unit) => UNITS_TAILWIND[unit] ?? unit))]
+const spacing = Object.keys(UNITS).map((unit) => UNITS_TAILWIND[unit as keyof typeof UNITS] ?? unit)
 const radius = Object.keys(RADII)
+const colors = Object.entries(COLORS).flatMap(([name, value]) =>
+  typeof value === "string" ? [name] : Object.keys(value).map((shade) => `${name}-${shade}`),
+)
 
-const theme: string[] = []
-const colors: string[] = []
-// Shadows embed a color: neutral-200 on white fills, otherwise the fill palette's 100 shade.
-const shadowColors = new Set<string>([COLORS.neutral[200]])
+// A theme key with a dot (`0.5`) escapes it, as Tailwind's own theme does.
+const key = (name: string) => name.replace(".", "\\.")
 
-for (const [name, value] of Object.entries(COLORS)) {
-  if (typeof value === "string") {
-    theme.push(`  --color-${name}: ${value};`)
-    colors.push(name)
-    continue
-  }
+const theme = ["  --color-currentcolor: currentColor;", "  --color-transparent: transparent;"]
 
-  for (const [shade, hex] of Object.entries(value)) {
-    theme.push(`  --color-${name}-${shade}: ${hex};`)
-    colors.push(`${name}-${shade}`)
-  }
-
-  shadowColors.add(value[100])
+for (const [name, hex] of Object.entries(TOKENS.colors.Light)) {
+  theme.push(`  --color-${name.replace(/^fill-/, "")}: ${hex};`)
 }
 
-// The Tailwind hues switch to the tokens' Dark mode values in dark mode. `@variant dark` inside a theme layer is the
-// form both Tailwind on web (`prefers-color-scheme`) and Uniwind on iOS and Android read as a dark theme.
-const dark: string[] = []
+// `full` stays Tailwind's 100% (`w-full`), which is what the library's `width-full` means.
+for (const [unit, pixels] of Object.entries(UNITS)) {
+  if (unit === "full") continue
 
-for (const [name, token] of Object.entries(tokens.colors.Dark)) {
-  const [, hue] = name.match(/^fill-([a-z]+)-\d+$/) ?? []
-
-  if (hue && Object.hasOwn(TAILWIND_COLORS, hue) && "$value" in token) {
-    dark.push(`      --color-${name.slice("fill-".length)}: ${token.$value.hex};`)
-  }
+  theme.push(`  --spacing-${key(UNITS_TAILWIND[unit as keyof typeof UNITS] ?? unit)}: ${pixels}px;`)
 }
 
-const shadows = [...shadowColors].flatMap((color) =>
-  [4, 16].map((blur) => `shadow-[0_4px_${blur}px_0_color-mix(in_oklab,${color},transparent)]`),
+for (const [name, pixels] of Object.entries(RADII)) {
+  theme.push(`  --radius-${name}: ${pixels}px;`)
+}
+
+for (const [name, pixels] of Object.entries(CONTAINERS)) {
+  theme.push(`  --container-${name}: ${pixels}px;`)
+}
+
+const shadowTokens = TOKENS.shadows.Default as Record<string, number | string>
+
+for (const name of SHADOWS) {
+  const layers: string[] = []
+
+  for (let layer = 1; `shadow-${name}-${layer}-color` in shadowTokens; layer++) {
+    const field = (part: string) => shadowTokens[`shadow-${name}-${layer}-${part}`]
+
+    layers.push(
+      `${field("offset-x")}px ${field("offset-y")}px ${field("blur")}px ${field("spread")}px ${field("color")}`,
+    )
+  }
+
+  theme.push(`  --shadow-${name}: ${layers.join(", ")};`)
+}
+
+const typography = TOKENS.typography.Default as Record<string, number>
+
+for (const size of TEXT_SIZES) {
+  theme.push(`  --text-${size}: ${typography[`font-size-${size}`]}px;`)
+  theme.push(`  --text-${size}--line-height: ${typography[`line-height-${size}`]}px;`)
+}
+
+for (const [name, weight] of Object.entries(typography)) {
+  if (name.startsWith("font-weight-")) theme.push(`  --${name}: ${weight};`)
+}
+
+// `@variant dark` inside a theme layer is the form both Tailwind on web (`prefers-color-scheme`) and Uniwind on iOS
+// and Android read as a dark theme.
+const dark = Object.entries(TOKENS.colors.Dark).map(
+  ([name, hex]) => `      --color-${name.replace(/^fill-/, "")}: ${hex};`,
 )
 
 const css = [
@@ -67,11 +91,11 @@ const css = [
   "",
   `@source inline("{,hover:}{bg,text,outline}-{${colors.join(",")}}");`,
   `@source inline("group-hover:text-{${colors.join(",")}}");`,
-  `@source inline("{p,px,py,pl,pr,pt,pb,gap,w,h,min-w,min-h,max-w,max-h}-{${spacing.join(",")}}");`,
+  `@source inline("{p,px,py,pl,pr,pt,pb,gap,gap-x,gap-y,w,h,min-w,min-h,max-w,max-h}-{${spacing.join(",")}}");`,
   `@source inline("rounded{,-tl,-tr,-bl,-br}-{${radius.join(",")}}");`,
+  `@source inline("{w,min-w,max-w}-{${Object.keys(CONTAINERS).join(",")}}");`,
   `@source inline("shadow-{${SHADOWS.join(",")}}");`,
   `@source inline("text-{${TEXT_SIZES.join(",")}}");`,
-  ...shadows.map((shadow) => `@source inline("${shadow}");`),
   "",
 ].join("\n")
 
