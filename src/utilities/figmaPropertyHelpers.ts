@@ -1,10 +1,12 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
 import { COLORS } from "../constants/colors"
-import { RADII, SHADOWS, UNITS, UNITS_TAILWIND } from "../constants/units"
+import { RADII, SHADOWS, TEXT_SIZES, UNITS, UNITS_TAILWIND } from "../constants/units"
 import type {
   FigmaFill,
   FigmaFillHover,
   FigmaFrameAlignment,
+  FigmaFrameAutolayout,
+  FigmaFrameAutolayoutDirection,
   FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
@@ -13,8 +15,6 @@ import type {
   FigmaFrameCornerRadiusTopRight,
   FigmaFrameEdgePosition,
   FigmaFrameEffectShadow,
-  FigmaFrameFlow,
-  FigmaFrameFlowDirection,
   FigmaFrameGap,
   FigmaFrameHeight,
   FigmaFrameHorizontalPosition,
@@ -66,9 +66,9 @@ const FRAME_ITEMS: Record<FigmaFrameEdgePosition, string> = {
   end: "items-end",
 }
 
-const resolveFrameFlow = (p: FigmaFrameFlow): FigmaFrameFlowDirection => {
-  if (p["flow-horizontal"]) return "horizontal"
-  if (p["flow-vertical"]) return "vertical"
+const resolveFrameAutolayout = (p: FigmaFrameAutolayout): FigmaFrameAutolayoutDirection => {
+  if (p["autolayout-horizontal"]) return "horizontal"
+  if (p["autolayout-vertical"]) return "vertical"
 
   return "vertical"
 }
@@ -92,16 +92,16 @@ const resolveFrameAlignment = (
   return { vertical: "top", horizontal: "left" }
 }
 
-export const computeFrameFlow = (p: FigmaFrameFlow): FigmaPropertiesReturn => {
-  return { className: resolveFrameFlow(p) === "horizontal" ? "flex-row" : "flex-col" }
+export const computeFrameAutolayout = (p: FigmaFrameAutolayout): FigmaPropertiesReturn => {
+  return { className: resolveFrameAutolayout(p) === "horizontal" ? "flex-row" : "flex-col" }
 }
 
-export const computeFrameAlignment = (p: FigmaFrameAlignment & FigmaFrameFlow): FigmaPropertiesReturn => {
+export const computeFrameAlignment = (p: FigmaFrameAlignment & FigmaFrameAutolayout): FigmaPropertiesReturn => {
   const { vertical, horizontal } = resolveFrameAlignment(p)
   const horizontalEdge = FRAME_HORIZONTAL_TO_EDGE[horizontal]
   const verticalEdge = FRAME_VERTICAL_TO_EDGE[vertical]
 
-  if (resolveFrameFlow(p) === "horizontal") {
+  if (resolveFrameAutolayout(p) === "horizontal") {
     return { className: `${FRAME_JUSTIFY[horizontalEdge]} ${FRAME_ITEMS[verticalEdge]}` }
   }
 
@@ -409,7 +409,17 @@ export const computeFrameEffectShadow = (p: FigmaFrameEffectShadow): FigmaProper
   return { styles: { boxShadow: "none" }, className: "" }
 }
 
+const TEXT_SIZE_CLASSES = Object.fromEntries(TEXT_SIZES.map((name) => [name, `text-${name}`])) as Record<
+  (typeof TEXT_SIZES)[number],
+  string
+>
+
 export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturnError => {
+  // Tailwind's text sizes, set with the `unison-text/<size>` text styles. The font is the consumer's default.
+  for (const name of TEXT_SIZES) {
+    if (p[`typography-${name}`]) return { className: TEXT_SIZE_CLASSES[name] }
+  }
+
   if (p["typography-timecode"]) {
     return {
       className: "font-['iAWriterDuo'] font-bold text-[64px] leading-[64px]",

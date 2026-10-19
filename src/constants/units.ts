@@ -243,3 +243,22 @@ export const RADII = {
  * Tailwind's default box shadow scale. The names are the Tailwind suffixes (`shadow-md`).
  */
 export const SHADOWS = ["2xs", "xs", "sm", "md", "lg", "xl", "2xl"] as const
+
+/**
+ * Tailwind's default text sizes, each with its own line height. The names are the Tailwind suffixes (`text-sm`).
+ */
+export const TEXT_SIZES = [
+  "xs",
+  "sm",
+  "base",
+  "lg",
+  "xl",
+  "2xl",
+  "3xl",
+  "4xl",
+  "5xl",
+  "6xl",
+  "7xl",
+  "8xl",
+  "9xl",
+] as const

@@ -4,8 +4,9 @@
 // (`@import "unison-components/dist/tailwind.css"`) and need no build step of their own. Rerun with
 // `bun run tailwind:css` after changing the tokens, and commit the result.
 import { writeFileSync } from "node:fs"
-import { COLORS } from "../src/constants/colors"
-import { RADII, SHADOWS, UNITS, UNITS_TAILWIND } from "../src/constants/units"
+import tokens from "../dist/tokens.json"
+import { COLORS, TAILWIND_COLORS } from "../src/constants/colors"
+import { RADII, SHADOWS, TEXT_SIZES, UNITS, UNITS_TAILWIND } from "../src/constants/units"
 
 const units = Object.keys(UNITS) as (keyof typeof UNITS)[]
 const spacing = [...new Set(units.map((unit) => UNITS_TAILWIND[unit] ?? unit))]
@@ -31,6 +32,18 @@ for (const [name, value] of Object.entries(COLORS)) {
   shadowColors.add(value[100])
 }
 
+// The Tailwind hues switch to the tokens' Dark mode values in dark mode. `@variant dark` inside a theme layer is the
+// form both Tailwind on web (`prefers-color-scheme`) and Uniwind on iOS and Android read as a dark theme.
+const dark: string[] = []
+
+for (const [name, token] of Object.entries(tokens.colors.Dark)) {
+  const [, hue] = name.match(/^fill-([a-z]+)-\d+$/) ?? []
+
+  if (hue && Object.hasOwn(TAILWIND_COLORS, hue) && "$value" in token) {
+    dark.push(`      --color-${name.slice("fill-".length)}: ${token.$value.hex};`)
+  }
+}
+
 const shadows = [...shadowColors].flatMap((color) =>
   [4, 16].map((blur) => `shadow-[0_4px_${blur}px_0_color-mix(in_oklab,${color},transparent)]`),
 )
@@ -44,11 +57,20 @@ const css = [
   ...theme,
   "}",
   "",
+  "@layer theme {",
+  "  :root {",
+  "    @variant dark {",
+  ...dark,
+  "    }",
+  "  }",
+  "}",
+  "",
   `@source inline("{,hover:}{bg,text,outline}-{${colors.join(",")}}");`,
   `@source inline("group-hover:text-{${colors.join(",")}}");`,
   `@source inline("{p,px,py,pl,pr,pt,pb,gap,w,h,min-w,min-h,max-w,max-h}-{${spacing.join(",")}}");`,
   `@source inline("rounded{,-tl,-tr,-bl,-br}-{${radius.join(",")}}");`,
   `@source inline("shadow-{${SHADOWS.join(",")}}");`,
+  `@source inline("text-{${TEXT_SIZES.join(",")}}");`,
   ...shadows.map((shadow) => `@source inline("${shadow}");`),
   "",
 ].join("\n")

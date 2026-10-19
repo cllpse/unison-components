@@ -1,4 +1,6 @@
-export const COLORS = {
+import tokens from "../../dist/tokens.json"
+
+const UNISON_COLORS = {
   currentcolor: "currentColor",
   transparent: "transparent",
 
@@ -149,6 +151,39 @@ export const COLORS = {
     50: "#FFFFFF",
   },
 } as const
+
+type ColorTokenName = Exclude<keyof typeof tokens.colors.Light, "$extensions">
+
+/** The Tailwind hues in dist/tokens.json (`fill-red-500`), except neutral, which the library defines itself. */
+type TailwindHue = Exclude<
+  { [Name in ColorTokenName]: Name extends `fill-${infer Hue}-${string}` ? Hue : never }[ColorTokenName],
+  "neutral"
+>
+
+type TailwindShade<Hue extends string> = {
+  [Name in ColorTokenName]: Name extends `fill-${Hue}-${infer Shade}` ? Shade : never
+}[ColorTokenName]
+
+/**
+ * Tailwind's palette, read from the tokens' Light mode: `{ red: { 50: "#FEF2F2", … }, … }`. Dark mode values only
+ * reach the generated tailwind.css.
+ */
+export const TAILWIND_COLORS = (() => {
+  const palette: Record<string, Record<string, string>> = {}
+
+  for (const [name, token] of Object.entries(tokens.colors.Light)) {
+    const [, hue, shade] = name.match(/^fill-([a-z]+)-(\d+)$/) ?? []
+
+    if (!hue || hue === "neutral" || !("$value" in token)) continue
+
+    palette[hue] ??= {}
+    palette[hue][shade] = token.$value.hex
+  }
+
+  return palette as { [Hue in TailwindHue]: { [Shade in TailwindShade<Hue>]: string } }
+})()
+
+export const COLORS = { ...UNISON_COLORS, ...TAILWIND_COLORS }
 
 export type ColorName = keyof typeof COLORS
 

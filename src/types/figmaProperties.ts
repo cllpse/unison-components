@@ -1,5 +1,5 @@
 import type { COLORS } from "../constants/colors"
-import type { RADII, SHADOWS, UNITS } from "../constants/units"
+import type { RADII, SHADOWS, TEXT_SIZES, UNITS } from "../constants/units"
 import type { ClassName, StyleNative, StyleWeb } from "./elementProperties"
 
 type Simplify<T> = {
@@ -77,19 +77,17 @@ export type FigmaFrameCornerRadiusBottomRight = RadiusFlags<"corner-radius-botto
 
 export type FigmaFrameBorderRadius = RadiusFlags<"border-radius-">
 
-export type FigmaFrameFlow = {
-  "flow-horizontal"?: boolean
-  "flow-vertical"?: boolean
-  "flow-grid"?: boolean
+export type FigmaFrameAutolayout = {
+  "autolayout-horizontal"?: boolean
+  "autolayout-vertical"?: boolean
 }
 
-export type FigmaFrameFlowParent = {
-  "flow-horizontal-parent"?: boolean
-  "flow-vertical-parent"?: boolean
-  "flow-grid-parent"?: boolean
+export type FigmaFrameAutolayoutParent = {
+  "autolayout-horizontal-parent"?: boolean
+  "autolayout-vertical-parent"?: boolean
 }
 
-export type FigmaFrameFlowDirection = "horizontal" | "vertical"
+export type FigmaFrameAutolayoutDirection = "horizontal" | "vertical"
 
 export type FigmaFrameAlignment = {
   "alignment-top-left"?: boolean
@@ -150,7 +148,7 @@ export type FigmaTypography = {
   "typography-label-nowrap"?: boolean
   "typography-label-small-wrap"?: boolean
   "typography-label-small-nowrap"?: boolean
-}
+} & { [key in (typeof TEXT_SIZES)[number] as `typography-${key}`]?: boolean }
 
 export type FigmaTypographyAlignment = {
   "typography-align-left"?: boolean

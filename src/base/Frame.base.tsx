@@ -6,6 +6,7 @@ import type {
   FigmaFill,
   FigmaFillHover,
   FigmaFrameAlignment,
+  FigmaFrameAutolayout,
   FigmaFrameBorderRadius,
   FigmaFrameCornerRadius,
   FigmaFrameCornerRadiusBottomLeft,
@@ -13,7 +14,6 @@ import type {
   FigmaFrameCornerRadiusTopLeft,
   FigmaFrameCornerRadiusTopRight,
   FigmaFrameEffectShadow,
-  FigmaFrameFlow,
   FigmaFrameGap,
   FigmaFrameHeight,
   FigmaFrameWidth,
@@ -33,11 +33,11 @@ import { computeElementPointerEvents } from "../utilities/elementPropertyHelpers
 
 import {
   computeFrameAlignment,
+  computeFrameAutolayout,
   computeFrameCornerRadius,
   computeFrameEffectShadow,
   computeFrameFill,
   computeFrameFillHover,
-  computeFrameFlow,
   computeFrameGap,
   computeFramePadding,
   computeFramePaddingBottom,
@@ -51,7 +51,7 @@ import {
   computeFrameStrokeHover,
 } from "../utilities/figmaPropertyHelpers"
 
-export type Frame = FigmaFrameFlow &
+export type Frame = FigmaFrameAutolayout &
   FigmaFrameWidth &
   FigmaFrameHeight &
   FigmaFrameAlignment &
@@ -119,7 +119,7 @@ export default (p: Frame) => {
   const strokeHover = computeFrameStrokeHover(p).className
   const pointerEvents = computeElementPointerEvents(p).className
 
-  const flow = computeFrameFlow(p).className
+  const flow = computeFrameAutolayout(p).className
   const alignment = computeFrameAlignment(p).className
   const sizing = computeFrameSizing(p)
 

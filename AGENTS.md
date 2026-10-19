@@ -23,12 +23,12 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 ## Props: Figma flags
 
-- Styling props are boolean flags named in kebab-case after Figma: `flow-horizontal`, `width-fill`, `padding-4`,
+- Styling props are boolean flags named in kebab-case after Figma: `autolayout-horizontal`, `width-fill`, `padding-4`,
   `corner-radius-full`, `fill-primary-500`, `typography-body-wrap`. Prefer adding a flag over a value prop.
 - Flag types live in `src/types/figmaProperties.ts` as `Figma<Thing>` types. Generate them from the tokens with
   mapped template-literal types (`UnitsFlags<"gap-">`, `Color<"fill-">`) instead of hand-writing every key.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is
-  exported under the component's name (`export type Frame = FigmaFrameFlow & … & { … }`).
+  exported under the component's name (`export type Frame = FigmaFrameAutolayout & … & { … }`).
 - Flags within a group are mutually exclusive; set at most one.
 - Unit keys follow the Tailwind spacing scale. Fractional units use `p` (`0p5`, `1p5`); `05` and `1px` are
   deprecated (use `0p5` and `px`). Keys whose Tailwind suffix differs from the key map through `UNITS_TAILWIND`.
