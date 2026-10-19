@@ -19,7 +19,8 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   `Platform.select` / `Platform.OS`.
 - `dist/web.ts` / `dist/native.ts` are the public entry points. Every public export is listed there, sorted by
   path. `dist/` also holds the generated `design-tokens.ts` and `tailwind.css`;
-  consumers import only from `dist/`.
+  consumers import only from `dist/`. `bun run build` compiles everything into the git-ignored `build/`, which is what
+  the npm package ships (see `exports` in `package.json`).
 - `dist/design-tokens.ts` — generated from `dist/design-tokens.json`, the only source of design values (never hard-code one), by
   `bun run generate:tokens`: `TOKENS`, plus the scales under their public names (`COLORS`, `SPACING`, `RADIUS`, `CONTAINERS`,
   `SHADOWS`, `TEXT_SIZES`) and their types. Import the scales from there directly. Runtime code reads only the
@@ -80,7 +81,7 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 
 ## TypeScript
 
-- `type`, not `interface` (the only exception is module augmentation in `global.d.ts`).
+- `type`, not `interface` (the only exception is the module augmentation in `types/base.ts`).
 - Never use `Props` in a type name, including aliases of library types (`ViewProps as ReactNativeViewProperties`).
 - Type-only imports use `import type` or inline `type` specifiers.
 - Token objects are `as const` and named in `SCREAMING_SNAKE_CASE` (`COLORS`, `SPACING`). Derive types from them

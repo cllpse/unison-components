@@ -52,3 +52,25 @@ export type PropertiesResult = {
   styles?: Style
   className?: ClassName
 }
+
+// Lets `className` through to React Native's own props and to JSX, as React Native Web and Uniwind read it. Declared
+// here rather than in a global .d.ts so it reaches consumers through the emitted declarations of every component.
+declare global {
+  namespace JSX {
+    interface IntrinsicAttributes {
+      className?: string
+    }
+    interface IntrinsicClassAttributes<T> {
+      className?: string
+    }
+  }
+}
+
+declare module "react-native" {
+  interface ViewProps {
+    className?: string
+  }
+  interface TextProps {
+    className?: string
+  }
+}

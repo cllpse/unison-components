@@ -1,9 +1,58 @@
 {
   "name": "unison-components",
-  "version": "1.0.0",
-  "description": "",
-  "main": "",
+  "version": "0.1.0",
+  "description": "React Native components whose props mirror Figma's design vocabulary, for web and native.",
+  "license": "ISC",
+  "author": "cllpse",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cllpse/unison-components.git"
+  },
+  "homepage": "https://github.com/cllpse/unison-components#readme",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "build"
+  ],
+  "exports": {
+    ".": {
+      "types": "./build/dist/web.d.ts",
+      "react-native": "./build/dist/native.js",
+      "default": "./build/dist/web.js"
+    },
+    "./web": {
+      "types": "./build/dist/web.d.ts",
+      "default": "./build/dist/web.js"
+    },
+    "./native": {
+      "types": "./build/dist/native.d.ts",
+      "default": "./build/dist/native.js"
+    },
+    "./tailwind.css": "./build/dist/tailwind.css",
+    "./design-tokens": {
+      "types": "./build/dist/design-tokens.d.ts",
+      "default": "./build/dist/design-tokens.js"
+    },
+    "./design-tokens.json": "./build/dist/design-tokens.json",
+    "./maps": {
+      "types": "./build/maps/index.d.ts",
+      "default": "./build/maps/index.js"
+    },
+    "./types/figma": {
+      "types": "./build/types/figma.d.ts",
+      "default": "./build/types/figma.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
+    "build": "rm -rf build && tsc -p tsconfig.build.json && cp dist/design-tokens.json dist/tailwind.css build/dist/",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "prepublishOnly": "bun run typecheck && bun run lint && bun run build",
     "lint": "biome check",
     "format": "biome format --write",
     "typecheck": "tsc --noEmit",
@@ -16,18 +65,19 @@
     "components:sync-manual:playground-web": "rsync -av --delete ./dist ./src ./maps ./types ./utilities ../unison-playground-web/unison-components/",
     "components:sync-watch:playground-web": "chokidar './dist/**/*' './src/**/*' './maps/**/*' './types/**/*' './utilities/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-playground-web/unison-components/{path}'; else rsync -aR '{path}' ../unison-playground-web/unison-components/; fi\""
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "react": "^19.3.0",
-    "react-native": "^0.87.1",
-    "react-native-svg": "^15.15.5"
+  "peerDependencies": {
+    "react": ">=19.3",
+    "react-native": ">=0.87",
+    "react-native-svg": ">=15.15"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "chokidar-cli": "^3.0.0",
+    "react": "^19.3.0",
+    "react-native": "^0.87.1",
+    "react-native-svg": "^15.15.5",
     "typescript": "^7.0.2"
   },
   "packageManager": "bun@1.4.3"

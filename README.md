@@ -15,22 +15,32 @@ bun install
 
 ## Using the library
 
-Consumers add the library as a git submodule and wire up two things:
+Install it from npm, with its peer dependencies (`react`, `react-native` and `react-native-svg`; React Native Web on web):
 
-- A `@unison` path alias for _unison-components/dist/web_ (web) or _unison-components/dist/native_ (iOS and Android).
-  Import components only from there; nothing else in the library is public.
-- The generated stylesheet, imported from the app's Tailwind entry stylesheet:
-
-```css
-@import "./unison-components/dist/tailwind.css";
+```sh
+bun add unison-components
 ```
 
-The stylesheet needs no build step in the consumer: it is generated and committed here. See
+Import the components from `unison-components`. Metro picks the iOS and Android build through the `react-native` export
+condition and every other bundler the web build; `unison-components/web` and `unison-components/native` name one
+explicitly. Nothing else in the library is public, except `maps`, `types/figma`, `design-tokens` and `design-tokens.json`,
+which the Figma plugin reads. Then import the generated stylesheet from the app's Tailwind entry stylesheet:
+
+```css
+@import "unison-components/tailwind.css";
+```
+
+The package is compiled JavaScript with type declarations, so consumers need no transpiling and no build step for the
+stylesheet.
+
+Consumers that still add the library as a git submodule wire up a `@unison` path alias for
+_unison-components/dist/web_ (web) or _unison-components/dist/native_ (iOS and Android) and import
+_./unison-components/dist/tailwind.css_ instead. See
 [unison-playground-web](https://github.com/cllpse/unison-playground-web) and
 [unison-playground-expo](https://github.com/cllpse/unison-playground-expo) for working setups.
 
 ```tsx
-import { Frame, Text, Vector } from "@unison"
+import { Frame, Text, Vector } from "unison-components"
 
 <Frame autolayout-vertical gap-4 padding-4 width-fill corner-radius-lg fill-white effect-shadow-md>
   <Text fill-black typography-lg>Hello</Text>
@@ -139,6 +149,7 @@ component, so platform-only libraries (such as React Native Reanimated) stay out
 
 ## Scripts
 
+- `bun run build` / `build:watch` - compile the library into _build/_, the folder the npm package ships
 - `bun run generate:tokens` / `generate:tokens:watch` - write _dist/design-tokens.ts_ from _dist/design-tokens.json_
 - `bun run generate:tailwind` / `generate:tailwind:watch` - write _dist/tailwind.css_ from the tokens and _maps/_
 - `bun run components:sync-manual:plugin` / `components:sync-watch:plugin` - copy the library into
@@ -148,5 +159,14 @@ component, so platform-only libraries (such as React Native Reanimated) stay out
 - `bun run lint` - Biome check
 - `bun run format` - Biome format, writing changes
 - `bun run typecheck` - `tsc --noEmit`
+
+## Publishing
+
+1. `npm login` once per machine (`bun publish` reads the same credentials).
+2. Bump the version with `npm version patch` or `npm version minor`; below 1.0 a breaking flag or prop change bumps the
+   minor.
+3. `bun publish`. `prepublishOnly` typechecks, lints and builds first. Check what will ship with `bun run build && npm
+   pack --dry-run`.
+4. `git push --follow-tags`.
 
 Conventions for working on the library itself are in _AGENTS.md_.
