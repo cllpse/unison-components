@@ -11,7 +11,7 @@ import type {
   Style,
   TailwindGroup,
   ViewAttributes,
-  ViewElement,
+  ViewReference,
 } from "../types/baseProperties"
 import type {
   FigmaFill,
@@ -89,7 +89,7 @@ export type Frame = FigmaFrameAutolayout &
   PointerEvents &
   TailwindGroup &
   ViewAttributes &
-  ViewElement & {
+  ViewReference & {
     onTouchStart?: PressableProperties["onTouchStart"]
     onTouchEnd?: PressableProperties["onTouchEnd"]
 

@@ -20,15 +20,15 @@ export type Style = NativeStyle & WebStyle
 /** Tailwind classes: applied by React Native Web on web and by Uniwind on iOS and Android. */
 export type ClassName = string
 
-/** The underlying View's id, ref and how it takes touches. */
-export type ViewElement = {
-  id?: ReactNativeViewProperties["id"]
+/** A ref to the underlying View. */
+export type ViewReference = {
   ref?: RefObject<ViewInstance | null>
-  pointerEvents?: ReactNativeViewProperties["pointerEvents"]
 }
 
-/** Accessibility props React Native Web renders as HTML attributes; the native shells omit them. */
+/** The underlying View's id, how it takes touches, and the accessibility attributes React Native Web renders. */
 export type ViewAttributes = {
+  id?: ReactNativeViewProperties["id"]
+  pointerEvents?: ReactNativeViewProperties["pointerEvents"]
   role?: ReactNativeViewProperties["role"]
   "aria-label"?: ReactNativeViewProperties["aria-label"]
   "aria-selected"?: ReactNativeViewProperties["aria-selected"]
