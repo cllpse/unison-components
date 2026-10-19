@@ -43,6 +43,8 @@ the library builds at runtime. It is generated from the tokens; rerun and commit
 bun run tailwind:css
 ```
 
+`bun run tailwind:css:watch` does the same on every change to `src/constants/` or the generator.
+
 ## Type checking
 
 ```sh

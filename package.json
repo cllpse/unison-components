@@ -8,6 +8,7 @@
     "format": "biome format --write",
     "typecheck": "tsc --noEmit",
     "tailwind:css": "bun scripts/generateTailwindCss.ts",
+    "tailwind:css:watch": "chokidar './src/constants/**/*' './scripts/generateTailwindCss.ts' --initial -c 'bun scripts/generateTailwindCss.ts'",
     "components:sync-manual:plugin": "rsync -av --delete ./dist ./src ../unison-plugin/unison-components/",
     "components:sync-watch:plugin": "chokidar './dist/**/*' './src/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
     "components:sync-manual:playground-web": "rsync -av --delete ./dist ./src ../unison-playground-web/unison-components/",

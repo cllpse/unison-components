@@ -443,7 +443,7 @@ export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturn
   if (p["typography-body-nowrap"]) {
     return {
       className:
-        "font-['SharpGrotesk20'] not-italic font-normal text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-y-hidden",
+        "font-['SharpGrotesk20'] not-italic font-normal text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
     }
   }
 
@@ -456,7 +456,7 @@ export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturn
   if (p["typography-body-small-nowrap"]) {
     return {
       className:
-        "font-['SharpGrotesk20'] not-italic font-normal text-[14px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden",
+        "font-['SharpGrotesk20'] not-italic font-normal text-[14px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
     }
   }
 
@@ -469,7 +469,7 @@ export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturn
   if (p["typography-label-nowrap"]) {
     return {
       className:
-        "font-['SharpGrotesk20'] not-italic font-medium text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden",
+        "font-['SharpGrotesk20'] not-italic font-medium text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
     }
   }
 
@@ -482,7 +482,7 @@ export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturn
   if (p["typography-label-small-nowrap"]) {
     return {
       className:
-        "font-['SharpGrotesk20'] not-italic font-medium text-[14px] leading-[21px] whitespace-nowrap text-ellipsis overflow-hidden",
+        "font-['SharpGrotesk20'] not-italic font-medium text-[14px] leading-[21px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
     }
   }
 
@@ -495,7 +495,7 @@ export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturn
   if (p["typography-mono-nowrap"]) {
     return {
       className:
-        "font-mono not-italic font-normal text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden",
+        "font-mono not-italic font-normal text-[15px] leading-[25px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
     }
   }
 
@@ -508,7 +508,7 @@ export const computeTextTypography = (p: FigmaTypography): FigmaPropertiesReturn
   if (p["typography-mono-small-nowrap"]) {
     return {
       className:
-        "font-mono not-italic font-normal text-[14px] leading-[21px] whitespace-nowrap text-ellipsis overflow-hidden",
+        "font-mono not-italic font-normal text-[14px] leading-[21px] whitespace-nowrap text-ellipsis overflow-hidden max-w-full",
     }
   }
 
