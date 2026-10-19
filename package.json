@@ -17,20 +17,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tanstack/react-table": "^9.3.1",
-    "@tanstack/react-virtual": "^3.14.18",
-    "expo-linear-gradient": "^57.0.2",
-    "framer-motion": "^14.1.1",
-    "motion": "^14.1.1",
     "react": "^19.3.0",
     "react-native": "^0.87.1",
-    "react-native-reanimated": "^4.7.1",
     "react-native-svg": "^15.15.5"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
     "chokidar-cli": "^3.0.0",
     "typescript": "^7.0.2"
   },
