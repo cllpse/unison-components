@@ -4,6 +4,12 @@ A React Native component library whose props mirror Figma's design vocabulary. I
 Web and on iOS and Android through React Native, and it is the code the Unison Figma plugin generates against. Three
 components are public: `Frame`, `Text` and `Vector`.
 
+Part of [Unison](https://github.com/cllpse/unison), alongside
+[unison-plugin](https://github.com/cllpse/unison-plugin),
+[unison-playground-web](https://github.com/cllpse/unison-playground-web),
+[unison-playground-expo](https://github.com/cllpse/unison-playground-expo) and
+[unison-website](https://github.com/cllpse/unison-website).
+
 ## Requirements
 
 - [Bun](https://bun.sh) 1.4.3
