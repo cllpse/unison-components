@@ -1,6 +1,6 @@
 {
   "name": "unison-components",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A React Native component library whose props mirror Figma's design vocabulary. Renders on web through React Native Web and on iOS and Android through React Native; the code the Unison Figma plugin generates against.",
   "keywords": [
     "react-native",
