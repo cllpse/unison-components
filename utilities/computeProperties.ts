@@ -1,6 +1,21 @@
 import { Platform, type StyleProp, type TextStyle } from "react-native"
-import type { ColorClassPrefix, ColorFlag, FlagSet, SizeFlag } from "../maps"
-import type { PointerEvents, PropertiesResult, TailwindGroup, TailwindGroupHoverFill } from "../types/base"
+import {
+  ANIMATIONS,
+  DEFAULT_TRANSITION,
+  EASINGS,
+  TRANSITION_DELAYS,
+  TRANSITION_DURATIONS,
+  TRANSITION_PROPERTIES,
+} from "../dist/design-tokens"
+import type { ClassFlag, ColorClassPrefix, ColorFlag, FlagSet, SizeFlag } from "../maps"
+import type {
+  PointerEvents,
+  PropertiesResult,
+  Style,
+  TailwindAnimate,
+  TailwindGroup,
+  TailwindGroupHoverFill,
+} from "../types/base"
 import type {
   FigmaFill,
   FigmaFillHover,
@@ -26,12 +41,17 @@ import type {
   FigmaStroke,
   FigmaStrokeHover,
   FigmaStrokeStyle,
+  FigmaTransition,
+  FigmaTransitionDelay,
+  FigmaTransitionDuration,
+  FigmaTransitionEasing,
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
   FigmaVectorHeight,
   FigmaVectorWidth,
 } from "../types/figma"
+import { MOTION, type Motion } from "./configureMotion"
 import { readFlags } from "./readFlags"
 
 // Every helper returns a shared, frozen object: token-derived flags are read through readFlags (one walk of the props
@@ -456,3 +476,152 @@ export const FONT_FEATURE_STYLE: StyleProp<TextStyle> = Platform.select({
   android: { fontFeatureSettings: '"ss01" 1' },
   default: {},
 })
+
+// Motion
+
+const TRANSITION_CACHE = new Map<ClassFlag, PropertiesResult>()
+
+/** The transition's class, and `transition-none` when the viewer asks for reduced motion. */
+export const computeElementTransition = (p: FigmaTransition): PropertiesResult => {
+  const flag = readFlags(p).transition
+
+  if (flag === undefined) return EMPTY
+
+  let transition = TRANSITION_CACHE.get(flag)
+
+  if (transition === undefined) {
+    transition = result(`${flag.className} motion-reduce:transition-none`)
+    TRANSITION_CACHE.set(flag, transition)
+  }
+
+  return transition
+}
+
+export const computeElementTransitionDuration = (p: FigmaTransitionDuration): PropertiesResult =>
+  classResult(readFlags(p), "transition-duration")
+
+export const computeElementTransitionDelay = (p: FigmaTransitionDelay): PropertiesResult =>
+  classResult(readFlags(p), "transition-delay")
+
+export const computeElementTransitionEasing = (p: FigmaTransitionEasing): PropertiesResult =>
+  classResult(readFlags(p), "transition-easing")
+
+/** The loop's class, under `motion-safe:` so it only runs when the viewer allows motion (`motion-safe:animate-spin`). */
+export const computeElementTailwindAnimate = (p: TailwindAnimate): PropertiesResult =>
+  classResult(readFlags(p), "tailwind-animate")
+
+/** An easing from the tokens: a CSS keyword (`linear`, `ease`) or cubic-bezier control points. */
+type Easing = string | readonly number[]
+
+const timingFunction = (motion: Motion, easing: Easing) =>
+  typeof easing === "string" ? easing : motion.cubicBezier(easing[0], easing[1], easing[2], easing[3])
+
+// Uniwind, outside Pro, compiles every `cubic-bezier()` to an empty string and skips `@keyframes`, so on iOS and Android
+// the motion classes do nothing. With motion configured, the native shells add these styles instead, which Reanimated's
+// CSS transitions and animations run: the same values as the classes, read from the tokens.
+const motionStyle = (
+  motion: Motion,
+  transition: ClassFlag | undefined,
+  duration: ClassFlag | undefined,
+  delay: ClassFlag | undefined,
+  easing: ClassFlag | undefined,
+  animation: ClassFlag | undefined,
+): Style => {
+  const style: Record<string, unknown> = {}
+
+  if (transition !== undefined) {
+    style.transitionProperty = TRANSITION_PROPERTIES[transition.key as keyof typeof TRANSITION_PROPERTIES]
+    style.transitionDuration =
+      duration === undefined
+        ? DEFAULT_TRANSITION.duration
+        : TRANSITION_DURATIONS[duration.key as keyof typeof TRANSITION_DURATIONS]
+    style.transitionTimingFunction = timingFunction(
+      motion,
+      easing === undefined ? DEFAULT_TRANSITION.easing : EASINGS[easing.key as keyof typeof EASINGS],
+    )
+
+    if (delay !== undefined) style.transitionDelay = TRANSITION_DELAYS[delay.key as keyof typeof TRANSITION_DELAYS]
+  }
+
+  if (animation !== undefined) {
+    const {
+      duration: animationDuration,
+      easing: animationEasing,
+      iterationCount,
+      keyframes,
+    } = ANIMATIONS[animation.key as keyof typeof ANIMATIONS]
+    const frames: Record<string, Record<string, unknown>> = {}
+
+    for (const [offset, frame] of Object.entries(keyframes) as [string, Record<string, unknown>][]) {
+      const easingAt = frame.animationTimingFunction as Easing | undefined
+
+      frames[offset] =
+        easingAt === undefined ? frame : { ...frame, animationTimingFunction: timingFunction(motion, easingAt) }
+    }
+
+    style.animationName = frames
+    style.animationDuration = animationDuration
+    style.animationTimingFunction = timingFunction(motion, animationEasing)
+    style.animationIterationCount = iterationCount
+  }
+
+  return Object.freeze(style) as Style
+}
+
+// Cached per combination of the five flags (`undefined` when absent), one Map level per flag, so a render does five
+// lookups and builds nothing once the combination has been seen.
+const MOTION_CACHE = new Map<unknown, unknown>()
+
+const level = (map: Map<unknown, unknown>, key: unknown) => {
+  let next = map.get(key) as Map<unknown, unknown> | undefined
+
+  if (next === undefined) {
+    next = new Map()
+    map.set(key, next)
+  }
+
+  return next
+}
+
+/**
+ * The native styles for a Frame's motion flags, once `configureMotion` has run; empty otherwise, and on web, where the
+ * classes do it. The native shells render through the animated components when this has styles.
+ * @example computeElementMotion({ "transition-colors": true }).styles // { transitionProperty: ["color", …], … }
+ */
+export const computeElementMotion = (
+  p: FigmaTransition & FigmaTransitionDuration & FigmaTransitionDelay & FigmaTransitionEasing & TailwindAnimate,
+): PropertiesResult => {
+  const motion = MOTION.current
+
+  if (motion === undefined) return EMPTY
+
+  const flags = readFlags(p)
+  const transition = flags.transition
+  const animation = flags["tailwind-animate"]
+
+  if (transition === undefined && animation === undefined) return EMPTY
+
+  const byEasing = level(
+    level(level(MOTION_CACHE, transition), flags["transition-duration"]),
+    flags["transition-delay"],
+  )
+  const byAnimation = level(byEasing, flags["transition-easing"])
+  let styles = byAnimation.get(animation) as PropertiesResult | undefined
+
+  if (styles === undefined) {
+    styles = Object.freeze({
+      styles: motionStyle(
+        motion,
+        transition,
+        flags["transition-duration"],
+        flags["transition-delay"],
+        flags["transition-easing"],
+        animation,
+      ),
+      className: "",
+    })
+    byAnimation.set(animation, styles)
+  }
+
+  return styles
+}

@@ -44,6 +44,10 @@
       "types": "./build/dist/native.d.ts",
       "default": "./build/dist/native.js"
     },
+    "./uniwind-motion": {
+      "types": "./build/dist/uniwind-motion.d.ts",
+      "default": "./build/dist/uniwind-motion.js"
+    },
     "./tailwind.css": "./build/dist/tailwind.css",
     "./design-tokens": {
       "types": "./build/dist/design-tokens.d.ts",
@@ -76,8 +80,8 @@
     "typecheck": "tsc --noEmit",
     "generate:tokens": "bun scripts/generateTokens.ts && biome format --write dist/design-tokens.ts",
     "generate:tailwind": "bun scripts/generateTailwind.ts",
-    "generate:tokens:watch": "chokidar './dist/design-tokens.json' './scripts/generateTokens.ts' --initial -c 'bun run generate:tokens'",
-    "generate:tailwind:watch": "chokidar './maps/**/*' './dist/design-tokens.ts' './scripts/generateTailwind.ts' --initial -c 'bun run generate:tailwind'",
+    "generate:tokens:watch": "chokidar './dist/design-tokens.json' './dist/motion-tokens.css' './scripts/generateTokens.ts' --initial -c 'bun run generate:tokens'",
+    "generate:tailwind:watch": "chokidar './maps/**/*' './dist/design-tokens.ts' './dist/motion-tokens.css' './scripts/generateTailwind.ts' --initial -c 'bun run generate:tailwind'",
     "components:sync-manual:plugin": "rsync -av --delete ./dist ./src ./maps ./types ./utilities ../unison-plugin/unison-components/",
     "components:sync-watch:plugin": "chokidar './dist/**/*' './src/**/*' './maps/**/*' './types/**/*' './utilities/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
     "components:sync-manual:playground-web": "rsync -av --delete ./dist ./src ./maps ./types ./utilities ../unison-playground-web/unison-components/",
@@ -86,7 +90,17 @@
   "peerDependencies": {
     "react": ">=19.3",
     "react-native": ">=0.87",
-    "react-native-svg": ">=15.15"
+    "react-native-svg": ">=15.15",
+    "react-native-reanimated": ">=4",
+    "uniwind": ">=1.12"
+  },
+  "peerDependenciesMeta": {
+    "react-native-reanimated": {
+      "optional": true
+    },
+    "uniwind": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
@@ -95,8 +109,11 @@
     "chokidar-cli": "^3.0.0",
     "react": "^19.3.0",
     "react-native": "^0.87.1",
+    "react-native-reanimated": "4.7.1",
     "react-native-svg": "^15.15.5",
-    "typescript": "^7.0.2"
+    "react-native-worklets": "0.13.0",
+    "typescript": "^7.0.2",
+    "uniwind": "1.12.2"
   },
   "packageManager": "bun@1.4.3"
 }

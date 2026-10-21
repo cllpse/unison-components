@@ -2,7 +2,7 @@ import type { Style, WebStyle } from "../../types/base"
 import type { KnownAttributes, KnownOnly } from "../../types/utilities"
 import FrameBase, { type Frame as FrameType } from "../base/Frame.base"
 
-export type Frame = Omit<FrameType, "style"> & {
+export type Frame = Omit<FrameType, "style" | "_animated"> & {
   style?: WebStyle
 }
 

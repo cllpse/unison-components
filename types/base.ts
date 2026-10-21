@@ -6,6 +6,7 @@ import type {
   ViewInstance,
   ViewStyle,
 } from "react-native"
+import type { ANIMATIONS } from "../dist/design-tokens"
 import type { NamedFlagName } from "../maps"
 
 /** Inline styles React Native takes on iOS and Android. */
@@ -46,6 +47,9 @@ export type TailwindGroup = {
 export type TailwindGroupHoverFill = {
   "tailwind-group-hover-fill"?: boolean
 }
+
+/** Runs an animation from motion-tokens.css in a loop (`animate-spin`), unless the viewer asks for reduced motion. */
+export type TailwindAnimate = { [key in keyof typeof ANIMATIONS as `tailwind-animate-${key}`]?: boolean }
 
 /** What a `compute*` helper returns: Tailwind classes, with inline styles only for what a class can't express. */
 export type PropertiesResult = {

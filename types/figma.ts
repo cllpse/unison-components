@@ -3,11 +3,15 @@
 import type {
   CONTAINERS,
   ColorNameAndShade,
+  EASINGS,
   RADIUS,
   SHADOWS,
   SPACING,
   SpacingPixelKey,
   TEXT_SIZES,
+  TRANSITION_DELAYS,
+  TRANSITION_DURATIONS,
+  TRANSITION_PROPERTIES,
 } from "../dist/design-tokens"
 import type { ColorGroup, NamedFlagGroup, NamedFlagName, RadiusGroup, SizeMode, SpacingGroup } from "../maps"
 import type { Simplify } from "./utilities"
@@ -86,3 +90,12 @@ export type FigmaStrokeStyle = NamedFlags<"stroke-style">
 export type FigmaFillHover = Simplify<ColorFlags<"fill-hover">>
 
 export type FigmaStrokeHover = Simplify<ColorFlags<"stroke-hover">>
+
+/** What changes animate between two states, as a Figma prototype's Smart animate between variants does. */
+export type FigmaTransition = Simplify<GroupFlags<"transition", keyof typeof TRANSITION_PROPERTIES>>
+
+export type FigmaTransitionDuration = Simplify<GroupFlags<"transition-duration", keyof typeof TRANSITION_DURATIONS>>
+
+export type FigmaTransitionDelay = Simplify<GroupFlags<"transition-delay", keyof typeof TRANSITION_DELAYS>>
+
+export type FigmaTransitionEasing = Simplify<GroupFlags<"transition-easing", keyof typeof EASINGS>>

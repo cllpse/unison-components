@@ -1,15 +1,20 @@
 import {
+  ANIMATIONS,
   COLORS,
   CONTAINERS,
   type ColorName,
   type ColorNameAndShade,
   type ColorShade,
+  EASINGS,
   type PaletteColorName,
   RADIUS,
   SHADOWS,
   SPACING,
   SPACING_TAILWIND,
   TEXT_SIZES,
+  TRANSITION_DELAYS,
+  TRANSITION_DURATIONS,
+  TRANSITION_PROPERTIES,
 } from "../dist/design-tokens"
 
 // Every token-derived flag, keyed by its full name (`padding-4`, `fill-red-500`), built once at module load from the
@@ -51,6 +56,19 @@ const COLOR_CLASS_PREFIXES: Record<ColorGroup, readonly ColorClassPrefix[]> = {
   "stroke-hover": ["hover:outline"],
 }
 
+/**
+ * Groups of motion flags from dist/motion-tokens.css, as [group, Tailwind class prefix, scale]; a flag is `<group>-<key>`
+ * (`transition-colors`, `transition-duration-150`, `transition-easing-out`). `tailwind-animate-` loops have no Figma
+ * source, so they carry the `tailwind-` prefix like `tailwind-group`, and only run when motion is allowed.
+ */
+export const MOTION_GROUPS = [
+  ["transition", "transition", TRANSITION_PROPERTIES],
+  ["transition-duration", "duration", TRANSITION_DURATIONS],
+  ["transition-delay", "delay", TRANSITION_DELAYS],
+  ["transition-easing", "ease", EASINGS],
+  ["tailwind-animate", "motion-safe:animate", ANIMATIONS],
+] as const
+
 /** Figma's sizing modes, which `width-` and `height-` take besides the spacing scale (`width-fill`). */
 export const SIZE_MODES = ["fill", "hug"] as const
 
@@ -76,11 +94,13 @@ export const NAMED_FLAGS = {
   "typography-align": ["typography-align-left", "typography-align-center", "typography-align-right"],
   "typography-decoration": ["typography-decoration-underline"],
   "pointer-events": ["pointer-events-none", "pointer-events-auto"],
+  tailwind: ["tailwind-group", "tailwind-group-hover-fill"],
 } as const
 
 export type SpacingGroup = (typeof SPACING_GROUPS)[number][0]
 export type RadiusGroup = (typeof RADIUS_GROUPS)[number][0]
 export type ColorGroup = (typeof COLOR_GROUPS)[number]
+export type MotionGroup = (typeof MOTION_GROUPS)[number][0]
 export type SizeMode = (typeof SIZE_MODES)[number]
 export type NamedFlagGroup = keyof typeof NAMED_FLAGS
 export type NamedFlagName<Group extends NamedFlagGroup = NamedFlagGroup> = (typeof NAMED_FLAGS)[Group][number]
@@ -93,10 +113,12 @@ export type ColorClassPrefix =
   | "hover:outline"
   | "group-hover:text"
 
-/** A flag that maps to one Tailwind class: spacing, radius, shadow and text size flags. */
+/** A flag that maps to one Tailwind class: spacing, radius, shadow, text size and motion flags. */
 export type ClassFlag = Readonly<{
-  group: SpacingGroup | RadiusGroup | "effect-shadow" | "typography"
+  group: SpacingGroup | RadiusGroup | MotionGroup | "effect-shadow" | "typography"
   className: string
+  /** The flag's name after its group prefix, for motion flags: the key of its scale (`colors`, `150`, `out`). */
+  key?: string
 }>
 
 /**
@@ -123,7 +145,9 @@ export type NamedFlag = Readonly<{ group: "other" }>
 export type Flag = ClassFlag | SizeFlag | ColorFlag | NamedFlag
 
 /** The flags a props object sets, one per group (see readFlags). */
-export type FlagSet = { [Group in SpacingGroup | RadiusGroup | "effect-shadow" | "typography"]?: ClassFlag } & {
+export type FlagSet = {
+  [Group in SpacingGroup | RadiusGroup | MotionGroup | "effect-shadow" | "typography"]?: ClassFlag
+} & {
   width?: Extract<SizeFlag, { mode: "exact" }>
   height?: Extract<SizeFlag, { mode: "exact" }>
   "width-mode"?: Extract<SizeFlag, { mode: SizeMode }>
@@ -149,6 +173,10 @@ for (const [group, prefix] of RADIUS_GROUPS) {
 for (const name of SHADOWS) add(`effect-shadow-${name}`, { group: "effect-shadow", className: `shadow-${name}` })
 
 for (const size of TEXT_SIZES) add(`typography-${size}`, { group: "typography", className: `text-${size}` })
+
+for (const [group, prefix, scale] of MOTION_GROUPS) {
+  for (const key of Object.keys(scale)) add(`${group}-${key}`, { group, className: `${prefix}-${key}`, key })
+}
 
 for (const axis of ["width", "height"] as const) {
   for (const key of Object.keys(SPACING) as (keyof typeof SPACING)[]) {
