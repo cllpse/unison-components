@@ -25,6 +25,12 @@ Figma's design vocabulary. See README.md for the platform-extension model.
   `bun run generate:tokens`: `TOKENS`, plus the scales under their public names (`COLORS`, `SPACING`, `RADIUS`, `CONTAINERS`,
   `SHADOWS`, `TEXT_SIZES`) and their types. Import the scales from there directly. Runtime code reads only the
   scales, so `TOKENS` (both modes, shadow layers, typography) stays out of app bundles unless a consumer imports it.
+  The motion scales (`EASINGS`, `TRANSITION_DURATIONS`, `TRANSITION_DELAYS`, `TRANSITION_PROPERTIES`,
+  `DEFAULT_TRANSITION`, `ANIMATIONS`) come from `dist/motion-tokens.css`, the one place to edit motion, which
+  `bun run generate:tailwind` also copies into `tailwind.css`.
+- `dist/uniwind-motion.ts` — opt-in entry for Uniwind apps: hands Reanimated's animated components to
+  `configureMotion`, so native Frames with a `transition-` or `tailwind-animate-` flag animate. NativeWind apps leave it
+  out and get the classes.
 - `types` — prop and return types; `maps` — the flag table built from the scales (`FLAGS`);
   `utilities` — pure helpers.
 

@@ -29,8 +29,9 @@ bun add unison-components
 
 Import the components from `unison-components`. Metro picks the iOS and Android build through the `react-native` export
 condition and every other bundler the web build; `unison-components/web` and `unison-components/native` name one
-explicitly. Nothing else in the library is public, except `maps`, `types/figma`, `design-tokens` and `design-tokens.json`,
-which the Figma plugin reads. Then import the generated stylesheet from the app's Tailwind entry stylesheet:
+explicitly. Nothing else in the library is public, except `maps`, `types/figma`, `design-tokens` and
+`design-tokens.json`, which the Figma plugin reads, and `uniwind-motion` (see [Motion](#motion)). Then import the
+generated stylesheet from the app's Tailwind entry stylesheet:
 
 ```css
 @import "unison-components/tailwind.css";
@@ -57,12 +58,15 @@ import { Frame, Text, Vector } from "unison-components"
 ## Flags
 
 Styling is set with boolean, hyphenated flags named after Figma's properties. Components emit Tailwind classes only,
-no inline styles.
+no inline styles, except for motion on iOS and Android (see [Motion](#motion)).
 
 - From the tokens: `fill-`, `fill-hover-`, `stroke-` and `stroke-hover-<color>` (`fill-red-500`, `fill-white`),
   `width-` and `height-<spacing>` (`width-4`), `width-<container>` (`width-md`), `padding-` and `gap-<spacing>` (with
   `-vertical`, `-horizontal` and per-side variants), `corner-radius-<radius>`, `effect-shadow-<shadow>` and
   `typography-<size>`.
+- From _dist/motion-tokens.css_ (`Frame` only): `transition-<property>` (`transition-colors`),
+  `transition-duration-<ms>`, `transition-delay-<ms>`, `transition-easing-<name>` (`transition-easing-out`) and
+  `tailwind-animate-<name>` (`tailwind-animate-spin`).
 - Fixed: `autolayout-horizontal` / `-vertical`, `width-fill` / `width-hug` (and `height-`), `alignment-<position>`,
   `stroke-style-dashed` / `-solid`, `typography-align-<side>`, `typography-decoration-underline`, `effect-shadow-none`
   and `pointer-events-none` / `-auto`.
@@ -147,6 +151,64 @@ TOKENS.units.Default["spacing-4"] // 16
 From the parent [unison](https://github.com/cllpse/unison) repository the same scripts run as
 `bun run components:<script>`.
 
+## Motion
+
+_dist/motion-tokens.css_ is the one place to edit animations, easings and transitions, as _dist/design-tokens.json_ is
+for every other design value. It holds Tailwind 4's own motion values as Tailwind theme variables, under the names
+Tailwind reads:
+
+| Variables                                  | Classes                            | Flags                            |
+| ------------------------------------------ | ---------------------------------- | -------------------------------- |
+| `--ease-<name>`                            | `ease-<name>`                      | `transition-easing-<name>`       |
+| `--transition-duration-<ms>`               | `duration-<ms>`                    | `transition-duration-<ms>`       |
+| `--transition-delay-<ms>`                  | `delay-<ms>`                       | `transition-delay-<ms>`          |
+| `--transition-property-<name>`             | `transition-<name>`                | `transition-<name>`              |
+| `--default-transition-duration`, `--default-transition-timing-function` | every `transition-<name>` without a duration or easing | |
+| `--animate-<name>` and its `@keyframes`    | `motion-safe:animate-<name>`       | `tailwind-animate-<name>`        |
+
+A transition flag also adds `motion-reduce:transition-none`, and an animation only runs under `motion-safe:`, so both
+respect the viewer's reduced-motion setting on web. `tailwind-animate-` flags have no Figma source, so they carry the
+`tailwind-` prefix like `tailwind-group`.
+
+```tsx
+<Frame fill-blue-500 transition-colors transition-duration-200 transition-easing-out />
+<Frame fill-violet-600 width-8 height-8 tailwind-animate-spin />
+```
+
+### Changing motion
+
+Edit _dist/motion-tokens.css_, then run `bun run generate:tokens` and `bun run generate:tailwind` (the watchers pick it
+up too). The first writes the motion scales into _dist/design-tokens.ts_ (`EASINGS`, `TRANSITION_DURATIONS`,
+`TRANSITION_DELAYS`, `TRANSITION_PROPERTIES`, `DEFAULT_TRANSITION` and `ANIMATIONS`, with the keyframes in React
+Native's form), which the flags and the native styles are built from. The second copies the file into
+_dist/tailwind.css_, so web reads the same values. Commit all three files together.
+
+The generator understands custom properties and `@keyframes` inside the file's one `@theme`. Keyframes may set
+`transform`, `opacity` and `animation-timing-function`; anything else stops the build.
+
+### iOS and Android
+
+On web the flags are plain Tailwind classes. On iOS and Android it depends on the styling library:
+
+- **Uniwind** (outside Pro) drops easings and keyframes, so the classes alone do nothing. Opt in to Reanimated motion
+  with one import in the app's entry file, before the first render:
+
+  ```ts
+  import "unison-components/uniwind-motion"
+  ```
+
+  Install `react-native-reanimated` 4 and `react-native-worklets` (`bunx expo install react-native-reanimated
+  react-native-worklets`). A `Frame` with a motion flag then renders through Reanimated's animated `View` or
+  `Pressable`, wrapped with Uniwind's `withUniwind` so its classes still apply, and gets its motion as Reanimated CSS
+  styles built from _dist/design-tokens.ts_. Every other `Frame` stays a plain `View`.
+- **NativeWind** documents `transition-` and `animate-` classes as supported through Reanimated, so leave the import
+  out and let it run the classes (not yet tried with this library).
+
+`react-native-reanimated` and `uniwind` are optional peer dependencies, so a NativeWind app never needs Uniwind and an
+app without _unison-components/uniwind-motion_ never needs Reanimated. A transition animates whenever the `Frame`'s
+styles change between renders, such as when an app swaps one variant's flags for another's. Touch screens have no hover,
+so `fill-hover-` changes don't transition there. Reduced motion is not yet handled on iOS and Android.
+
 ## Platform files
 
 Files under _src/_ use platform extensions: _.web.tsx_ is used only on web, _.native.tsx_ only on iOS and Android, and
@@ -157,7 +219,9 @@ component, so platform-only libraries (such as React Native Reanimated) stay out
 
 - `bun run build` / `build:watch` - compile the library into _build/_, the folder the npm package ships
 - `bun run generate:tokens` / `generate:tokens:watch` - write _dist/design-tokens.ts_ from _dist/design-tokens.json_
-- `bun run generate:tailwind` / `generate:tailwind:watch` - write _dist/tailwind.css_ from the tokens and _maps/_
+  and _dist/motion-tokens.css_
+- `bun run generate:tailwind` / `generate:tailwind:watch` - write _dist/tailwind.css_ from the tokens, _maps/_ and
+  _dist/motion-tokens.css_
 - `bun run components:sync-manual:plugin` / `components:sync-watch:plugin` - copy the library into
   _../unison-plugin/unison-components_ once, or on every change
 - `bun run components:sync-manual:playground-web` / `components:sync-watch:playground-web` - the same for
