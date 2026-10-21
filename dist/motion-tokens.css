@@ -1,0 +1,95 @@
+/*
+ * Every animation, easing and transition value Tailwind 4.3.3 ships, copied from its theme.css and utilities. This is
+ * the one place to edit motion, as dist/design-tokens.json is for colors, units, typography and shadows. Each value is
+ * a Tailwind theme variable under the namespace Tailwind itself reads, so the file works as a `@theme` source on web
+ * as-is, and is the reference a generator reads to build motion for iOS and Android.
+ *
+ * Not imported by dist/tailwind.css yet.
+ */
+
+@theme {
+  /* Easings: `ease-<name>` sets `transition-timing-function`. */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*
+   * Durations: `duration-<name>` sets `transition-duration`. Tailwind accepts any integer as milliseconds
+   * (`duration-250`); these are the steps it suggests.
+   */
+  --transition-duration-0: 0ms;
+  --transition-duration-75: 75ms;
+  --transition-duration-100: 100ms;
+  --transition-duration-150: 150ms;
+  --transition-duration-200: 200ms;
+  --transition-duration-300: 300ms;
+  --transition-duration-500: 500ms;
+  --transition-duration-700: 700ms;
+  --transition-duration-1000: 1000ms;
+
+  /* Delays: `delay-<name>` sets `transition-delay`, with the same steps and any integer accepted. */
+  --transition-delay-0: 0ms;
+  --transition-delay-75: 75ms;
+  --transition-delay-100: 100ms;
+  --transition-delay-150: 150ms;
+  --transition-delay-200: 200ms;
+  --transition-delay-300: 300ms;
+  --transition-delay-500: 500ms;
+  --transition-delay-700: 700ms;
+  --transition-delay-1000: 1000ms;
+
+  /*
+   * What each `transition-<name>` animates. Every one of them also sets the default duration and timing function
+   * below, so `transition-colors` alone is a complete transition.
+   */
+  --transition-property-colors:
+    color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from,
+    --tw-gradient-via, --tw-gradient-to;
+  --transition-property-opacity: opacity;
+  --transition-property-shadow: box-shadow;
+  --transition-property-transform: transform, translate, scale, rotate;
+
+  /* The duration and timing function every `transition-*` uses unless `duration-*` or `ease-*` is set. */
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Animations: `animate-<name>` sets `animation`, and its keyframes follow. */
+  --animate-spin: spin 1s linear infinite;
+  --animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-bounce: bounce 1s infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes ping {
+    75%,
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(-25%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+}
