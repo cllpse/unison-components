@@ -49,7 +49,7 @@ export type TailwindGroupHoverFill = {
 }
 
 /** Runs an animation from motion-tokens.css in a loop (`animate-spin`), unless the viewer asks for reduced motion. */
-export type TailwindAnimate = { [key in keyof typeof ANIMATIONS as `tailwind-animate-${key}`]?: boolean }
+export type Animate = { [key in keyof typeof ANIMATIONS as `animate-${key}`]?: boolean }
 
 /** What a `compute*` helper returns: Tailwind classes, with inline styles only for what a class can't express. */
 export type PropertiesResult = {

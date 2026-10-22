@@ -1,6 +1,6 @@
 // Turns on motion for iOS and Android in apps styled with Uniwind: import it once, before the first render
 // (`import "unison-components/uniwind-motion"`). Uniwind outside Pro drops easings and keyframes, so Frames with a
-// `transition-` or `tailwind-animate-` flag render through Reanimated's animated components instead, wrapped with
+// `transition-` or `animate-` flag render through Reanimated's animated components instead, wrapped with
 // `withUniwind` so their classes resolve to styles Reanimated sees. NativeWind animates the classes itself, so apps
 // using it leave this out.
 import { Pressable } from "react-native"

@@ -58,15 +58,15 @@ const COLOR_CLASS_PREFIXES: Record<ColorGroup, readonly ColorClassPrefix[]> = {
 
 /**
  * Groups of motion flags from dist/motion-tokens.css, as [group, Tailwind class prefix, scale]; a flag is `<group>-<key>`
- * (`transition-colors`, `transition-duration-150`, `transition-easing-out`). `tailwind-animate-` loops have no Figma
- * source, so they carry the `tailwind-` prefix like `tailwind-group`, and only run when motion is allowed.
+ * (`transition-colors`, `transition-duration-150`, `transition-easing-out`, `animate-spin`). `animate-` loops only run
+ * when motion is allowed.
  */
 export const MOTION_GROUPS = [
   ["transition", "transition", TRANSITION_PROPERTIES],
   ["transition-duration", "duration", TRANSITION_DURATIONS],
   ["transition-delay", "delay", TRANSITION_DELAYS],
   ["transition-easing", "ease", EASINGS],
-  ["tailwind-animate", "motion-safe:animate", ANIMATIONS],
+  ["animate", "motion-safe:animate", ANIMATIONS],
 ] as const
 
 /** Figma's sizing modes, which `width-` and `height-` take besides the spacing scale (`width-fill`). */
@@ -93,6 +93,7 @@ export const NAMED_FLAGS = {
   "stroke-style": ["stroke-style-dashed", "stroke-style-solid"],
   "typography-align": ["typography-align-left", "typography-align-center", "typography-align-right"],
   "typography-decoration": ["typography-decoration-underline"],
+  "typography-settings": ["typography-settings-truncate"],
   "pointer-events": ["pointer-events-none", "pointer-events-auto"],
   tailwind: ["tailwind-group", "tailwind-group-hover-fill"],
 } as const

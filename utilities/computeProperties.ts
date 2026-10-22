@@ -9,10 +9,10 @@ import {
 } from "../dist/design-tokens"
 import type { ClassFlag, ColorClassPrefix, ColorFlag, FlagSet, SizeFlag } from "../maps"
 import type {
+  Animate,
   PointerEvents,
   PropertiesResult,
   Style,
-  TailwindAnimate,
   TailwindGroup,
   TailwindGroupHoverFill,
 } from "../types/base"
@@ -48,6 +48,7 @@ import type {
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
+  FigmaTypographySettings,
   FigmaVectorHeight,
   FigmaVectorWidth,
 } from "../types/figma"
@@ -427,6 +428,17 @@ export const computeTextTypographyDecoration = (p: FigmaTypographyDecoration): P
   return EMPTY
 }
 
+// `line-clamp-1` rather than Tailwind's `truncate`: Uniwind turns a line clamp into React Native's numberOfLines, the
+// only way iOS and Android cut text off with an ellipsis, while `truncate` (nowrap, overflow hidden) gives them none.
+// On web both end the first line with an ellipsis.
+const TRUNCATE = result("line-clamp-1")
+
+export const computeTextTypographySettings = (p: FigmaTypographySettings): PropertiesResult => {
+  if (p["typography-settings-truncate"]) return TRUNCATE
+
+  return EMPTY
+}
+
 // Vector
 
 /**
@@ -507,8 +519,7 @@ export const computeElementTransitionEasing = (p: FigmaTransitionEasing): Proper
   classResult(readFlags(p), "transition-easing")
 
 /** The loop's class, under `motion-safe:` so it only runs when the viewer allows motion (`motion-safe:animate-spin`). */
-export const computeElementTailwindAnimate = (p: TailwindAnimate): PropertiesResult =>
-  classResult(readFlags(p), "tailwind-animate")
+export const computeElementAnimate = (p: Animate): PropertiesResult => classResult(readFlags(p), "animate")
 
 /** An easing from the tokens: a CSS keyword (`linear`, `ease`) or cubic-bezier control points. */
 type Easing = string | readonly number[]
@@ -589,7 +600,7 @@ const level = (map: Map<unknown, unknown>, key: unknown) => {
  * @example computeElementMotion({ "transition-colors": true }).styles // { transitionProperty: ["color", …], … }
  */
 export const computeElementMotion = (
-  p: FigmaTransition & FigmaTransitionDuration & FigmaTransitionDelay & FigmaTransitionEasing & TailwindAnimate,
+  p: FigmaTransition & FigmaTransitionDuration & FigmaTransitionDelay & FigmaTransitionEasing & Animate,
 ): PropertiesResult => {
   const motion = MOTION.current
 
@@ -597,7 +608,7 @@ export const computeElementMotion = (
 
   const flags = readFlags(p)
   const transition = flags.transition
-  const animation = flags["tailwind-animate"]
+  const animation = flags.animate
 
   if (transition === undefined && animation === undefined) return EMPTY
 

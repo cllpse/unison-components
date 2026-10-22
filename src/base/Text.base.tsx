@@ -7,6 +7,7 @@ import type {
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
+  FigmaTypographySettings,
 } from "../../types/figma"
 import {
   computeTextFill,
@@ -15,6 +16,7 @@ import {
   computeTextTypography,
   computeTextTypographyAlignment,
   computeTextTypographyDecoration,
+  computeTextTypographySettings,
   FONT_FEATURE_STYLE,
 } from "../../utilities/computeProperties"
 
@@ -24,6 +26,7 @@ export type Text = FigmaFill &
   FigmaTypography &
   FigmaTypographyAlignment &
   FigmaTypographyDecoration &
+  FigmaTypographySettings &
   TailwindGroupHoverFill & {
     children?: TextProperties["children"]
     style?: Style
@@ -35,6 +38,7 @@ export default (p: Text) => {
     computeTextTypography(p).className,
     computeTextTypographyAlignment(p).className,
     computeTextTypographyDecoration(p).className,
+    computeTextTypographySettings(p).className,
     computeTextFill(p).className,
     computeTextFillHover(p).className,
     computeTextTailwindGroupHoverFill(p).className,

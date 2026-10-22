@@ -20,7 +20,7 @@ export type Motion = Readonly<{
 export const MOTION: { current?: Motion } = {}
 
 /**
- * Turn on motion for iOS and Android: Frames with a `transition-` or `tailwind-animate-` flag render through these
+ * Turn on motion for iOS and Android: Frames with a `transition-` or `animate-` flag render through these
  * animated components, with the easings, durations and keyframes from dist/motion-tokens.css as React Native styles.
  * Call it once before the first render; `unison-components/uniwind-motion` does it for Uniwind apps.
  * @example configureMotion({ View: withUniwind(Animated.View), Pressable: withUniwind(AnimatedPressable), cubicBezier })

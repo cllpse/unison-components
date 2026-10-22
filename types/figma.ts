@@ -77,6 +77,9 @@ export type FigmaTypographyAlignment = NamedFlags<"typography-align">
 
 export type FigmaTypographyDecoration = NamedFlags<"typography-decoration">
 
+/** Figma's "Truncate text" setting: one line, cut off with an ellipsis. */
+export type FigmaTypographySettings = NamedFlags<"typography-settings">
+
 export type FigmaVectorWidth = Simplify<GroupFlags<"width", SpacingPixelKey>>
 
 export type FigmaVectorHeight = Simplify<GroupFlags<"height", SpacingPixelKey>>

@@ -66,9 +66,10 @@ no inline styles, except for motion on iOS and Android (see [Motion](#motion)).
   `typography-<size>`.
 - From _dist/motion-tokens.css_ (`Frame` only): `transition-<property>` (`transition-colors`),
   `transition-duration-<ms>`, `transition-delay-<ms>`, `transition-easing-<name>` (`transition-easing-out`) and
-  `tailwind-animate-<name>` (`tailwind-animate-spin`).
+  `animate-<name>` (`animate-spin`).
 - Fixed: `autolayout-horizontal` / `-vertical`, `width-fill` / `width-hug` (and `height-`), `alignment-<position>`,
-  `stroke-style-dashed` / `-solid`, `typography-align-<side>`, `typography-decoration-underline`, `effect-shadow-none`
+  `stroke-style-dashed` / `-solid`, `typography-align-<side>`, `typography-decoration-underline`,
+  `typography-settings-truncate` (one line with an ellipsis), `effect-shadow-none`
   and `pointer-events-none` / `-auto`.
 - Set at most one flag per group; if several are set, the first wins.
 - An unknown or misspelled flag (`fill-red-55`) is a type error, and outside production builds it is also logged.
@@ -164,15 +165,14 @@ Tailwind reads:
 | `--transition-delay-<ms>`                  | `delay-<ms>`                       | `transition-delay-<ms>`          |
 | `--transition-property-<name>`             | `transition-<name>`                | `transition-<name>`              |
 | `--default-transition-duration`, `--default-transition-timing-function` | every `transition-<name>` without a duration or easing | |
-| `--animate-<name>` and its `@keyframes`    | `motion-safe:animate-<name>`       | `tailwind-animate-<name>`        |
+| `--animate-<name>` and its `@keyframes`    | `motion-safe:animate-<name>`       | `animate-<name>`                 |
 
 A transition flag also adds `motion-reduce:transition-none`, and an animation only runs under `motion-safe:`, so both
-respect the viewer's reduced-motion setting on web. `tailwind-animate-` flags have no Figma source, so they carry the
-`tailwind-` prefix like `tailwind-group`.
+respect the viewer's reduced-motion setting on web.
 
 ```tsx
 <Frame fill-blue-500 transition-colors transition-duration-200 transition-easing-out />
-<Frame fill-violet-600 width-8 height-8 tailwind-animate-spin />
+<Frame fill-violet-600 width-8 height-8 animate-spin />
 ```
 
 ### Changing motion

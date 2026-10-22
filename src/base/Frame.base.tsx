@@ -7,10 +7,10 @@ import {
   View,
 } from "react-native"
 import type {
+  Animate,
   ClassName,
   PointerEvents,
   Style,
-  TailwindAnimate,
   TailwindGroup,
   ViewAttributes,
   ViewReference,
@@ -46,8 +46,8 @@ import type {
   FigmaTransitionEasing,
 } from "../../types/figma"
 import {
+  computeElementAnimate,
   computeElementPointerEvents,
-  computeElementTailwindAnimate,
   computeElementTailwindGroup,
   computeElementTransition,
   computeElementTransitionDelay,
@@ -101,7 +101,7 @@ export type Frame = FigmaFrameAutolayout &
   FigmaTransitionDuration &
   FigmaTransitionDelay &
   FigmaTransitionEasing &
-  TailwindAnimate &
+  Animate &
   PointerEvents &
   TailwindGroup &
   ViewAttributes &
@@ -155,7 +155,7 @@ export default (p: Frame) => {
     animated ? undefined : computeElementTransitionDuration(p).className,
     animated ? undefined : computeElementTransitionDelay(p).className,
     animated ? undefined : computeElementTransitionEasing(p).className,
-    animated ? undefined : computeElementTailwindAnimate(p).className,
+    animated ? undefined : computeElementAnimate(p).className,
     p.className,
   ]
     .filter(Boolean)
