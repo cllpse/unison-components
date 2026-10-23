@@ -40,10 +40,7 @@ generated stylesheet from the app's Tailwind entry stylesheet:
 The package is compiled JavaScript with type declarations, so consumers need no transpiling and no build step for the
 stylesheet.
 
-Consumers that still add the library as a git submodule wire up a `@unison` path alias for
-_unison-components/dist/web_ (web) or _unison-components/dist/native_ (iOS and Android) and import
-_./unison-components/dist/tailwind.css_ instead. See
-[unison-playground-web](https://github.com/cllpse/unison-playground-web) and
+See [unison-playground-web](https://github.com/cllpse/unison-playground-web) and
 [unison-playground-expo](https://github.com/cllpse/unison-playground-expo) for working setups.
 
 ```tsx
@@ -224,8 +221,11 @@ component, so platform-only libraries (such as React Native Reanimated) stay out
   _dist/motion-tokens.css_
 - `bun run components:sync-manual:plugin` / `components:sync-watch:plugin` - copy the library into
   _../unison-plugin/unison-components_ once, or on every change
-- `bun run components:sync-manual:playground-web` / `components:sync-watch:playground-web` - the same for
-  _../unison-playground-web/unison-components_
+- `bun run components:sync-manual:playground-web` / `components:sync-watch:playground-web` - build the library and copy
+  _build/_ and _package.json_ over the installed package in _../unison-playground-web/node_modules/unison-components_,
+  once or on every change
+- `bun run components:sync-manual:playground-expo` / `components:sync-watch:playground-expo` - the same for
+  _../unison-playground-expo/node_modules/unison-components_
 - `bun run lint` - Biome check
 - `bun run format` - Biome format, writing changes
 - `bun run typecheck` - `tsc --noEmit`

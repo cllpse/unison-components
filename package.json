@@ -32,8 +32,11 @@
   ],
   "exports": {
     ".": {
+      "react-native": {
+        "types": "./build/dist/native.d.ts",
+        "default": "./build/dist/native.js"
+      },
       "types": "./build/dist/web.d.ts",
-      "react-native": "./build/dist/native.js",
       "default": "./build/dist/web.js"
     },
     "./web": {
@@ -84,8 +87,10 @@
     "generate:tailwind:watch": "chokidar './maps/**/*' './dist/design-tokens.ts' './dist/motion-tokens.css' './scripts/generateTailwind.ts' --initial -c 'bun run generate:tailwind'",
     "components:sync-manual:plugin": "rsync -av --delete ./dist ./src ./maps ./types ./utilities ../unison-plugin/unison-components/",
     "components:sync-watch:plugin": "chokidar './dist/**/*' './src/**/*' './maps/**/*' './types/**/*' './utilities/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-plugin/unison-components/{path}'; else rsync -aR '{path}' ../unison-plugin/unison-components/; fi\"",
-    "components:sync-manual:playground-web": "rsync -av --delete ./dist ./src ./maps ./types ./utilities ../unison-playground-web/unison-components/",
-    "components:sync-watch:playground-web": "chokidar './dist/**/*' './src/**/*' './maps/**/*' './types/**/*' './utilities/**/*' -c \"if [ '{event}' = 'unlink' ] || [ '{event}' = 'unlinkDir' ]; then rm -rf '../unison-playground-web/unison-components/{path}'; else rsync -aR '{path}' ../unison-playground-web/unison-components/; fi\""
+    "components:sync-manual:playground-web": "bun run build && rsync -av --delete ./build ./package.json ../unison-playground-web/node_modules/unison-components/",
+    "components:sync-watch:playground-web": "chokidar './dist/**/*' './src/**/*' './maps/**/*' './types/**/*' './utilities/**/*' -c 'bun run components:sync-manual:playground-web'",
+    "components:sync-manual:playground-expo": "bun run build && rsync -av --delete ./build ./package.json ../unison-playground-expo/node_modules/unison-components/",
+    "components:sync-watch:playground-expo": "chokidar './dist/**/*' './src/**/*' './maps/**/*' './types/**/*' './utilities/**/*' -c 'bun run components:sync-manual:playground-expo'"
   },
   "peerDependencies": {
     "react": ">=19.3",
