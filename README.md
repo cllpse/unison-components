@@ -82,9 +82,9 @@ nearest `group` frame is, with `group-<state>-` in front, as in Tailwind's `grou
 
 | Component | Own states                                                                      | Group states                                                       |
 | --------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `Frame`   | `fill-` and `stroke-hover-`, `fill-` and `stroke-focus-visible-`, `fill-active-`, `fill-disabled-`, `fill-selected-` | `group-hover-fill-`, `group-active-fill-`, `group-focus-visible-fill-`, `group-hover-stroke-` |
-| `Text`    | `fill-hover-`                                                                   | `group-hover-fill-`, `group-active-fill-`, `group-focus-visible-fill-` |
-| `Vector`  |                                                                                 | `group-hover-fill-`, `group-active-fill-`, `group-focus-visible-fill-` |
+| `Frame`   | `fill-hover-`, `fill-active-`, `fill-focus-`, `fill-focus-visible-`, `fill-disabled-`, `fill-selected-`, `stroke-hover-`, `stroke-focus-`, `stroke-focus-visible-` | `group-hover-fill-`, `group-active-fill-`, `group-focus-fill-`, `group-focus-visible-fill-`, `group-hover-stroke-` |
+| `Text`    | `fill-hover-`                                                                   | `group-hover-fill-`, `group-active-fill-`, `group-focus-fill-`, `group-focus-visible-fill-` |
+| `Vector`  |                                                                                 | `group-hover-fill-`, `group-active-fill-`, `group-focus-fill-`, `group-focus-visible-fill-` |
 
 ```tsx
 <Frame group fill-blue-500 fill-hover-blue-600 fill-active-blue-700 fill-disabled-gray-300 disabled={busy} onPress={buy}>
@@ -94,10 +94,13 @@ nearest `group` frame is, with `group-<state>-` in front, as in Tailwind's `grou
 
 - A `Frame` takes focus, and on iOS and Android presses (`active`), only with `onPress`, `onPressIn` or `onPressOut`.
   `disabled` also stops its presses; `aria-selected` sets its selected state.
-- Touch screens have no hover, so `hover` states only apply on web. On iOS and Android, `focus-visible` is any focus,
-  which only comes from a keyboard or a TV remote there.
-- Group states need Uniwind Pro on iOS and Android, and there only `group-active-` and `group-focus-visible-` apply,
-  with a pressable `group` frame. Without Pro the classes do nothing there.
+- Touch screens have no hover, so `hover` states only apply on web.
+- `focus` and `focus-visible` are separate states, as in CSS: `focus` is any focus, a click included, and
+  `focus-visible` the focus a browser shows, which is typically from a keyboard. Keyboard focus is both, and then
+  `focus-visible` wins. On iOS and Android focus only comes from a keyboard or a TV remote, so both states are any
+  focus there, and `focus-visible` still wins where both are set.
+- Group states need Uniwind Pro on iOS and Android, and there only `group-active-`, `group-focus-` and
+  `group-focus-visible-` apply, with a pressable `group` frame. Without Pro the classes do nothing there.
 - The element's own states win over its group's, and `disabled` and `selected` over hover, focus and press.
 - `COLOR_COMPONENTS` in _maps/_ lists the states per component and property; a state added there is typed, read and
   safelisted with the rest. `STATE_VARIANTS` holds the Tailwind variant each state matches on web and on iOS and

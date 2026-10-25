@@ -49,12 +49,14 @@ export const RADIUS_GROUPS = [
  * Per state, the Tailwind variant that matches it on web and on iOS and Android (Uniwind): in front of the class for
  * the element's own state (`active:bg-red-500`), after `group-` for its group's (`group-active:bg-red-500`). Uniwind
  * has no hover and can't read `:focus-visible`, but focus there only comes from a keyboard or a TV remote, which is
- * what focus-visible means on web. It can't read `aria-` attributes either, so disabled and selected match the `data-`
- * attributes a Frame mirrors them to.
+ * what focus-visible means on web, so focus-visible is `focus` there too; where both are set, focus-visible wins on
+ * every platform (see `colorStatesResult`). Uniwind can't read `aria-` attributes either, so disabled and selected
+ * match the `data-` attributes a Frame mirrors them to.
  */
 export const STATE_VARIANTS = {
   hover: { web: "hover", native: "hover" },
   active: { web: "active", native: "active" },
+  focus: { web: "focus", native: "focus" },
   "focus-visible": { web: "focus-visible", native: "focus" },
   disabled: { web: "data-[disabled=true]", native: "data-[disabled=true]" },
   selected: { web: "data-[selected=true]", native: "data-[selected=true]" },
@@ -70,13 +72,13 @@ export const COLOR_COMPONENTS = {
   Frame: {
     fill: {
       prefix: "bg",
-      states: ["hover", "active", "focus-visible", "disabled", "selected"],
-      groupStates: ["hover", "active", "focus-visible"],
+      states: ["hover", "active", "focus", "focus-visible", "disabled", "selected"],
+      groupStates: ["hover", "active", "focus", "focus-visible"],
     },
-    stroke: { prefix: "outline", states: ["hover", "focus-visible"], groupStates: ["hover"] },
+    stroke: { prefix: "outline", states: ["hover", "focus", "focus-visible"], groupStates: ["hover"] },
   },
-  Text: { fill: { prefix: "text", states: ["hover"], groupStates: ["hover", "active", "focus-visible"] } },
-  Vector: { fill: { prefix: "text", states: [], groupStates: ["hover", "active", "focus-visible"] } },
+  Text: { fill: { prefix: "text", states: ["hover"], groupStates: ["hover", "active", "focus", "focus-visible"] } },
+  Vector: { fill: { prefix: "text", states: [], groupStates: ["hover", "active", "focus", "focus-visible"] } },
 } as const satisfies Record<string, Record<string, ColorConfig>>
 
 type ColorConfig = Readonly<{ prefix: string; states: readonly State[]; groupStates: readonly State[] }>

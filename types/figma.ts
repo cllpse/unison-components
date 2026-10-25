@@ -112,13 +112,13 @@ export type FigmaStroke = Simplify<ColorFlags<"stroke">>
 
 export type FigmaStrokeStyle = NamedFlags<"stroke-style">
 
-/** `fill-hover-`, `fill-active-`, `fill-focus-visible-`, `fill-disabled-` and `fill-selected-`. */
+/** `fill-hover-`, `fill-active-`, `fill-focus-`, `fill-focus-visible-`, `fill-disabled-` and `fill-selected-`. */
 export type FigmaFrameFillState = Simplify<StateFlags<FigmaFill, "fill", ColorState<"Frame", "fill">>>
 
-/** `stroke-hover-` and `stroke-focus-visible-`. */
+/** `stroke-hover-`, `stroke-focus-` and `stroke-focus-visible-`. */
 export type FigmaFrameStrokeState = Simplify<StateFlags<FigmaStroke, "stroke", ColorState<"Frame", "stroke">>>
 
-/** `group-hover-fill-`, `group-active-fill-` and `group-focus-visible-fill-`. */
+/** `group-hover-fill-`, `group-active-fill-`, `group-focus-fill-` and `group-focus-visible-fill-`. */
 export type FigmaFrameGroupFill = Simplify<GroupStateFlags<FigmaFill, GroupState<"Frame", "fill">>>
 
 /** `group-hover-stroke-`. */
@@ -127,10 +127,10 @@ export type FigmaFrameGroupStroke = Simplify<GroupStateFlags<FigmaStroke, GroupS
 /** `fill-hover-`. */
 export type FigmaTextFillState = Simplify<StateFlags<FigmaFill, "fill", ColorState<"Text", "fill">>>
 
-/** `group-hover-fill-`, `group-active-fill-` and `group-focus-visible-fill-`. */
+/** `group-hover-fill-`, `group-active-fill-`, `group-focus-fill-` and `group-focus-visible-fill-`. */
 export type FigmaTextGroupFill = Simplify<GroupStateFlags<FigmaFill, GroupState<"Text", "fill">>>
 
-/** `group-hover-fill-`, `group-active-fill-` and `group-focus-visible-fill-`. */
+/** `group-hover-fill-`, `group-active-fill-`, `group-focus-fill-` and `group-focus-visible-fill-`. */
 export type FigmaVectorGroupFill = Simplify<GroupStateFlags<FigmaFill, GroupState<"Vector", "fill">>>
 
 /** What changes animate between two states, as a Figma prototype's Smart animate between variants does. */

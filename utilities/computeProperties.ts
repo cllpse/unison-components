@@ -407,7 +407,16 @@ const colorStatesResult = (flags: FlagSet, states: ColorStates): PropertiesResul
   let joined = combination.get(JOINED) as PropertiesResult | undefined
 
   if (joined === undefined) {
-    joined = joinResult(states.prefixes.map(([group, prefix]) => colorResult(flags[group], prefix).className))
+    // On iOS and Android `focus` and `focus-visible` both compile to `focus:`, so one property with both set would get
+    // two classes for one variant. The later state replaces the earlier, so focus-visible wins there as it does on web,
+    // where Tailwind orders `focus-visible:` after `focus:`.
+    const classNames = new Map<string, string | undefined>()
+
+    for (const [group, prefix] of states.prefixes) {
+      if (flags[group] !== undefined) classNames.set(prefix, colorResult(flags[group], prefix).className)
+    }
+
+    joined = joinResult([...classNames.values()])
     combination.set(JOINED, joined)
   }
 
