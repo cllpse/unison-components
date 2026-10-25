@@ -9,15 +9,15 @@ import {
 import type {
   Animate,
   ClassName,
+  FrameState,
+  Group,
   PointerEvents,
   Style,
-  TailwindGroup,
   ViewAttributes,
   ViewReference,
 } from "../../types/base"
 import type {
   FigmaFill,
-  FigmaFillHover,
   FigmaFrameAlignment,
   FigmaFrameAutolayout,
   FigmaFrameCornerRadius,
@@ -26,7 +26,10 @@ import type {
   FigmaFrameCornerRadiusTopLeft,
   FigmaFrameCornerRadiusTopRight,
   FigmaFrameEffectShadow,
+  FigmaFrameFillState,
   FigmaFrameGap,
+  FigmaFrameGroupFill,
+  FigmaFrameGroupStroke,
   FigmaFrameHeight,
   FigmaFramePadding,
   FigmaFramePaddingBottom,
@@ -35,10 +38,10 @@ import type {
   FigmaFramePaddingRight,
   FigmaFramePaddingTop,
   FigmaFramePaddingVertical,
+  FigmaFrameStrokeState,
   FigmaFrameWidth,
   FigmaFrameWrap,
   FigmaStroke,
-  FigmaStrokeHover,
   FigmaStrokeStyle,
   FigmaTransition,
   FigmaTransitionDelay,
@@ -48,18 +51,18 @@ import type {
 import {
   computeElementAnimate,
   computeElementPointerEvents,
-  computeElementTailwindGroup,
   computeElementTransition,
   computeElementTransitionDelay,
   computeElementTransitionDuration,
   computeElementTransitionEasing,
   computeFrameAlignment,
   computeFrameAutolayout,
+  computeFrameColorStates,
   computeFrameCornerRadius,
   computeFrameEffectShadow,
   computeFrameFill,
-  computeFrameFillHover,
   computeFrameGap,
+  computeFrameGroup,
   computeFramePadding,
   computeFramePaddingBottom,
   computeFramePaddingHorizontal,
@@ -68,8 +71,8 @@ import {
   computeFramePaddingTop,
   computeFramePaddingVertical,
   computeFrameSizing,
+  computeFrameStateAttributes,
   computeFrameStroke,
-  computeFrameStrokeHover,
   computeFrameWrap,
 } from "../../utilities/computeProperties"
 
@@ -89,8 +92,10 @@ export type Frame = FigmaFrameAutolayout &
   FigmaFill &
   FigmaStroke &
   FigmaStrokeStyle &
-  FigmaFillHover &
-  FigmaStrokeHover &
+  FigmaFrameFillState &
+  FigmaFrameStrokeState &
+  FigmaFrameGroupFill &
+  FigmaFrameGroupStroke &
   FigmaFrameCornerRadius &
   FigmaFrameCornerRadiusTopLeft &
   FigmaFrameCornerRadiusTopRight &
@@ -103,7 +108,8 @@ export type Frame = FigmaFrameAutolayout &
   FigmaTransitionEasing &
   Animate &
   PointerEvents &
-  TailwindGroup &
+  Group &
+  FrameState &
   ViewAttributes &
   ViewReference & {
     onTouchStart?: PressableProperties["onTouchStart"]
@@ -144,12 +150,11 @@ export default (p: Frame) => {
     computeFramePaddingBottom(p).className,
     computeFrameFill(p).className,
     computeFrameStroke(p).className,
-    computeFrameFillHover(p).className,
-    computeFrameStrokeHover(p).className,
+    computeFrameColorStates(p).className,
     computeFrameCornerRadius(p).className,
     computeFrameEffectShadow(p).className,
     computeElementPointerEvents(p).className,
-    computeElementTailwindGroup(p).className,
+    computeFrameGroup(p).className,
     // The animated components take the motion as styles; Uniwind would otherwise add an empty easing on top.
     animated ? undefined : computeElementTransition(p).className,
     animated ? undefined : computeElementTransitionDuration(p).className,
@@ -167,6 +172,8 @@ export default (p: Frame) => {
     role: p.role as Role,
     "aria-label": p["aria-label"],
     "aria-selected": p["aria-selected"],
+    "aria-disabled": p.disabled,
+    ...computeFrameStateAttributes(p),
     onTouchStart: p.onTouchStart,
     onTouchEnd: p.onTouchEnd,
     // React Native Web's className passthrough; React Native's style types don't know `$$css`. The animated components
@@ -181,7 +188,15 @@ export default (p: Frame) => {
   const FramePressable = animated?.Pressable ?? Pressable
 
   if (p.onPress || p.onPressIn || p.onPressOut) {
-    return <FramePressable {...props} onPress={p.onPress} onPressIn={p.onPressIn} onPressOut={p.onPressOut} />
+    return (
+      <FramePressable
+        {...props}
+        disabled={p.disabled}
+        onPress={p.onPress}
+        onPressIn={p.onPressIn}
+        onPressOut={p.onPressOut}
+      />
+    )
   }
 
   return <FrameView {...props} />

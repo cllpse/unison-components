@@ -45,15 +45,89 @@ export const RADIUS_GROUPS = [
   ["corner-radius-bottom-right", "rounded-br"],
 ] as const
 
-/** Groups of color flags; a flag is `<group>-<color>` (`fill-white`, `stroke-hover-red-500`). */
-export const COLOR_GROUPS = ["fill", "fill-hover", "stroke", "stroke-hover"] as const
+/**
+ * Per state, the Tailwind variant that matches it on web and on iOS and Android (Uniwind): in front of the class for
+ * the element's own state (`active:bg-red-500`), after `group-` for its group's (`group-active:bg-red-500`). Uniwind
+ * has no hover and can't read `:focus-visible`, but focus there only comes from a keyboard or a TV remote, which is
+ * what focus-visible means on web. It can't read `aria-` attributes either, so disabled and selected match the `data-`
+ * attributes a Frame mirrors them to.
+ */
+export const STATE_VARIANTS = {
+  hover: { web: "hover", native: "hover" },
+  active: { web: "active", native: "active" },
+  "focus-visible": { web: "focus-visible", native: "focus" },
+  disabled: { web: "data-[disabled=true]", native: "data-[disabled=true]" },
+  selected: { web: "data-[selected=true]", native: "data-[selected=true]" },
+} as const
 
-/** Per color group, the Tailwind class prefixes its flags produce across components (Frame, Text and Icon). */
-const COLOR_CLASS_PREFIXES: Record<ColorGroup, readonly ColorClassPrefix[]> = {
-  fill: ["bg", "text"],
-  "fill-hover": ["hover:bg", "hover:text", "group-hover:text"],
-  stroke: ["outline"],
-  "stroke-hover": ["hover:outline"],
+/**
+ * The color flags each component takes, per property: the Tailwind class prefix it paints with, the states of its own
+ * it changes color in (after the property: `fill-active-red-500`) and the states of its nearest `group` frame (in
+ * front, as in Tailwind: `group-hover-fill-red-500`). A Text has no press, focus or disabled state of its own and a
+ * Vector no hover, so both only follow their group beyond that.
+ */
+export const COLOR_COMPONENTS = {
+  Frame: {
+    fill: {
+      prefix: "bg",
+      states: ["hover", "active", "focus-visible", "disabled", "selected"],
+      groupStates: ["hover", "active", "focus-visible"],
+    },
+    stroke: { prefix: "outline", states: ["hover", "focus-visible"], groupStates: ["hover"] },
+  },
+  Text: { fill: { prefix: "text", states: ["hover"], groupStates: ["hover", "active", "focus-visible"] } },
+  Vector: { fill: { prefix: "text", states: [], groupStates: ["hover", "active", "focus-visible"] } },
+} as const satisfies Record<string, Record<string, ColorConfig>>
+
+type ColorConfig = Readonly<{ prefix: string; states: readonly State[]; groupStates: readonly State[] }>
+
+const colorConfigs = (component: ColorComponent) =>
+  Object.entries(COLOR_COMPONENTS[component]) as [ColorProperty, ColorConfig][]
+
+/**
+ * A component's state color groups, each with the Tailwind class prefix it paints with on a platform.
+ * @example colorStateClassPrefixes("Frame", "native") // [["fill-hover", "hover:bg"], …, ["fill-focus-visible", "focus:bg"], …]
+ */
+export const colorStateClassPrefixes = (
+  component: ColorComponent,
+  platform: keyof (typeof STATE_VARIANTS)[State],
+): (readonly [ColorGroup, string])[] =>
+  colorConfigs(component).flatMap(([property, { prefix, states, groupStates }]) => [
+    ...states.map(
+      (state) => [`${property}-${state}` as ColorGroup, `${STATE_VARIANTS[state][platform]}:${prefix}`] as const,
+    ),
+    ...groupStates.map(
+      (state) =>
+        [`group-${state}-${property}` as ColorGroup, `group-${STATE_VARIANTS[state][platform]}:${prefix}`] as const,
+    ),
+  ])
+
+/** Groups of color flags, from every component's properties and states; a flag is `<group>-<color>` (`fill-white`, `group-hover-fill-red-500`). */
+export const COLOR_GROUPS: readonly ColorGroup[] = [
+  ...new Set(
+    (Object.keys(COLOR_COMPONENTS) as ColorComponent[]).flatMap((component) => [
+      ...colorConfigs(component).map(([property]) => property),
+      ...colorStateClassPrefixes(component, "web").map(([group]) => group),
+    ]),
+  ),
+]
+
+/** Per color group, the Tailwind class prefixes its flags produce across components and platforms, for the safelist. */
+const COLOR_CLASS_PREFIXES = new Map<ColorGroup, Set<string>>()
+
+for (const component of Object.keys(COLOR_COMPONENTS) as ColorComponent[]) {
+  const prefixes = [
+    ...colorConfigs(component).map(([property, { prefix }]) => [property, prefix] as const),
+    ...colorStateClassPrefixes(component, "web"),
+    ...colorStateClassPrefixes(component, "native"),
+  ]
+
+  for (const [group, prefix] of prefixes) {
+    const classPrefixes = COLOR_CLASS_PREFIXES.get(group) ?? new Set()
+
+    classPrefixes.add(prefix)
+    COLOR_CLASS_PREFIXES.set(group, classPrefixes)
+  }
 }
 
 /**
@@ -95,24 +169,38 @@ export const NAMED_FLAGS = {
   "typography-decoration": ["typography-decoration-underline"],
   "typography-settings": ["typography-settings-truncate"],
   "pointer-events": ["pointer-events-none", "pointer-events-auto"],
-  tailwind: ["tailwind-group", "tailwind-group-hover-fill"],
+  group: ["group"],
 } as const
 
 export type SpacingGroup = (typeof SPACING_GROUPS)[number][0]
 export type RadiusGroup = (typeof RADIUS_GROUPS)[number][0]
-export type ColorGroup = (typeof COLOR_GROUPS)[number]
+export type State = keyof typeof STATE_VARIANTS
+export type ColorComponent = keyof typeof COLOR_COMPONENTS
+export type ColorProperty<Component extends ColorComponent = ColorComponent> = {
+  [C in Component]: keyof (typeof COLOR_COMPONENTS)[C]
+}[Component]
+/** The states of its own a component's color property changes in (`"hover" | "active" | …` for a Frame's fill). */
+export type ColorState<
+  Component extends ColorComponent,
+  Property extends ColorProperty<Component>,
+> = (typeof COLOR_COMPONENTS)[Component][Property] extends { states: readonly (infer S)[] } ? S : never
+/** The states of its group a component's color property follows. */
+export type GroupState<
+  Component extends ColorComponent,
+  Property extends ColorProperty<Component>,
+> = (typeof COLOR_COMPONENTS)[Component][Property] extends { groupStates: readonly (infer S)[] } ? S : never
+export type ColorGroup = {
+  [Component in ColorComponent]: {
+    [Property in ColorProperty<Component>]:
+      | Property
+      | `${Property & string}-${ColorState<Component, Property> & string}`
+      | `group-${GroupState<Component, Property> & string}-${Property & string}`
+  }[ColorProperty<Component>]
+}[ColorComponent]
 export type MotionGroup = (typeof MOTION_GROUPS)[number][0]
 export type SizeMode = (typeof SIZE_MODES)[number]
 export type NamedFlagGroup = keyof typeof NAMED_FLAGS
 export type NamedFlagName<Group extends NamedFlagGroup = NamedFlagGroup> = (typeof NAMED_FLAGS)[Group][number]
-export type ColorClassPrefix =
-  | "bg"
-  | "text"
-  | "outline"
-  | "hover:bg"
-  | "hover:text"
-  | "hover:outline"
-  | "group-hover:text"
 
 /** A flag that maps to one Tailwind class: spacing, radius, shadow, text size and motion flags. */
 export type ClassFlag = Readonly<{
@@ -227,7 +315,7 @@ export const FLAG_PREFIXES: ReadonlySet<string> = new Set([...table.keys()].map(
  */
 export const flagClasses = (flag: Flag): string[] => {
   if ("className" in flag) return [flag.className]
-  if ("name" in flag) return COLOR_CLASS_PREFIXES[flag.group].map((prefix) => `${prefix}-${flag.name}`)
+  if ("name" in flag) return [...(COLOR_CLASS_PREFIXES.get(flag.group) ?? [])].map((prefix) => `${prefix}-${flag.name}`)
 
   if (flag.group === "width" || flag.group === "height") {
     const axis = flag.group === "width" ? "w" : "h"

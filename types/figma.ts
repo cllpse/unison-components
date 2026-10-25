@@ -13,7 +13,17 @@ import type {
   TRANSITION_DURATIONS,
   TRANSITION_PROPERTIES,
 } from "../dist/design-tokens"
-import type { ColorGroup, NamedFlagGroup, NamedFlagName, RadiusGroup, SizeMode, SpacingGroup } from "../maps"
+import type {
+  ColorGroup,
+  ColorProperty,
+  ColorState,
+  GroupState,
+  NamedFlagGroup,
+  NamedFlagName,
+  RadiusGroup,
+  SizeMode,
+  SpacingGroup,
+} from "../maps"
 import type { Simplify } from "./utilities"
 
 /** `<group>-<key>` boolean flags for every key. */
@@ -24,6 +34,18 @@ type SpacingFlags<Group extends SpacingGroup> = GroupFlags<Group, keyof typeof S
 type RadiusFlags<Group extends RadiusGroup> = GroupFlags<Group, keyof typeof RADIUS>
 
 type ColorFlags<Group extends ColorGroup> = GroupFlags<Group, ColorNameAndShade>
+
+/** Every `<property>-<color>` flag of `Flags` again as `<property>-<state>-<color>`, set while the element is in that state. */
+type StateFlags<Flags, Property extends ColorProperty, State extends string> = {
+  [key in keyof Flags & string as key extends `${Property}-${infer color}`
+    ? `${Property}-${State}-${color}`
+    : never]?: Flags[key]
+}
+
+/** Every flag of `Flags` again behind `group-<state>-`, set while the nearest `group` frame is in that state. */
+type GroupStateFlags<Flags, State extends string> = {
+  [key in keyof Flags & string as `group-${State}-${key}`]?: Flags[key]
+}
 
 type NamedFlags<Group extends NamedFlagGroup> = { [key in NamedFlagName<Group>]?: boolean }
 
@@ -90,9 +112,26 @@ export type FigmaStroke = Simplify<ColorFlags<"stroke">>
 
 export type FigmaStrokeStyle = NamedFlags<"stroke-style">
 
-export type FigmaFillHover = Simplify<ColorFlags<"fill-hover">>
+/** `fill-hover-`, `fill-active-`, `fill-focus-visible-`, `fill-disabled-` and `fill-selected-`. */
+export type FigmaFrameFillState = Simplify<StateFlags<FigmaFill, "fill", ColorState<"Frame", "fill">>>
 
-export type FigmaStrokeHover = Simplify<ColorFlags<"stroke-hover">>
+/** `stroke-hover-` and `stroke-focus-visible-`. */
+export type FigmaFrameStrokeState = Simplify<StateFlags<FigmaStroke, "stroke", ColorState<"Frame", "stroke">>>
+
+/** `group-hover-fill-`, `group-active-fill-` and `group-focus-visible-fill-`. */
+export type FigmaFrameGroupFill = Simplify<GroupStateFlags<FigmaFill, GroupState<"Frame", "fill">>>
+
+/** `group-hover-stroke-`. */
+export type FigmaFrameGroupStroke = Simplify<GroupStateFlags<FigmaStroke, GroupState<"Frame", "stroke">>>
+
+/** `fill-hover-`. */
+export type FigmaTextFillState = Simplify<StateFlags<FigmaFill, "fill", ColorState<"Text", "fill">>>
+
+/** `group-hover-fill-`, `group-active-fill-` and `group-focus-visible-fill-`. */
+export type FigmaTextGroupFill = Simplify<GroupStateFlags<FigmaFill, GroupState<"Text", "fill">>>
+
+/** `group-hover-fill-`, `group-active-fill-` and `group-focus-visible-fill-`. */
+export type FigmaVectorGroupFill = Simplify<GroupStateFlags<FigmaFill, GroupState<"Vector", "fill">>>
 
 /** What changes animate between two states, as a Figma prototype's Smart animate between variants does. */
 export type FigmaTransition = Simplify<GroupFlags<"transition", keyof typeof TRANSITION_PROPERTIES>>

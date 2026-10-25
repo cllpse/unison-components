@@ -1,10 +1,16 @@
 import { View } from "react-native"
 import Svg, { Path } from "react-native-svg"
 import type { ClassName, Style } from "../../types/base"
-import type { FigmaFill, FigmaVectorHeight, FigmaVectorWidth } from "../../types/figma"
-import { computeVectorFill, computeVectorSize } from "../../utilities/computeProperties"
+import type { FigmaFill, FigmaVectorGroupFill, FigmaVectorHeight, FigmaVectorWidth } from "../../types/figma"
+import {
+  computeVectorColor,
+  computeVectorColorStates,
+  computeVectorFill,
+  computeVectorSize,
+} from "../../utilities/computeProperties"
 
 export type Vector = FigmaFill &
+  FigmaVectorGroupFill &
   FigmaVectorWidth &
   FigmaVectorHeight & {
     /** SVG path data, as Figma exports it from the vector's fill geometry. */
@@ -19,7 +25,14 @@ export type Vector = FigmaFill &
   }
 
 export default (p: Vector) => {
-  const className = [computeVectorSize(p).className, p.className].filter(Boolean).join(" ")
+  const className = [
+    computeVectorSize(p).className,
+    computeVectorFill(p).className,
+    computeVectorColorStates(p).className,
+    p.className,
+  ]
+    .filter(Boolean)
+    .join(" ")
 
   // The Svg fills a View that carries the size and the className, because react-native-svg's web renderer does not
   // take React Native Web's `$$css` className passthrough. The `className` prop is for Uniwind on iOS and Android;
@@ -36,7 +49,7 @@ export default (p: Vector) => {
       ]}
       className={className}
     >
-      <Svg width="100%" height="100%" viewBox={p.viewBox} color={computeVectorFill(p)}>
+      <Svg width="100%" height="100%" viewBox={p.viewBox} color={computeVectorColor(p)}>
         <Path d={p.path} fill="currentColor" fillRule={p.fillRule ?? "nonzero"} />
       </Svg>
     </View>

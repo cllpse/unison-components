@@ -39,9 +39,11 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - Styling props are boolean flags named in kebab-case after Figma: `autolayout-horizontal`, `width-fill`, `padding-4`,
   `corner-radius-full`, `fill-red-500`, `typography-sm`. Prefer adding a flag over a value prop.
 - Flag types live in `types/figma.ts` as `Figma<Thing>` types, built from the group lists in `maps`
-  (`SPACING_GROUPS`, `RADIUS_GROUPS`, `COLOR_GROUPS`, `NAMED_FLAGS`) and the scales in `dist/design-tokens.ts` with mapped
+  (`SPACING_GROUPS`, `RADIUS_GROUPS`, `COLOR_COMPONENTS`, `NAMED_FLAGS`) and the scales in `dist/design-tokens.ts` with mapped
   template-literal types (`SpacingFlags<"gap">`, `ColorFlags<"fill">`, `NamedFlags<"alignment">`). Never hand-write a
-  flag name there; add it to `maps` and it is typed, read, safelisted and checked from one place.
+  flag name there; add it to `maps` and it is typed, read, safelisted and checked from one place. State color flags
+  are the base flags again, remapped: `StateFlags<FigmaFill, "fill", …>` (`fill-active-`) and
+  `GroupStateFlags<FigmaFill, …>` (`group-hover-fill-`), from the states `COLOR_COMPONENTS` lists per component.
 - A component's props type is an intersection of `Figma*` types plus a `{ … }` block for regular props, and is
   exported under the component's name (`export type Frame = FigmaFrameAutolayout & … & { … }`).
 - Flags within a group are mutually exclusive; set at most one. If several are set anyway, the first in props order wins.

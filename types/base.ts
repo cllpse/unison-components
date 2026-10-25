@@ -32,21 +32,22 @@ export type ViewAttributes = {
   pointerEvents?: ReactNativeViewProperties["pointerEvents"]
   role?: ReactNativeViewProperties["role"]
   "aria-label"?: ReactNativeViewProperties["aria-label"]
+}
+
+/**
+ * A Frame's disabled and selected states, which its `fill-disabled-` and `fill-selected-` flags follow on every
+ * platform. A disabled Frame also takes no presses.
+ */
+export type FrameState = {
+  disabled?: boolean
   "aria-selected"?: ReactNativeViewProperties["aria-selected"]
 }
 
 /** The `pointer-events-none` and `pointer-events-auto` flags, as on web. */
 export type PointerEvents = { [key in NamedFlagName<"pointer-events">]?: boolean }
 
-/** Marks the element as a Tailwind `group`, so descendants can style off its hover (`group-hover:`). */
-export type TailwindGroup = {
-  "tailwind-group"?: boolean
-}
-
-/** Gives text its `fill-hover-` color when its Tailwind group is hovered, not only itself (`group-hover:`). */
-export type TailwindGroupHoverFill = {
-  "tailwind-group-hover-fill"?: boolean
-}
+/** Makes the Frame the `group` whose state its descendants' `group-<state>-` flags follow, as Tailwind's `group` does. */
+export type Group = { [key in NamedFlagName<"group">]?: boolean }
 
 /** Runs an animation from motion-tokens.css in a loop (`animate-spin`), unless the viewer asks for reduced motion. */
 export type Animate = { [key in keyof typeof ANIMATIONS as `animate-${key}`]?: boolean }

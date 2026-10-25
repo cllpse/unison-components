@@ -1,18 +1,18 @@
 import { type TextProps as TextProperties, Text as TextReactNative } from "react-native"
-import type { ClassName, Style, TailwindGroupHoverFill } from "../../types/base"
+import type { ClassName, Style } from "../../types/base"
 import type {
   FigmaFill,
-  FigmaFillHover,
   FigmaFrameWidth,
+  FigmaTextFillState,
+  FigmaTextGroupFill,
   FigmaTypography,
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
   FigmaTypographySettings,
 } from "../../types/figma"
 import {
+  computeTextColorStates,
   computeTextFill,
-  computeTextFillHover,
-  computeTextTailwindGroupHoverFill,
   computeTextTypography,
   computeTextTypographyAlignment,
   computeTextTypographyDecoration,
@@ -21,13 +21,13 @@ import {
 } from "../../utilities/computeProperties"
 
 export type Text = FigmaFill &
-  FigmaFillHover &
+  FigmaTextFillState &
+  FigmaTextGroupFill &
   FigmaFrameWidth &
   FigmaTypography &
   FigmaTypographyAlignment &
   FigmaTypographyDecoration &
-  FigmaTypographySettings &
-  TailwindGroupHoverFill & {
+  FigmaTypographySettings & {
     children?: TextProperties["children"]
     style?: Style
     className?: ClassName
@@ -40,8 +40,7 @@ export default (p: Text) => {
     computeTextTypographyDecoration(p).className,
     computeTextTypographySettings(p).className,
     computeTextFill(p).className,
-    computeTextFillHover(p).className,
-    computeTextTailwindGroupHoverFill(p).className,
+    computeTextColorStates(p).className,
     p.className,
   ]
     .filter(Boolean)

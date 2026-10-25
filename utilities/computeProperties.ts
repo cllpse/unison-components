@@ -7,18 +7,19 @@ import {
   TRANSITION_DURATIONS,
   TRANSITION_PROPERTIES,
 } from "../dist/design-tokens"
-import type { ClassFlag, ColorClassPrefix, ColorFlag, FlagSet, SizeFlag } from "../maps"
-import type {
-  Animate,
-  PointerEvents,
-  PropertiesResult,
-  Style,
-  TailwindGroup,
-  TailwindGroupHoverFill,
-} from "../types/base"
+import {
+  type ClassFlag,
+  COLOR_COMPONENTS,
+  type ColorComponent,
+  type ColorFlag,
+  type ColorGroup,
+  colorStateClassPrefixes,
+  type FlagSet,
+  type SizeFlag,
+} from "../maps"
+import type { Animate, FrameState, Group, PointerEvents, PropertiesResult, Style } from "../types/base"
 import type {
   FigmaFill,
-  FigmaFillHover,
   FigmaFrameAlignment,
   FigmaFrameAutolayout,
   FigmaFrameCornerRadius,
@@ -27,7 +28,10 @@ import type {
   FigmaFrameCornerRadiusTopLeft,
   FigmaFrameCornerRadiusTopRight,
   FigmaFrameEffectShadow,
+  FigmaFrameFillState,
   FigmaFrameGap,
+  FigmaFrameGroupFill,
+  FigmaFrameGroupStroke,
   FigmaFrameHeight,
   FigmaFramePadding,
   FigmaFramePaddingBottom,
@@ -36,11 +40,13 @@ import type {
   FigmaFramePaddingRight,
   FigmaFramePaddingTop,
   FigmaFramePaddingVertical,
+  FigmaFrameStrokeState,
   FigmaFrameWidth,
   FigmaFrameWrap,
   FigmaStroke,
-  FigmaStrokeHover,
   FigmaStrokeStyle,
+  FigmaTextFillState,
+  FigmaTextGroupFill,
   FigmaTransition,
   FigmaTransitionDelay,
   FigmaTransitionDuration,
@@ -49,6 +55,7 @@ import type {
   FigmaTypographyAlignment,
   FigmaTypographyDecoration,
   FigmaTypographySettings,
+  FigmaVectorGroupFill,
   FigmaVectorHeight,
   FigmaVectorWidth,
 } from "../types/figma"
@@ -73,6 +80,18 @@ const result = (className: string): PropertiesResult => {
   }
 
   return r
+}
+
+/** The next level of a combination cache: the Map under `key`, created on first use. */
+const level = (map: Map<unknown, unknown>, key: unknown) => {
+  let next = map.get(key) as Map<unknown, unknown> | undefined
+
+  if (next === undefined) {
+    next = new Map()
+    map.set(key, next)
+  }
+
+  return next
 }
 
 /** The result for several class fragments, skipping absent ones. */
@@ -305,9 +324,9 @@ export const computeFrameCornerRadius = (
 // Colors
 
 // Cached per Tailwind class prefix and flag, so a color's class is built once.
-const COLOR_RESULT_CACHE = new Map<ColorClassPrefix, Map<ColorFlag, PropertiesResult>>()
+const COLOR_RESULT_CACHE = new Map<string, Map<ColorFlag, PropertiesResult>>()
 
-const colorResult = (flag: ColorFlag | undefined, prefix: ColorClassPrefix): PropertiesResult => {
+const colorResult = (flag: ColorFlag | undefined, prefix: string): PropertiesResult => {
   if (flag === undefined) return EMPTY
 
   let byFlag = COLOR_RESULT_CACHE.get(prefix)
@@ -327,7 +346,8 @@ const colorResult = (flag: ColorFlag | undefined, prefix: ColorClassPrefix): Pro
   return r
 }
 
-export const computeFrameFill = (p: FigmaFill): PropertiesResult => colorResult(readFlags(p).fill, "bg")
+export const computeFrameFill = (p: FigmaFill): PropertiesResult =>
+  colorResult(readFlags(p).fill, COLOR_COMPONENTS.Frame.fill.prefix)
 
 const STROKE_SOLID = "outline-1 outline -outline-offset-1"
 const STROKE_DASHED = `${STROKE_SOLID} outline-dashed`
@@ -336,7 +356,7 @@ const STROKE_DASHED = `${STROKE_SOLID} outline-dashed`
 const STROKE_CACHE = new Map<PropertiesResult, readonly [PropertiesResult, PropertiesResult]>()
 
 export const computeFrameStroke = (p: FigmaStroke & FigmaStrokeStyle): PropertiesResult => {
-  const stroke = colorResult(readFlags(p).stroke, "outline")
+  const stroke = colorResult(readFlags(p).stroke, COLOR_COMPONENTS.Frame.stroke.prefix)
 
   if (stroke === EMPTY) return EMPTY
 
@@ -350,11 +370,99 @@ export const computeFrameStroke = (p: FigmaStroke & FigmaStrokeStyle): Propertie
   return styles[p["stroke-style-dashed"] ? 1 : 0]
 }
 
-export const computeFrameFillHover = (p: FigmaFillHover): PropertiesResult =>
-  colorResult(readFlags(p)["fill-hover"], "hover:bg")
+// Color states
 
-export const computeFrameStrokeHover = (p: FigmaStrokeHover): PropertiesResult =>
-  colorResult(readFlags(p)["stroke-hover"], "hover:outline")
+/** A component's state color groups with the class prefix each gives on this platform, and their joined classes. */
+type ColorStates = Readonly<{ prefixes: readonly (readonly [ColorGroup, string])[]; cache: Map<unknown, unknown> }>
+
+const PLATFORM = Platform.OS === "web" ? "web" : "native"
+
+const colorStates = (component: ColorComponent): ColorStates => ({
+  prefixes: colorStateClassPrefixes(component, PLATFORM),
+  cache: new Map(),
+})
+
+const FRAME_COLOR_STATES = colorStates("Frame")
+const TEXT_COLOR_STATES = colorStates("Text")
+const VECTOR_COLOR_STATES = colorStates("Vector")
+
+// The joined classes sit in a combination's last Map level under this key.
+const JOINED = Symbol("joined")
+
+/**
+ * The classes for the state color flags a component sets, cached per combination: one Map level per flag that is set,
+ * in the prefixes' order, so a render does one lookup per set flag and builds nothing once it has been seen.
+ */
+const colorStatesResult = (flags: FlagSet, states: ColorStates): PropertiesResult => {
+  let combination: Map<unknown, unknown> | undefined
+
+  for (const [group] of states.prefixes) {
+    const flag = flags[group]
+
+    if (flag !== undefined) combination = level(combination ?? states.cache, flag)
+  }
+
+  if (combination === undefined) return EMPTY
+
+  let joined = combination.get(JOINED) as PropertiesResult | undefined
+
+  if (joined === undefined) {
+    joined = joinResult(states.prefixes.map(([group, prefix]) => colorResult(flags[group], prefix).className))
+    combination.set(JOINED, joined)
+  }
+
+  return joined
+}
+
+/**
+ * A Frame's fill and stroke in its own states and its group's, each through the variant that matches the state on
+ * this platform.
+ * @example computeFrameColorStates({ "fill-active-blue-700": true, "group-hover-stroke-white": true }) // "active:bg-blue-700 group-hover:outline-white"
+ */
+export const computeFrameColorStates = (
+  p: FigmaFrameFillState & FigmaFrameStrokeState & FigmaFrameGroupFill & FigmaFrameGroupStroke,
+): PropertiesResult => colorStatesResult(readFlags(p), FRAME_COLOR_STATES)
+
+/** The `data-` attributes a Frame mirrors its disabled and selected states to, as each platform takes them. */
+type StateAttributes = Readonly<{
+  dataSet?: Readonly<{ disabled?: true; selected?: true }>
+  "data-disabled"?: true
+  "data-selected"?: true
+}>
+
+// Uniwind matches `data-` variants against a component's own props, while React Native Web only renders the `data-`
+// attributes it is given in `dataSet`. An attribute is only set while its state is on, so a Frame without one renders
+// none.
+const stateAttributes = (disabled: boolean, selected: boolean): StateAttributes => {
+  if (PLATFORM === "web") {
+    return Object.freeze({
+      dataSet: Object.freeze({
+        ...(disabled && { disabled: true as const }),
+        ...(selected && { selected: true as const }),
+      }),
+    })
+  }
+
+  return Object.freeze({
+    ...(disabled && { "data-disabled": true as const }),
+    ...(selected && { "data-selected": true as const }),
+  })
+}
+
+const STATE_ATTRIBUTES = [
+  stateAttributes(false, false),
+  stateAttributes(false, true),
+  stateAttributes(true, false),
+  stateAttributes(true, true),
+]
+
+/**
+ * The `data-` attributes that mirror a Frame's disabled and selected states, for its `fill-disabled-` and
+ * `fill-selected-` flags. Returns a shared, frozen object.
+ * @example computeFrameStateAttributes({ disabled: true }) // { "data-disabled": true } on iOS and Android
+ */
+export const computeFrameStateAttributes = (p: FrameState): StateAttributes =>
+  STATE_ATTRIBUTES[(p.disabled ? 2 : 0) + (p["aria-selected"] ? 1 : 0)]
 
 // Pointer events
 
@@ -375,7 +483,7 @@ const GROUP = result("group")
 
 export const computeFrameWrap = (p: FigmaFrameWrap): PropertiesResult => (p.wrap ? FLEX_WRAP : EMPTY)
 
-export const computeElementTailwindGroup = (p: TailwindGroup): PropertiesResult => (p["tailwind-group"] ? GROUP : EMPTY)
+export const computeFrameGroup = (p: Group): PropertiesResult => (p.group ? GROUP : EMPTY)
 
 // Shadow
 
@@ -393,14 +501,12 @@ export const computeFrameEffectShadow = (p: FigmaFrameEffectShadow): PropertiesR
 
 export const computeTextTypography = (p: FigmaTypography): PropertiesResult => classResult(readFlags(p), "typography")
 
-export const computeTextFill = (p: FigmaFill): PropertiesResult => colorResult(readFlags(p).fill, "text")
+export const computeTextFill = (p: FigmaFill): PropertiesResult =>
+  colorResult(readFlags(p).fill, COLOR_COMPONENTS.Text.fill.prefix)
 
-export const computeTextFillHover = (p: FigmaFillHover): PropertiesResult =>
-  colorResult(readFlags(p)["fill-hover"], "hover:text")
-
-/** The text's `fill-hover-` color on its group's hover too: `hover:text-red-500` also gives `group-hover:text-red-500`. */
-export const computeTextTailwindGroupHoverFill = (p: FigmaFillHover & TailwindGroupHoverFill): PropertiesResult =>
-  p["tailwind-group-hover-fill"] ? colorResult(readFlags(p)["fill-hover"], "group-hover:text") : EMPTY
+/** A Text's fill on its own hover and in its group's states. */
+export const computeTextColorStates = (p: FigmaTextFillState & FigmaTextGroupFill): PropertiesResult =>
+  colorStatesResult(readFlags(p), TEXT_COLOR_STATES)
 
 const ALIGN_LEFT = Object.freeze({ styles: Object.freeze({ textAlign: "left" as const }), className: "text-left" })
 const ALIGN_CENTER = Object.freeze({
@@ -441,12 +547,29 @@ export const computeTextTypographySettings = (p: FigmaTypographySettings): Prope
 
 // Vector
 
+// On web the path's `currentColor` is the CSS color its box inherits, so the fill is a text color class there, which
+// follows dark mode and the group's states. React Native has no inherited color: react-native-svg takes it as the Svg's
+// `color` prop, so on iOS and Android the fill is the flag's value instead and takes no state.
+
 /**
- * Resolve a vector's fill flag to a color value, since SVG paths take a paint value rather than a Tailwind class.
- * Without a fill flag the path inherits `currentColor`, so a parent's text color tints it.
- * @example computeVectorFill({ "fill-red-500": true }) // "#FB2C36"
+ * A vector's fill as a text color class on web, for the path's `currentColor`; empty on iOS and Android, which take
+ * computeVectorColor.
+ * @example computeVectorFill({ "fill-red-500": true }) // "text-red-500" on web
  */
-export const computeVectorFill = (p: FigmaFill): string => readFlags(p).fill?.value ?? "currentColor"
+export const computeVectorFill = (p: FigmaFill): PropertiesResult =>
+  PLATFORM === "web" ? colorResult(readFlags(p).fill, COLOR_COMPONENTS.Vector.fill.prefix) : EMPTY
+
+/** A Vector's fill in its group's states, on web. */
+export const computeVectorColorStates = (p: FigmaVectorGroupFill): PropertiesResult =>
+  PLATFORM === "web" ? colorStatesResult(readFlags(p), VECTOR_COLOR_STATES) : EMPTY
+
+/**
+ * A vector's fill as the Svg's color value on iOS and Android; undefined on web, where the path inherits the box's
+ * color. Without a fill flag the path takes `currentColor`, so on web a parent's text color tints it.
+ * @example computeVectorColor({ "fill-red-500": true }) // "#FB2C36" on iOS and Android
+ */
+export const computeVectorColor = (p: FigmaFill): string | undefined =>
+  PLATFORM === "web" ? undefined : (readFlags(p).fill?.value ?? "currentColor")
 
 // Cached per pair of width and height flags, so repeat renders of the same vector never allocate.
 const VECTOR_SIZE_CACHE = new Map<ExactSizeFlag, Map<ExactSizeFlag, PropertiesResult>>()
@@ -582,17 +705,6 @@ const motionStyle = (
 // Cached per combination of the five flags (`undefined` when absent), one Map level per flag, so a render does five
 // lookups and builds nothing once the combination has been seen.
 const MOTION_CACHE = new Map<unknown, unknown>()
-
-const level = (map: Map<unknown, unknown>, key: unknown) => {
-  let next = map.get(key) as Map<unknown, unknown> | undefined
-
-  if (next === undefined) {
-    next = new Map()
-    map.set(key, next)
-  }
-
-  return next
-}
 
 /**
  * The native styles for a Frame's motion flags, once `configureMotion` has run; empty otherwise, and on web, where the

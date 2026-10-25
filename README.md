@@ -57,8 +57,8 @@ import { Frame, Text, Vector } from "unison-components"
 Styling is set with boolean, hyphenated flags named after Figma's properties. Components emit Tailwind classes only,
 no inline styles, except for motion on iOS and Android (see [Motion](#motion)).
 
-- From the tokens: `fill-`, `fill-hover-`, `stroke-` and `stroke-hover-<color>` (`fill-red-500`, `fill-white`),
-  `width-` and `height-<spacing>` (`width-4`), `width-<container>` (`width-md`), `padding-` and `gap-<spacing>` (with
+- From the tokens: `fill-` and `stroke-<color>` (`fill-red-500`, `fill-white`), the same in a state (see
+  [States](#states)), `width-` and `height-<spacing>` (`width-4`), `width-<container>` (`width-md`), `padding-` and `gap-<spacing>` (with
   `-vertical`, `-horizontal` and per-side variants), `corner-radius-<radius>`, `effect-shadow-<shadow>` and
   `typography-<size>`.
 - From _dist/motion-tokens.css_ (`Frame` only): `transition-<property>` (`transition-colors`),
@@ -66,14 +66,42 @@ no inline styles, except for motion on iOS and Android (see [Motion](#motion)).
   `animate-<name>` (`animate-spin`).
 - Fixed: `autolayout-horizontal` / `-vertical`, `width-fill` / `width-hug` (and `height-`), `alignment-<position>`,
   `stroke-style-dashed` / `-solid`, `typography-align-<side>`, `typography-decoration-underline`,
-  `typography-settings-truncate` (one line with an ellipsis), `effect-shadow-none`
-  and `pointer-events-none` / `-auto`.
+  `typography-settings-truncate` (one line with an ellipsis), `effect-shadow-none`, `pointer-events-none` / `-auto`
+  and `group` (`Frame` only, see [States](#states)).
 - Set at most one flag per group; if several are set, the first wins.
 - An unknown or misspelled flag (`fill-red-55`) is a type error, and outside production builds it is also logged.
 - `Vector` takes `path`, `viewBox` and an optional `fillRule`, and needs both a `width-` and a `height-` flag.
 
-Known gaps: there are no letter-spacing, line-height or font-family flags, and a `Vector` fill keeps its Light color in
-dark mode.
+Known gaps: there are no letter-spacing, line-height or font-family flags, and on iOS and Android a `Vector` fill keeps
+its Light color in dark mode and takes no state.
+
+## States
+
+A color flag can also apply only while its element is in a state, with the state after the property, or while its
+nearest `group` frame is, with `group-<state>-` in front, as in Tailwind's `group-hover:`:
+
+| Component | Own states                                                                      | Group states                                                       |
+| --------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `Frame`   | `fill-` and `stroke-hover-`, `fill-` and `stroke-focus-visible-`, `fill-active-`, `fill-disabled-`, `fill-selected-` | `group-hover-fill-`, `group-active-fill-`, `group-focus-visible-fill-`, `group-hover-stroke-` |
+| `Text`    | `fill-hover-`                                                                   | `group-hover-fill-`, `group-active-fill-`, `group-focus-visible-fill-` |
+| `Vector`  |                                                                                 | `group-hover-fill-`, `group-active-fill-`, `group-focus-visible-fill-` |
+
+```tsx
+<Frame group fill-blue-500 fill-hover-blue-600 fill-active-blue-700 fill-disabled-gray-300 disabled={busy} onPress={buy}>
+  <Text fill-white group-hover-fill-blue-50>Buy</Text>
+</Frame>
+```
+
+- A `Frame` takes focus, and on iOS and Android presses (`active`), only with `onPress`, `onPressIn` or `onPressOut`.
+  `disabled` also stops its presses; `aria-selected` sets its selected state.
+- Touch screens have no hover, so `hover` states only apply on web. On iOS and Android, `focus-visible` is any focus,
+  which only comes from a keyboard or a TV remote there.
+- Group states need Uniwind Pro on iOS and Android, and there only `group-active-` and `group-focus-visible-` apply,
+  with a pressable `group` frame. Without Pro the classes do nothing there.
+- The element's own states win over its group's, and `disabled` and `selected` over hover, focus and press.
+- `COLOR_COMPONENTS` in _maps/_ lists the states per component and property; a state added there is typed, read and
+  safelisted with the rest. `STATE_VARIANTS` holds the Tailwind variant each state matches on web and on iOS and
+  Android.
 
 ## Design tokens
 
@@ -85,7 +113,7 @@ collection, then one key per mode:
 
 | Collection | Modes       | Variables                                       | Flags                                            |
 | ---------- | ----------- | ----------------------------------------------- | ------------------------------------------------ |
-| colors     | Light, Dark | `fill-<hue>-<shade>`, `fill-<name>`             | `fill-`, `fill-hover-`, `stroke-`, `stroke-hover-` |
+| colors     | Light, Dark | `fill-<hue>-<shade>`, `fill-<name>`             | `fill-`, `stroke-`, and both in a state          |
 | units      | Default     | `spacing-<key>`, `radius-<name>`, `container-<name>` | `width-`, `height-`, `padding-`, `gap-`, `corner-radius-` |
 | typography | Default     | `font-size-<size>`, `line-height-<size>`, `font-weight-<name>` | `typography-<size>`                 |
 | shadows    | Default     | `shadow-<name>-<layer>-<offset-x, offset-y, blur, spread, color>` | `effect-shadow-<name>`        |
