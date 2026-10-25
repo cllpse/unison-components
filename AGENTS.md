@@ -48,8 +48,9 @@ Figma's design vocabulary. See README.md for the platform-extension model.
 - Every token-derived flag is a key of `FLAGS` (`maps/index.ts`), with the class it produces. A new
   token-derived flag group goes there too, so it is read, safelisted and checked like the others.
 - TypeScript does not check JSX attribute names that contain a hyphen, so the platform shells are generic over the
-  props they are given and take `p: Given & KnownOnly<Component, Given, "Component">` (`types/utilities.ts`): a
-  misspelled flag (`fill-red-55`) is a type error. `readFlags` also logs such props outside production builds, for
+  props they are given and take `p: KnownOnly<Component, Given, "Component">` (`types/utilities.ts`): a
+  misspelled flag (`fill-red-55`) is a type error. Don't intersect it with `Given`; that made type-checking several
+  times slower (see its JSDoc). `readFlags` also logs such props outside production builds, for
   untyped callers.
 - Unit keys are the tokens' `spacing-` names. Fractional units use `p` (`0p5`, `1p5`); keys whose Tailwind suffix
   differs from the key map through `SPACING_TAILWIND`.

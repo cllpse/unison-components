@@ -9,7 +9,7 @@ export type Text = TextType
 //   overrides RNW's reset.
 const TEXT_CLASSES = ["unison-components__text", "[overflow-wrap:anywhere]"].join(" ")
 
-export default <Given extends KnownAttributes<Text>>(p: Given & KnownOnly<Text, Given, "Text">) => {
+export default <Given extends KnownAttributes<Text>>(p: KnownOnly<Text, Given, "Text">) => {
   const { className, ...rest } = p as Text
 
   return <TextBase {...rest} className={className ? `${TEXT_CLASSES} ${className}` : TEXT_CLASSES} />

@@ -8,7 +8,7 @@ export type Frame = Omit<FrameType, "style" | "_animated"> & {
 
 const FRAME_CLASSES = "unison-components__frame [corner-shape:round]"
 
-export default <Given extends KnownAttributes<Frame>>(p: Given & KnownOnly<Frame, Given, "Frame">) => {
+export default <Given extends KnownAttributes<Frame>>(p: KnownOnly<Frame, Given, "Frame">) => {
   const { style, className, ...rest } = p as Frame
 
   return (
