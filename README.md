@@ -106,6 +106,59 @@ nearest `group` frame is, with `group-<state>-` in front, as in Tailwind's `grou
   safelisted with the rest. `STATE_VARIANTS` holds the Tailwind variant each state matches on web and on iOS and
   Android.
 
+### Group states
+
+`group` marks a `Frame`; the elements inside it take `group-<state>-` flags, which apply while that frame is in the
+state. One example per group flag:
+
+`group-hover-fill-` (`Frame`, `Text`, `Vector`; web only): hovering anywhere on a row recolors its label and icon.
+
+```tsx
+<Frame group autolayout-horizontal gap-3 padding-3 fill-hover-gray-100 onPress={open}>
+  <Text fill-gray-900 group-hover-fill-blue-600>Settings</Text>
+  <Vector path={chevron} viewBox="0 0 16 16" width-4 height-4 fill-gray-400 group-hover-fill-blue-600 />
+</Frame>
+```
+
+`group-active-fill-` (`Frame`, `Text`, `Vector`): pressing a card darkens its image and its title.
+
+```tsx
+<Frame group autolayout-vertical gap-2 padding-4 onPress={open}>
+  <Frame width-fill height-32 corner-radius-lg fill-gray-100 group-active-fill-gray-200 />
+  <Text fill-gray-700 group-active-fill-gray-900>Card title</Text>
+</Frame>
+```
+
+`group-focus-fill-` (`Frame`, `Text`, `Vector`): any focus on a search field, a click included, tints its icon and
+placeholder.
+
+```tsx
+<Frame group autolayout-horizontal gap-2 padding-2 corner-radius-md stroke-gray-300 stroke-focus-blue-500 onPress={focusSearch}>
+  <Vector path={magnifier} viewBox="0 0 16 16" width-4 height-4 fill-gray-400 group-focus-fill-blue-500 />
+  <Text fill-gray-500 group-focus-fill-gray-900>Search</Text>
+</Frame>
+```
+
+`group-focus-visible-fill-` (`Frame`, `Text`, `Vector`): keyboard focus on a tab shows its indicator. Beside
+`group-focus-fill-`, the label is gray after a click and blue from the keyboard, where `focus-visible` wins.
+
+```tsx
+<Frame group autolayout-vertical gap-1 padding-2 onPress={open}>
+  <Text fill-gray-600 group-focus-fill-gray-900 group-focus-visible-fill-blue-600>Overview</Text>
+  <Frame width-fill height-0p5 fill-transparent group-focus-visible-fill-blue-500 />
+</Frame>
+```
+
+`group-hover-stroke-` (`Frame` only; web only): hovering a row rings its avatar. The line itself comes from the
+avatar's own `stroke-` flag (`stroke-transparent` here); a stroke state only changes its color.
+
+```tsx
+<Frame group autolayout-horizontal gap-3 padding-3 onPress={openProfile}>
+  <Frame width-8 height-8 corner-radius-full fill-gray-200 stroke-transparent group-hover-stroke-blue-500 />
+  <Text fill-gray-900>Ada Lovelace</Text>
+</Frame>
+```
+
 ## Design tokens
 
 _dist/design-tokens.json_ is the source of truth for every design value in the library. Every token-derived flag above
