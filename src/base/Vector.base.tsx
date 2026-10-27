@@ -15,7 +15,11 @@ export type Vector = FigmaFill &
   FigmaVectorHeight & {
     /** SVG path data, as Figma exports it from the vector's fill geometry. */
     path: string
-    /** The vector's bounds in path coordinates (`"minX minY width height"`); scaled to fit the `width-` / `height-` box. */
+    /**
+     * The vector's bounds in path coordinates (`"minX minY width height"`). With both a `width-` and a `height-` flag
+     * it is scaled to fit that box; with one, the other side follows its aspect ratio; with neither, the vector
+     * stretches to its container and keeps the aspect ratio.
+     */
     viewBox: string
     /** Figma's winding rule for the path. Defaults to `"nonzero"`. */
     fillRule?: "nonzero" | "evenodd"
@@ -25,12 +29,9 @@ export type Vector = FigmaFill &
   }
 
 export default (p: Vector) => {
-  const className = [
-    computeVectorSize(p).className,
-    computeVectorFill(p).className,
-    computeVectorColorStates(p).className,
-    p.className,
-  ]
+  const size = computeVectorSize(p)
+
+  const className = [size.className, computeVectorFill(p).className, computeVectorColorStates(p).className, p.className]
     .filter(Boolean)
     .join(" ")
 
@@ -40,6 +41,7 @@ export default (p: Vector) => {
   return (
     <View
       style={[
+        size.styles,
         p.style,
         {
           // @ts-expect-error React Native Web's className passthrough

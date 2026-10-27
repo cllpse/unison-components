@@ -580,20 +580,32 @@ export const computeVectorColorStates = (p: FigmaVectorGroupFill): PropertiesRes
 export const computeVectorColor = (p: FigmaFill): string | undefined =>
   PLATFORM === "web" ? undefined : (readFlags(p).fill?.value ?? "currentColor")
 
-// Cached per pair of width and height flags, so repeat renders of the same vector never allocate.
-const VECTOR_SIZE_CACHE = new Map<ExactSizeFlag, Map<ExactSizeFlag, PropertiesResult>>()
+// Cached per width flag, height flag and viewBox, so repeat renders of the same vector never allocate.
+const VECTOR_SIZE_CACHE = new Map<ExactSizeFlag | null, Map<ExactSizeFlag | null, Map<string, PropertiesResult>>>()
+
+/** A viewBox's width over its height (`"minX minY width height"`); undefined when it has no area. */
+const viewBoxRatio = (viewBox: string): number | undefined => {
+  const parts = viewBox.trim().split(/[\s,]+/)
+  const width = Number(parts[2])
+  const height = Number(parts[3])
+
+  return width > 0 && height > 0 ? width / height : undefined
+}
 
 /**
- * Size a vector to its `width-` and `height-` flags. The box is pinned and never grows or shrinks,
- * matching how Figma keeps a vector at its own bounds inside auto layout; the viewBox scales to fit it. Returns a
- * shared, frozen object.
- * @example computeVectorSize({ "width-6": true, "height-6": true }) // { className: "w-6 h-6 min-w-6 … shrink-0" }
+ * Size a vector. With both a `width-` and a `height-` flag the box is pinned and never grows or shrinks, matching how
+ * Figma keeps a fixed vector at its own bounds inside auto layout; the viewBox scales to fit it. With one flag, the
+ * other side follows the viewBox's aspect ratio. With neither, the box stretches to its container and keeps the
+ * aspect ratio, as a vector set to fill its container does in Figma. Returns a shared, frozen object.
+ * @example computeVectorSize({ "width-6": true, "height-6": true, viewBox: "0 0 24 24" }) // { className: "w-6 h-6 min-w-6 … shrink-0" }
+ * @example computeVectorSize({ viewBox: "0 0 24 12" }) // { className: "self-stretch … shrink", styles: { aspectRatio: 2 } }
  */
-export const computeVectorSize = (p: FigmaVectorWidth & FigmaVectorHeight): PropertiesResult => {
-  const { width, height } = readFlags(p)
+export const computeVectorSize = (p: FigmaVectorWidth & FigmaVectorHeight & { viewBox: string }): PropertiesResult => {
+  const flags = readFlags(p)
 
-  // Vectors take the spacing scale only, not Frame's container widths. Without both sizes, the box gets no size class.
-  if (width === undefined || width.container || height === undefined) return EMPTY
+  // Vectors take the spacing scale only, not Frame's container widths.
+  const width = flags.width !== undefined && !flags.width.container ? flags.width : null
+  const height = flags.height ?? null
 
   let byHeight = VECTOR_SIZE_CACHE.get(width)
 
@@ -602,14 +614,42 @@ export const computeVectorSize = (p: FigmaVectorWidth & FigmaVectorHeight): Prop
     VECTOR_SIZE_CACHE.set(width, byHeight)
   }
 
-  let size = byHeight.get(height)
+  let byViewBox = byHeight.get(height)
+
+  if (byViewBox === undefined) {
+    byViewBox = new Map()
+    byHeight.set(height, byViewBox)
+  }
+
+  let size = byViewBox.get(p.viewBox)
 
   if (size === undefined) {
-    const w = width.unit
-    const h = height.unit
+    const w = width?.unit
+    const h = height?.unit
 
-    size = result(`w-${w} h-${h} min-w-${w} min-h-${h} max-w-${w} max-h-${h} grow-0 shrink-0`)
-    byHeight.set(height, size)
+    if (w !== undefined && h !== undefined) {
+      size = result(`w-${w} h-${h} min-w-${w} min-h-${h} max-w-${w} max-h-${h} grow-0 shrink-0`)
+    } else {
+      // The free side follows the pinned one through `aspect-ratio`. On web a stretched cross axis would override the
+      // ratio, so a free side beside a pinned one is `fit-content` rather than `auto`; Yoga derives it from the ratio
+      // either way. Without a pinned side, the box stretches across the parent's cross axis and the ratio gives the
+      // main axis; `max-*-full` keeps it inside a parent that is too short the other way, and `shrink` lets it yield
+      // to fixed siblings, as a fill frame does.
+      const className =
+        w !== undefined
+          ? `w-${w} min-w-${w} max-w-${w} h-fit grow-0 shrink-0`
+          : h !== undefined
+            ? `h-${h} min-h-${h} max-h-${h} w-fit grow-0 shrink-0`
+            : "self-stretch min-w-0 min-h-0 max-w-full max-h-full grow-0 shrink"
+      const aspectRatio = viewBoxRatio(p.viewBox)
+
+      size =
+        aspectRatio === undefined
+          ? result(className)
+          : Object.freeze({ className, styles: Object.freeze({ aspectRatio }) })
+    }
+
+    byViewBox.set(p.viewBox, size)
   }
 
   return size

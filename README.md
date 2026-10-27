@@ -70,7 +70,9 @@ no inline styles, except for motion on iOS and Android (see [Motion](#motion)).
   and `group` (`Frame` only, see [States](#states)).
 - Set at most one flag per group; if several are set, the first wins.
 - An unknown or misspelled flag (`fill-red-55`) is a type error, and outside production builds it is also logged.
-- `Vector` takes `path`, `viewBox` and an optional `fillRule`, and needs both a `width-` and a `height-` flag.
+- `Vector` takes `path`, `viewBox` and an optional `fillRule`. With both a `width-` and a `height-` flag it is a
+  fixed box; with one, the other side follows the viewBox's aspect ratio; with neither, it stretches to its container
+  and keeps the aspect ratio.
 
 Known gaps: there are no letter-spacing, line-height or font-family flags, and on iOS and Android a `Vector` fill
 takes no state.
