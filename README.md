@@ -72,8 +72,8 @@ no inline styles, except for motion on iOS and Android (see [Motion](#motion)).
 - An unknown or misspelled flag (`fill-red-55`) is a type error, and outside production builds it is also logged.
 - `Vector` takes `path`, `viewBox` and an optional `fillRule`, and needs both a `width-` and a `height-` flag.
 
-Known gaps: there are no letter-spacing, line-height or font-family flags, and on iOS and Android a `Vector` fill keeps
-its Light color in dark mode and takes no state.
+Known gaps: there are no letter-spacing, line-height or font-family flags, and on iOS and Android a `Vector` fill
+takes no state.
 
 ## States
 
@@ -178,6 +178,8 @@ Rules the generator relies on:
 
 - Color names are `fill-<hue>-<shade>` or `fill-<name>`; anything else stops the build. Light and Dark must hold the
   same names.
+- The colors are Tailwind's palette, every hue from `50` to `950` plus `white` and `black`, as hex. Light and Dark
+  hold the same values: as in Tailwind, `fill-red-50` is the lightest red in both modes.
 - Numbers are pixels. Fractions spell the dot as `p` (`spacing-1p5` gives `padding-1p5`), since a token name can't
   hold a dot.
 - `spacing-full` is Figma's 999px stand-in for 100% (`width-full`), not a size.
@@ -205,7 +207,7 @@ Two generated files, both committed, carry the tokens into the library and its c
 ```ts
 import { TOKENS } from "./unison-components/dist/design-tokens"
 
-TOKENS.colors.Dark["fill-white"] // "#000000"
+TOKENS.colors.Light["fill-red-500"] // "#FB2C36"
 TOKENS.units.Default["spacing-4"] // 16
 ```
 
